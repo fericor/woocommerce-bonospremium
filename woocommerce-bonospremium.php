@@ -161,7 +161,9 @@ function woocommerce_product_custom_fields()
 
     $IDPRODUCTO = get_the_ID();
     $RUTA_QR    = WP_PLUGIN_DIR . '/woocommerce-bonospremium';
-    $URL_QR     = plugin_dir_url( __DIR__ ) . '/woocommerce-bonospremium/qrProductos';
+    // $URL_QR     = plugin_dir_url( __DIR__ ) . '/woocommerce-bonospremium/qrProductos';
+    $URL_QR     = ABSPATH . 'qrProductos';
+
 
     echo '';
 
@@ -212,7 +214,8 @@ function bonospremium_ajax_function() {
     global $woocommerce, $post;
 
     $RUTA_QR    = WP_PLUGIN_DIR . '/woocommerce-bonospremium';
-    $URL_QR     = plugin_dir_url( __DIR__ ) . '/woocommerce-bonospremium/qrProductos';
+    // $URL_QR     = plugin_dir_url( __DIR__ ) . '/woocommerce-bonospremium/qrProductos';
+    $URL_QR     = ABSPATH . 'qrProductos';
     $IDPRODUCTO = $_POST['idProducto'];
 
     include $RUTA_QR . '/librerias/phpqrcode/qrlib.php';
