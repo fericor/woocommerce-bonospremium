@@ -1,0 +1,15 @@
+{
+  "name": "Woocommerce Bonos Premium",
+  "slug": "woocommerce-bonospremium",
+  "version": "1.0.1",
+  "author": "Felix Cortez",
+  "homepage": "https://bonospremium.com/woocommerce-bonospremium",
+  "download_url": "https://bonospremium.com/descargas/woocommerce-bonospremium-1.0.1.zip",
+  "requires": "5.0",
+  "tested": "6.5",
+  "requires_php": "7.0",
+  "sections": {
+    "description": "Nueva versión con mejoras.",
+    "changelog": "Versión 1.0.1: Se corrigieron errores y se añadieron funciones nuevas."
+  }
+}

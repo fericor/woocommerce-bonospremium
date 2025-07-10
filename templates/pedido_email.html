@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido #{{numPedido}} :: Bonos Premium </title>
+    <style>
+        /* General Reset */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            color: #333333;
+        }
+
+        table {
+            border-spacing: 0;
+            width: 100%;
+        }
+
+        td {
+            padding: 0;
+        }
+
+        img {
+            border: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            margin-top: 50px;
+            border-radius: 8px;
+            border: 1px solid #e7e7e7;
+        }
+
+        .header {
+            background-color: #019cdb;
+            padding: 40px;
+            font-size: 28px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .content {
+            padding: 40px;
+            font-size: 10px;
+            line-height: 1.5;
+        }
+
+        .order-summary {
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .order-summary table {
+            width: 100%;
+        }
+
+        .order-summary th,
+        .order-summary td {
+            text-align: left;
+            padding: 8px;
+            border: 1px solid #e7e7e7;
+        }
+
+        .order-summary th {
+            font-weight: bold;
+        }
+
+        .order-summary tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #aaaaaa;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        a {
+            color: #039CDC;
+            text-decoration: none;
+        }
+        p {
+            color: #636363;
+            font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+            font-size: 12px;
+            line-height: 150%;
+        }
+        .numeroPedido {
+            font-size: 24px;
+        }
+
+        /* tamaños en mobil */
+        @media only screen and (max-width: 600px) {
+            p {
+                font-size: 10px;
+            }
+            .content {
+                font-size: 10px;
+                padding: 10px;
+            }
+            .numeroPedido {
+            font-size: 14px;
+        }
+        }
+        
+    </style>
+</head>
+
+<body>
+    <table role="presentation" class="email-container">
+        <tr>
+            <td>
+                <div class="header">
+                    Gracias por tu compra
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="content">
+                    <p style="font-size: 16px; margin-bottom: 20px;">Hola <strong>{{nombre_Pedido}}</strong>,</p>
+                    <p>Hemos recibido correctamente tu compra <strong>#{{numPedido}}</strong></p>
+                    <p style="margin-top: 14px;">En este mismo correo encontrarás un fichero adjunto con tu BonosPremium para que puedas disfrutarlo.</p>
+                    <p><strong style="color: #039CDC;" class="numeroPedido">[Pedido #{{numPedido}}] ({{fecha_Pedido}})</strong></p>
+                    <div class="order-summary">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 60%;">Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{trsBody_Pedidos}}
+                            </tbody>
+                            <tfoot>
+                                {{trsFoot_Pedidos}}
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <p>Gracias por confiar en <a href="http://bonospremium.com">bonospremium.com</a></p>
+                </div>
+            </td>
+        </tr>
+        </table>
+        <div class="footer">
+            &copy; {{ano}} BonosPremium. Todos los derechos reservados.
+        </div>
+</body>
+
+</html>
