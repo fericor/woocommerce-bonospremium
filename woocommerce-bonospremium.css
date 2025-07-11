@@ -1,6 +1,6 @@
 /* SOCIAL SHARE */
 .buttonSocial {
-    background-color: #039cdc; /* Green */
+    background-color: #fee404; /* Green */
     border: none;
     color: white !important;
     padding: 15px 32px;
@@ -29,14 +29,14 @@
     text-align: center;
     line-height: 1;
     border-radius: 100%;
-    color: var(--links-normal-color,#5bc0de) !important;
+    color: var(--links-normal-color,#333333) !important;
     text-decoration: none;
     font-weight: 700;
     border: 0;
 }
 
 .woocommerce a.remove1 i:hover {
-    color: #5bc0de !important;
+    color: #333333 !important;
 }
 
 .woocommerce .quantity .qty {
@@ -146,7 +146,7 @@ button#place_order {
 }
 
 .elementor-widget-woocommerce-checkout-page a {
-    color: var(--links-normal-color, #5bc0de) !important;
+    color: var(--links-normal-color, #333333) !important;
 }
 
 @media (max-width: 768px) {
@@ -198,7 +198,7 @@ button#place_order {
 }*/
 .variations select:focus {
     outline: none !important; /* Quitar el borde predeterminado */
-    border: 2px solid #007cba !important; /* Borde azul al enfocar */
+    border: 2px solid #fee404 !important; /* Borde azul al enfocar */
     box-shadow: 0 0 5px rgba(0, 124, 186, 0.5) !important; /* Sombra azul */
 }
 .variations select option {
@@ -215,7 +215,7 @@ ins {text-decoration: none !important; margin-left: 5px !important;}
 #elementor-search-form-6a76145{font-size: 20px;}
 
 /* ADMIN */
-.wp-core-ui .button, .wp-core-ui .button-secondary {background: #2271b1 !important; color: #ffffff !important;}
+.wp-core-ui .button, .wp-core-ui .button-secondary {background: #fee404 !important; color: #ffffff !important;}
 
 .woocommerce:where(body:not(.woocommerce-uses-block-theme)) div.product p.price, .woocommerce:where(body:not(.woocommerce-uses-block-theme)) div.product span.price {
     color: #958e09 !important;
@@ -238,7 +238,7 @@ del>span.woocommerce-Price-amount.amount {
 }
 
 ins>span.woocommerce-Price-amount.amount {
-    color: #039cdc;
+    color: #333333;
     font-family: arial;
     font-weight: 500;
     font-size: 25px !important;
@@ -248,3 +248,5 @@ p.stock.out-of-stock {
     text-align: center !important;
     font-size: 1.5em !important;
 }
+
+.qty-minus, .qty-plus { background: #fee404 !important; }

@@ -1,12 +1,12 @@
 <?php
 /*
  * Plugin Name: Woocommerce Bonos Premium
- * Plugin URI: https://bonospremium.com
+ * Plugin URI: https://bonospremiumgc.com
  * Description: Agrega un QR a cada producto del pedido.
  * Version: 1.0.0
  * Author: Felix Cortez (Bonospremium)
  * Author URI: https://vallamketing.es
- * Update URI: https://bonospremium.com/plugins_codes/tenerife/woocommerce-bonospremium/woocommerce-bonospremium.json
+ * Update URI: https://bonospremiumgc.com/plugins_codes/gran_canaria/woocommerce-bonospremium/woocommerce-bonospremium.json
  * License: GPL-2.0+
  */
 
@@ -60,7 +60,7 @@ function woocommerce_bonospremium_update_handler($transient) {
 }
 
 function get_remote_plugin_info() {
-    $response = wp_remote_get('https://bonospremium.com/plugins_codes/tenerife/woocommerce-bonospremium/woocommerce-bonospremium.json');
+    $response = wp_remote_get('https://bonospremiumgc.com/plugins_codes/gran_canaria/woocommerce-bonospremium/woocommerce-bonospremium.json');
     if (is_wp_error($response)) return null;
 
     $body = wp_remote_retrieve_body($response);
@@ -141,9 +141,7 @@ add_filter( 'auto_plugin_update_send_email', '__return_false' );
 add_filter( 'auto_theme_update_send_email', '__return_false' );
 
 wp_register_script( 'bp_simple-modal-js', plugin_dir_url( __FILE__ ) . 'librerias/simpleModal/jquery.simple-modal.js', array( 'jquery' ) );
-// wp_register_script( 'wc-paypal-js', 'https://www.paypal.com/sdk/js?client-id=AcNMAVfj332W8gdbkE6c-wqG4MasHq2uWqr4pTw5lE_zDDnBWgvakIBK3QJIA4KJTPLvAFwQh-ZX2gQd&currency=EUR&components=messages,buttons', array( 'jquery' ), NULL, true, array('namespace' => 'PayPalSDK') );
 wp_enqueue_script( 'bp_simple-modal-js' );
-// wp_enqueue_script( 'wc-paypal-js' );
 wp_enqueue_style( 'bp-simple-modal-css', plugin_dir_url( __FILE__ ) . 'librerias/simpleModal/jquery.simple-modal.css', false, '1.4', 'all');
 wp_enqueue_style( 'bonos-premium-css', plugin_dir_url( __FILE__ ) . 'woocommerce-bonospremium.css', false, '1.4', 'all');
 
@@ -305,16 +303,6 @@ function divComoLlegar() {
 
     $product_url   = get_permalink($product->get_id());
     $product_title = get_the_title($product->get_id());
-    
-    /*echo '<div class="social-sharing-buttons">
-            <a class="button twitter" href="https://twitter.com/share?url='.urlencode($product_url).'&text='.urlencode($product_title).'" target="_blank" rel="noopener noreferrer">
-                <svg style="height: 14px;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256" width="50px" height="50px" fill-rule="nonzero"><g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M5.91992,6l14.66211,21.375l-14.35156,16.625h3.17969l12.57617,-14.57812l10,14.57813h12.01367l-15.31836,-22.33008l13.51758,-15.66992h-3.16992l-11.75391,13.61719l-9.3418,-13.61719zM9.7168,8h7.16406l23.32227,34h-7.16406z"></path></g></g></svg>
-            </a>
-            <a class="button facebook" href="https://www.facebook.com/sharer.php?u='.urlencode($product_url).'" target="_blank" rel="noopener noreferrer">
-                Facebook
-            </a>
-            <!-- Add more social media buttons as needed -->
-        </div>';*/
 
     echo '<div class="col-xs-12 col-sm-12 col-md-12 ficha-bono">
 	        <div class="col-xs-12 no-padding">
@@ -368,7 +356,7 @@ function cwpai_custom_user_reg_admin_email($wp_new_user_notification_email, $use
                                                         <td valign="top" style="padding:48px 48px 32px">
                                                             <div style="color:#636363;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:14px;line-height:150%;text-align:left" align="left">
                                                                 <p style="margin:0 0 16px">Hola '.$user->user_login.',</p>
-                                                                <p style="margin:0 0 16px">Ya formas parte de BonosPremium. Su nombre de usuario es <strong>'.$user->user_login.'</strong>. Puede acceder a su área de gestion de bonos, cambiar su contraseña y más en: <a href="https://bonospremium.com/admin/" style="color:#039cdc;font-weight:normal;text-decoration:underline" target="_blank">https://bonospremium.com/admin/</a></p>
+                                                                <p style="margin:0 0 16px">Ya formas parte de BonosPremium. Su nombre de usuario es <strong>'.$user->user_login.'</strong>. Puede acceder a su área de gestion de bonos, cambiar su contraseña y más en: <a href="https://bonospremiumgc.com/admin/" style="color:#039cdc;font-weight:normal;text-decoration:underline" target="_blank">https://bonospremiumgc.com/admin/</a></p>
                                                                 <p style="margin:0 0 16px">Esperamos verte pronto.</p>
                                                             </div>
                                                         </td>
@@ -398,11 +386,6 @@ function bonosPremium_on_order_status_changed( $order_id, $from_status, $to_stat
     
     if ( ($from_status === 'pending') && ($to_status === 'processing') ) {
         bonospremium_payment_complete( $order_id );
-
-        /* $exite = $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(orderId) AS NUM FROM ". $wpdb->prefix ."wc_pedidos_item WHERE orderId = ".$order_id ) );
-        if($exite->NUM == 0){
-            wp_mail( 'fericor@hotmail.com', $order_id.' :: Pedido '.$from_status, 'Tu pedido ha sido '.$to_status );
-        } */
     }
 }
 add_action( 'woocommerce_order_status_changed', 'bonosPremium_on_order_status_changed', 10, 3 );
@@ -428,7 +411,8 @@ function bonospremium_payment_complete( $order_id ) {
         $FECHA_MODIFICACION = $ARRAY_FECHA_ORDER->canjeadoT;
 
         $RUTA_QR    = WP_PLUGIN_DIR . '/woocommerce-bonospremium';
-        $RUTA_IMGS  = WP_PLUGIN_DIR . '/woocommerce-bonospremium/qrProductos';
+        // $RUTA_IMGS  = WP_PLUGIN_DIR . '/woocommerce-bonospremium/qrProductos';
+        $RUTA_IMGS  = ABSPATH . '/qrProductos';
         $ARRAY_NAME_FILE = [];
 
         include $RUTA_QR . '/librerias/phpqrcode/qrlib.php';
@@ -508,7 +492,8 @@ function insertar_pedido_db( $order_id ) {
         $FECHA_MODIFICACION = $ARRAY_FECHA_ORDER->canjeadoT;
 
         $RUTA_QR    = WP_PLUGIN_DIR . '/woocommerce-bonospremium';
-        $RUTA_IMGS  = WP_PLUGIN_DIR . '/woocommerce-bonospremium/qrProductos';
+        // $RUTA_IMGS  = WP_PLUGIN_DIR . '/woocommerce-bonospremium/qrProductos';
+        $RUTA_IMGS  = ABSPATH . '/qrProductos';
         $ARRAY_NAME_FILE = [];
 
         include $RUTA_QR . '/librerias/phpqrcode/qrlib.php';
@@ -805,7 +790,7 @@ function enviarEmail($ORDERID, $NAME_ARRAY=[], $ENVIO=1){
 
     $to           = $data['billing']['email'];
     $headers      = array('Content-Type: text/html; charset=UTF-8'); 
-    $subject      = '¡Hemos recibido tu compra en BonosPremium!';
+    $subject      = '¡Hemos recibido tu compra en BonosPremium Gran Canaria!';
     $subjectAdmin = '[BonosPremium] Nueva compra #('.$ORDERID.')';
 
     ## BILLING INFORMATION:
@@ -874,13 +859,14 @@ function enviarEmail($ORDERID, $NAME_ARRAY=[], $ENVIO=1){
 
     $attachments = array();
     foreach($NAME_ARRAY as $item){
-        array_push($attachments, WP_PLUGIN_DIR . "/woocommerce-bonospremium/qrProductos/".$item.".pdf");
+        // array_push($attachments, WP_PLUGIN_DIR . "/woocommerce-bonospremium/qrProductos/".$item.".pdf");
+        array_push($attachments, ABSPATH . "/qrProductos/".$item.".pdf");
     }
 
     wp_mail( $to, $subject, $message, $headers, $attachments );
     
     if($ENVIO == 1){
-        wp_mail( 'pedidos@bonospremium.com', $subjectAdmin, $messageNew, $headers, $attachments );
+        wp_mail( 'pedidos@bonospremiumgc.com', $subjectAdmin, $messageNew, $headers, $attachments );
     }
 }
 
@@ -890,14 +876,15 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 
     include_once 'librerias/dompdf/autoload.inc.php';
 
-    $RUTA_IMGS = WP_PLUGIN_DIR . '/woocommerce-bonospremium/qrProductos';
+    // $RUTA_IMGS = WP_PLUGIN_DIR . '/woocommerce-bonospremium/qrProductos';
+    $RUTA_IMGS  = ABSPATH . 'qrProductos';
 
     ob_start();
     include_once dirname( __FILE__ ) . '/templates/plantilla_qrcode.html';
     $PAGE_TPL = ob_get_contents();
     ob_end_clean();
 
-    $IMG_LOGO = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/wp-content/uploads/2023/09/trans.png"));
+    $IMG_LOGO = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/wp-content/uploads/2023/05/logo.jpg"));
 	
 	$order = wc_get_order($ORDERID);
 	
@@ -915,35 +902,35 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 
     switch ($TEMA_CITA) {
         case "Día de la Madre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_diadelamadre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_diadelamadre1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Día del Padre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_diadelpadre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_diadelpadre1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Cumpleaños Hombre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_cumpleanoshombre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_cumpleanoshombre1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Cumpleaños Mujer":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_cumpleanosmujer1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_cumpleanosmujer1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Navidad":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_navidad1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_navidad1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Papá Noel":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_papanoel1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_papanoel1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Reyes Magos":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_reyesmagos1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_reyesmagos1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "San Valentin":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_sanvalentin1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_sanvalentin1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
     }
@@ -955,7 +942,7 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Bonos Premium</title>
+                    <title>Bonos Premium Gran Canaria</title>
 
                     <style>
                         @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
@@ -975,7 +962,7 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
                 <!-- Contenedor Principal -->
                 <div style="width: 100%; padding: 0px; font-family: Arial, sans-serif; background-color: #FFFFFF; border-radius: 0px; box-sizing: border-box;">
                     <!-- Encabezado -->
-                    <div style="background-color: #019cdb; padding: 20px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-top: 0px; margin-bottom: 0px;">
+                    <div style="background-color: #fee404; padding: 20px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-top: 0px; margin-bottom: 0px;">
                         <img style="width: 400px; padding: 0px;" src="'.$IMG_LOGO.'" alt="">
                     </div>'.$HTML_IMAGEN;
 
@@ -988,7 +975,8 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
         $CONDICIONES    = $product_info->get_meta('condiciones_generales');
         $NOMBRE_EMPRESA = $product_info->get_meta('nombre_establecimiento');
 
-        $nombreImagen = get_site_url() . '/wp-content/plugins/woocommerce-bonospremium/qrProductos/qr_'. $value->qrCode .'.png';
+        // $nombreImagen = get_site_url() . '/wp-content/plugins/woocommerce-bonospremium/qrProductos/qr_'. $value->qrCode .'.png';
+        $nombreImagen = ABSPATH . 'qrProductos/qr_'. $value->qrCode .'.png';
         $imagenBase64 = "data:image/png;base64," . base64_encode(file_get_contents($nombreImagen));
 
 
@@ -1004,7 +992,7 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 			$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM ptn_wc_codes_extras WHERE activo = 1 LIMIT 1" ) ); 
 						
 			$CODIDO_CINE      = $ARRAY_POST->codes;
-			$cineImagen       = 'https://bonospremium.com/wp-content/uploads/2025/07/ticket_cine.png';
+			$cineImagen       = 'https://bonospremiumgc.com/wp-content/uploads/2025/07/ticket_cine.png';
         	$cineImagenBase64 = "data:image/png;base64," . base64_encode(file_get_contents($cineImagen));
 			
 			// Actualizamos el estado del qr del cine
@@ -1017,10 +1005,10 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 				)
 			);
 			
-			$HTML_QR_OR_CINE = '<img src="'.$cineImagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #039CDC;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #039CDC; padding: 0px; margin: 0px;font-family: monospace;">'.$CODIDO_CINE.'</div>';
+			$HTML_QR_OR_CINE = '<img src="'.$cineImagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #333333;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #333333; padding: 0px; margin: 0px;font-family: monospace;">'.$CODIDO_CINE.'</div>';
 			
 		}else{
-			$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #039CDC;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #039CDC; padding: 0px; margin: 0px;font-family: monospace;">'.$value->qrCode.'</div>';
+			$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #333333;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #333333; padding: 0px; margin: 0px;font-family: monospace;">'.$value->qrCode.'</div>';
 		}
 		/* FIN CODIGO PARA EL QR DEL CINE */
 		////////////////////////////////////////////////////////////////////
@@ -1036,8 +1024,8 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
                         <div style="color: #8e8e8e !important; font-size: 14px;">'.$NEW_COLOR_DETAILS.'</div>
                     </div>
                     <!-- Condiciones del Bono -->
-                    <div style="margin-top: 0px; padding: 10px; background-color: #019cdb; border: 0px solid #67C3E9; border-radius: 0px;">
-                        <h3 style="color: #ffffff; font-size: 16px; margin: 0 0 10px;">Condiciones del Bono</h3>
+                    <div style="margin-top: 0px; padding: 10px; background-color: #fee404; border: 0px solid #d3bf0fff; border-radius: 0px;">
+                        <h3 style="color: #333333; font-size: 16px; margin: 0 0 10px;">Condiciones del Bono</h3>
                         <div class="text-color: #a5a5a5 !important;">'.$CONDICIONES.'</div>
                     </div>';
     }
@@ -1048,11 +1036,6 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 
     $ARRAY_TPL = array( "qrCodes" => $TICKETS );
     $HTML_TPL = parse_template($PAGE_TPL, $ARRAY_TPL);
-
-    // ESTO CREA UNA PLANTILLA EN HTML DE QRCODE
-    // $fp = fopen($RUTA_IMGS . "/" . $NAME_FILE, 'w') or die("can't open file");
-    // fwrite($fp, $HTML_TPL);
-    // fclose($fp);
 
     $options = new Dompdf\Options();
     $options->set('isRemoteEnabled', false);
@@ -1076,14 +1059,15 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
 
     include_once 'librerias/dompdf/autoload.inc.php';
 
-    $RUTA_IMGS = WP_PLUGIN_DIR . '/woocommerce-bonospremium/qrProductos';
+   // $RUTA_IMGS = WP_PLUGIN_DIR . '/woocommerce-bonospremium/qrProductos';
+    $RUTA_IMGS  = ABSPATH . 'qrProductos';
 
     ob_start();
     include_once dirname( __FILE__ ) . '/templates/plantilla_qrcode.html';
     $PAGE_TPL = ob_get_contents();
     ob_end_clean();
 
-    $IMG_LOGO = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/wp-content/uploads/2023/09/trans.png"));
+    $IMG_LOGO = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/wp-content/uploads/2023/05/logo.jpg"));
 	
 	$order = wc_get_order($ORDERID);
 	
@@ -1101,35 +1085,35 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
 
     switch ($TEMA_CITA) {
         case "Día de la Madre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_diadelamadre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_diadelamadre1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Día del Padre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_diadelpadre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_diadelpadre1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Cumpleaños Hombre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_cumpleanoshombre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_cumpleanoshombre1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Cumpleaños Mujer":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_cumpleanosmujer1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_cumpleanosmujer1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Navidad":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_navidad1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_navidad1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Papá Noel":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_papanoel1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_papanoel1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Reyes Magos":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_reyesmagos1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_reyesmagos1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "San Valentin":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_sanvalentin1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremiumgc.com/admin/assets/imgPlugin/qr_sanvalentin1.png"));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
     }
@@ -1141,7 +1125,7 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Bonos Premium</title>
+                    <title>Bonos Premium Gran Canaria</title>
 
                     <style>
                         @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
@@ -1161,7 +1145,7 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
                 <!-- Contenedor Principal -->
                 <div style="width: 100%; padding: 0px; font-family: Arial, sans-serif; background-color: #FFFFFF; border-radius: 0px; box-sizing: border-box;">
                     <!-- Encabezado -->
-                    <div style="background-color: #019cdb; padding: 20px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-top: 0px; margin-bottom: 0px;">
+                    <div style="background-color: #fee404; padding: 20px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-top: 0px; margin-bottom: 0px;">
                         <img style="width: 400px; padding: 0px;" src="'.$IMG_LOGO.'" alt="">
                     </div>'.$HTML_IMAGEN;
 
@@ -1170,7 +1154,8 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
     $CONDICIONES    = $product_info->get_meta('condiciones_generales');
     $NOMBRE_EMPRESA = $product_info->get_meta('nombre_establecimiento');
 
-    $nombreImagen = get_site_url() . '/wp-content/plugins/woocommerce-bonospremium/qrProductos/qr_'. $QRCODE .'.png';
+    // $nombreImagen = get_site_url() . '/wp-content/plugins/woocommerce-bonospremium/qrProductos/qr_'. $QRCODE .'.png';
+    $nombreImagen = ABSPATH . 'qrProductos/qr_'. $QRCODE .'.png';
     $imagenBase64 = "data:image/png;base64," . base64_encode(file_get_contents($nombreImagen));
 
 
@@ -1182,7 +1167,7 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
 		$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM ptn_wc_codes_extras WHERE activo = 1 LIMIT 1" ) ); 
 
 		$CODIDO_CINE      = $ARRAY_POST->codes;
-		$cineImagen       = 'https://bonospremium.com/wp-content/uploads/2025/07/ticket_cine.png';
+		$cineImagen       = 'https://bonospremiumgc.com/wp-content/uploads/2025/07/ticket_cine.png';
 		$cineImagenBase64 = "data:image/png;base64," . base64_encode(file_get_contents($cineImagen));
 
 		$HTML_QR_OR_CINE = '<img src="'.$cineImagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #039CDC;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #039CDC; padding: 0px; margin: 0px;font-family: monospace;">'.$CODIDO_CINE.'</div>';
@@ -1202,8 +1187,8 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
                     <div style="color: #8e8e8e !important; font-size: 14px;">'.$NEW_COLOR_DETAILS.'</div>
                 </div>
                 <!-- Condiciones del Bono -->
-                <div style="margin-top: 0px; padding: 10px; background-color: #019cdb; border: 0px solid #67C3E9; border-radius: 0px;">
-                    <h3 style="color: #ffffff; font-size: 16px; margin: 0 0 10px;">Condiciones del Bono</h3>
+                <div style="margin-top: 0px; padding: 10px; background-color: #fee404; border: 0px solid #dac511ff; border-radius: 0px;">
+                    <h3 style="color: #333333; font-size: 16px; margin: 0 0 10px;">Condiciones del Bono</h3>
                     <div class="text-color: #a5a5a5 !important;">'.$CONDICIONES.'</div>
                 </div>';
     
@@ -1237,7 +1222,8 @@ function crearQrCode($ORDERID, $QRCODE, $IDPRODUCTO){
     global $wp;
 
     $RUTA_QR    = WP_PLUGIN_DIR . '/woocommerce-bonospremium';
-    $RUTA_IMGS  = WP_PLUGIN_DIR . '/woocommerce-bonospremium/qrProductos';
+    // $RUTA_IMGS  = WP_PLUGIN_DIR . '/woocommerce-bonospremium/qrProductos';
+    $RUTA_IMGS  = ABSPATH . '/qrProductos';
     
     include $RUTA_QR . '/librerias/phpqrcode/qrlib.php';
 
@@ -1466,7 +1452,7 @@ add_filter( 'woocommerce_cart_item_name', 'dl_quitar_productos_checkout', 10, 3 
 /* APIREST CUSTOM */
 ////////////////////////////////////////////////////////////////////////
 // CREA EL PDF Y LOS PRODUCTOS DE UN PEDIDO ASIGNANDO EL QR AL PRODUCTO
-// https://bonospremium.com/wp-json/custom/v1/pdf/idPedido/idProducto/qrCode
+// https://bonospremiumgc.com/wp-json/custom/v1/pdf/idPedido/idProducto/qrCode
 ////////////////////////////////////////////////////////////////////////
 function regenerar_pdf_pedido_api_endpoint() {
     register_rest_route('custom/v1', '/pdf/(?P<idPedido>\d+)/(?P<idProducto>\d+)/(?P<qrCode>\w+)', array(
@@ -1489,7 +1475,7 @@ function regenerar_pdf_pedido_api_endpoint_callback(WP_REST_Request $request) {
 
 ////////////////////////////////////////////////////////////////////////
 // REENVIA UN PEDIDO AL CLIENTE CON SU EMAIL Y PDF DE PEDIDO
-// https://bonospremium.com/wp-json/custom/v1/email/20407
+// https://bonospremiumgc.com/wp-json/custom/v1/email/20407
 ////////////////////////////////////////////////////////////////////////
 function reenviar_email_pedido_api_endpoint() {
     register_rest_route('custom/v1', '/email/(?P<id>\d+)', array(
@@ -1523,7 +1509,7 @@ function reenviar_email_pedido_api_endpoint_callback(WP_REST_Request $request) {
 
 ////////////////////////////////////////////////////////////////////////
 // LISTA UN JSON DE TODOS LOS PEDIDOS QUE NO ESTEN EN LA TABLA Y HAY UNA URL PARA PODER GENERARLO Y ENVIAR EMAIL AL CLIENTE
-// https://bonospremium.com/wp-json/custom/v1/listar/0000-00-00/0000-00-00/Todo
+// https://bonospremiumgc.com/wp-json/custom/v1/listar/0000-00-00/0000-00-00/Todo
 ////////////////////////////////////////////////////////////////////////
 function register_listar_orders_api_endpoint() {
     register_rest_route('custom/v1', '/listar/(?P<start_date>\d{4}-\d{2}-\d{2})/(?P<end_date>\d{4}-\d{2}-\d{2})/(?P<categoria>[^/]+)', [
@@ -1590,7 +1576,7 @@ function listar_pedidos_perdidos(WP_REST_Request $request) {
         $item = [
             'ID'       => $order->get_id(),
             'Estado'   => $estado,
-            'url'      => "https://bonospremium.com/wp-json/custom/v1/data/" . $order->get_id(),
+            'url'      => "https://bonospremiumgc.com/wp-json/custom/v1/data/" . $order->get_id(),
             'Date'     => $order->get_date_created() ? $order->get_date_created()->date('Y-m-d H:i:s') : '',
             'Cantidad' => count($order->get_items()),
             'Total'    => $order->get_total(),
@@ -1678,7 +1664,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => "https://bonospremiumgc.com/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -1691,7 +1677,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => "https://bonospremiumgc.com/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -1704,7 +1690,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => "https://bonospremiumgc.com/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -1717,7 +1703,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => "https://bonospremiumgc.com/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -1730,7 +1716,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => "https://bonospremiumgc.com/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -1743,7 +1729,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => "https://bonospremiumgc.com/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -1756,7 +1742,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => "https://bonospremiumgc.com/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -1779,7 +1765,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                     /*$MyOrders[] = array(
                         "ID"     => $order_id, 
                         "Estado" => $order_estado, 
-                        "url"    => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                        "url"    => "https://bonospremiumgc.com/wp-json/custom/v1/data/".$order_id,
                         "Date"   => $order_date
                     );*/
             //    }
@@ -1809,7 +1795,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
 
 ////////////////////////////////////////////////////////////////////////
 // INSERTA TODOS LOS PRODUCTOS EN LA TABLA Y CREA EL PDF Y QR DE UN PEDIDO Y ENVIA EMAIL AL CLIENTE
-// https://bonospremium.com/wp-json/custom/v1/data/20407
+// https://bonospremiumgc.com/wp-json/custom/v1/data/20407
 ////////////////////////////////////////////////////////////////////////
 function register_custom_api_endpoint() {
     register_rest_route('custom/v1', '/data/(?P<id>\d+)', array(
@@ -1834,7 +1820,7 @@ function custom_api_endpoint_callback(WP_REST_Request $request) {
 
 ////////////////////////////////////////////////////////////////////////
 // INSERTA TODOS LOS PRODUCTOS EN LA TABLA Y CREA EL PDF Y QR DE UN PEDIDO SIN ENVIAR EMAIL AL CLIENTE
-// https://bonospremium.com/wp-json/custom/v1/insertar/20407
+// https://bonospremiumgc.com/wp-json/custom/v1/insertar/20407
 ////////////////////////////////////////////////////////////////////////
 function insert_pedido_api_endpoint() {
     register_rest_route('custom/v1', '/insertar/(?P<id>\d+)', array(
@@ -1859,7 +1845,7 @@ function insert_pedido_api_endpoint_callback(WP_REST_Request $request) {
 
 ////////////////////////////////////////////////////////////////////////
 // ACTUALIZA LA FECHA DE MODIFICACION QUE ES IGUAL A LA FEHCA DE CANJEO DE LA TABLA DE LOS PEDISO
-// http://bonospremium.com/wp-json/custom/v1/actualizarFechaPedidoCanjeado
+// http://bonospremiumgc.com/wp-json/custom/v1/actualizarFechaPedidoCanjeado
 ////////////////////////////////////////////////////////////////////////
 function api_actualizar_fecha_pedido_canjeado() {
     register_rest_route('custom/v1', '/actualizarFechaPedidoCanjeado', array(
@@ -1917,7 +1903,7 @@ function actualizar_fecha_pedido_canjeado() {
                 $MyOrders[] = array(
                     "ID"        => $order_id, 
                     "Estado"    => $order_estado, 
-                    "url"       => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"       => "https://bonospremiumgc.com/wp-json/custom/v1/data/".$order_id,
                     "Date"      => $order_date,
                     "fCanjeado" => $order_fecha,
                 );
@@ -2009,7 +1995,7 @@ function updateLapsedOrders() {
     $headers = array('Content-Type: text/html; charset=UTF-8');
 
     // Enviar correos 
-    wp_mail('info@bonospremium.com', 'Pedidos Caducados Automáticamente', $orders_text, $headers);
+    wp_mail('info@bonospremiumgc.com', 'Pedidos Caducados Automáticamente', $orders_text, $headers);
     wp_mail('fericor@gmail.com', 'Pedidos Caducados Automáticamente', $orders_text, $headers);
 
     error_log('✅ Pedidos actualizados y correos enviados.');
@@ -2118,16 +2104,16 @@ function custom_checkout_field($checkout){
                 if(PLANTILLA == "Reyes Magos"){ IMAGEN = "qr_reyesmagos1"; }
                 if(PLANTILLA == "San Valentin"){ IMAGEN = "qr_sanvalentin1"; }
                 
-                HTML_IMG_PLANTILLA = "<img src=\"https://bonospremium.com/admin/assets/imgPlugin/"+IMAGEN+".png\" style=\"width: 600px; padding: 0px;\">";
+                HTML_IMG_PLANTILLA = "<img src=\"https://bonospremiumgc.com/admin/assets/imgPlugin/"+IMAGEN+".png\" style=\"width: 600px; padding: 0px;\">";
             }
 
             console.log(PLANTILLA);
 
 
-            let HTML_PLANTILLA = "<div style=\"width: 100%; background-color: #039CDC; padding: 0px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-bottom: 0px;\"> <img style=\"width: 300px; padding: 20px;\" src=\"https://bonospremium.com/wp-content/uploads/2023/09/trans.png\" alt=\"\"> </div> <div style=\"text-align: center;\"> "+HTML_IMG_PLANTILLA+" <p style=\"font-style: oblique;\">"+TEXTO+"</p> </div>";
+            let HTML_PLANTILLA = "<div style=\"width: 100%; background-color: #fee404; padding: 0px; border-radius: 0px; color: #000000; text-align: center; margin-bottom: 0px;\"> <img style=\"width: 300px; padding: 20px;\" src=\"https://bonospremiumgc.com/wp-content/uploads/2023/09/trans.png\" alt=\"\"> </div> <div style=\"text-align: center;\"> "+HTML_IMG_PLANTILLA+" <p style=\"font-style: oblique;\">"+TEXTO+"</p> </div>";
 
             jQuery().simpleModal({
-                name: "BonoPremium",
+                name: "BonoPremium Gran Canaria",
                 title: " ",
                 size: "large",
                 content: "<p class=\'textBPView\'>"+HTML_PLANTILLA+"</p>"
