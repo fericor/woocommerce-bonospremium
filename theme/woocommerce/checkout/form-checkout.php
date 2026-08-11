@@ -10,7 +10,7 @@ $checkout = WC()->checkout();
 
 <?php wc_get_template('checkout/form-login.php', array('checkout' => $checkout)); ?>
 
-<form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url(wc_get_checkout_url()); ?>" enctype="multipart/form-data">
+<form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url(wc_get_checkout_url()); ?>" enctype="multipart/form-data" onsubmit="if(window.bpAbgRecoger)bpAbgRecoger();">
     <div class="bp-checkout-grid">
 
         <!-- Columna izquierda: formulario -->

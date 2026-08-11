@@ -9,10 +9,10 @@ get_header(); ?>
     <div class="bp-container bp-page-content">
         <div class="bp-contact-page">
             <div class="bp-contact-header">
-                <h1 class="bp-page-title"><?php the_title(); ?></h1>
+                <h1 class="bp-page-title"><?php echo bp_form_titulo('promociona'); ?></h1>
             </div>
             <div class="bp-contact-body">
-                <?php the_content(); ?>
+                <?php bp_form_intro('promociona'); ?>
                 <?php bp_form_success('promociona'); ?>
                 <form id="bp-form-promociona" class="bp-form" method="post">
                     <input type="hidden" name="bp_form_submit" value="promociona" />

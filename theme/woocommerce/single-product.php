@@ -24,13 +24,14 @@ get_header(); ?>
                 <div class="bp-slider">
                     <div class="bp-slider-track">
                         <?php
-                        // Main product image
-                        echo '<div class="bp-slide">' . $product->get_image('full') . '</div>';
+                        // Main product image (medium_large ~768px: el slider no necesita el original
+                        // de 2-3MB — Félix 10/08, optimización de velocidad)
+                        echo '<div class="bp-slide">' . $product->get_image('medium_large') . '</div>';
                         // Gallery images
                         $galleries = $product->get_gallery_image_ids();
                         if (!empty($galleries)) {
                             foreach ($galleries as $gid) {
-                                echo '<div class="bp-slide">' . wp_get_attachment_image($gid, 'full') . '</div>';
+                                echo '<div class="bp-slide">' . wp_get_attachment_image($gid, 'medium_large') . '</div>';
                             }
                         }
                         ?>

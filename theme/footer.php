@@ -98,6 +98,7 @@
     </div>
 </footer>
 
+<?php get_template_part('cookies-consent'); ?>
 <?php wp_footer(); ?>
 </body>
 </html>

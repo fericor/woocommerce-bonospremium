@@ -4,7 +4,56 @@
  */
 
 // Definir versión del tema
-define('BP_LZ_VERSION', '1.1.1');
+define('BP_LZ_VERSION', '1.1.5');
+
+// Preconnect a los CDN de terceros (reduce latencia de DNS/TLS — Félix 10/08)
+add_action('wp_head', function() {
+    echo '<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>' . "\n";
+    echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+    echo '<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>' . "\n";
+}, 1);
+
+// ===== CONSENTIMIENTO DE COOKIES (RGPD / Ley europea) — Félix 10/08 =====
+// Google Consent Mode v2: declara los estados de consentimiento ANTES de que
+// cargue cualquier script de Google (Analytics/Ads). Por defecto todo 'denied'
+// salvo lo estrictamente necesario; si el usuario ya aceptó, se actualiza a 'granted'.
+// Además, el pixel de Facebook se bloquea hasta aceptar: si window.fbq ya existe,
+// el snippet del plugin (if(f.fbq)return) no carga el script real de Meta.
+add_action('wp_head', function() {
+    $consent = isset($_COOKIE['bp_cookie_consent']) ? $_COOKIE['bp_cookie_consent'] : '';
+    ?>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'denied',
+        'functionality_storage': 'denied',
+        'personalization_storage': 'denied',
+        'security_storage': 'granted',
+        'wait_for_update': 500
+    });
+    gtag('set', 'url_passthrough', true);
+    <?php if ($consent === 'all') : ?>
+    gtag('consent', 'update', {
+        'ad_storage': 'granted',
+        'ad_user_data': 'granted',
+        'ad_personalization': 'granted',
+        'analytics_storage': 'granted',
+        'functionality_storage': 'granted',
+        'personalization_storage': 'granted'
+    });
+    <?php endif; ?>
+    </script>
+    <?php if ($consent !== 'all') : ?>
+    <script>
+    window.fbq = window.fbq || function(){ window.fbq.queue = window.fbq.queue || []; window.fbq.queue.push(arguments); };
+    window._fbq = window._fbq || window.fbq;
+    </script>
+    <?php endif;
+}, 1);
 
 // Soporte para WooCommerce
 add_action('after_setup_theme', function() {
@@ -122,9 +171,19 @@ remove_action('woocommerce_sidebar', 'woocommerce_get_sidebar', 10);
 add_filter('woocommerce_sale_flash', '__return_false');
 
 // Deshabilitar caché durante desarrollo
-add_action('send_headers', function() {
-    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-    header('Pragma: no-cache');
+// Cache-Control selectivo (Félix 10/08, optimización de velocidad):
+// - Carrito/checkout/mi cuenta: no-store (sesión activa, no cachear)
+// - Resto (home, tienda, productos): no-cache + revalidación (el navegador
+//   reutiliza con ETag/Last-Modified en vez de re-descargar todo)
+// ⚠️ En template_redirect (no send_headers): las conditionals de WooCommerce
+// (is_cart/is_checkout/is_account_page) solo resuelven tras query_posts().
+add_action('template_redirect', function() {
+    if (function_exists('is_cart') && (is_cart() || is_checkout() || is_account_page())) {
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+    } else {
+        header('Cache-Control: no-cache, must-revalidate, max-age=0');
+    }
     header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
 });
 
@@ -455,24 +514,98 @@ if (!defined('BP_BREVO_USER')) define('BP_BREVO_USER', '');
 if (!defined('BP_BREVO_PASS')) define('BP_BREVO_PASS', '');
 if (!defined('BP_BREVO_FROM')) define('BP_BREVO_FROM', 'info@bonospremium.com');
 
-// Configuración de cada formulario: email destino CONFIGURABLE
+// Configuración de cada formulario: email destino CONFIGURABLE por tienda.
+// Cada tienda define en su wp-config.php:  define('BP_FORM_CONTACTO_TO', '...'); etc.
+// Si no se define, usa info@bonospremium.com (fallback genérico).
+if (!defined('BP_FORM_CONTACTO_TO'))  define('BP_FORM_CONTACTO_TO', 'info@bonospremium.com');
+if (!defined('BP_FORM_PROMOCIONA_TO')) define('BP_FORM_PROMOCIONA_TO', 'info@bonospremium.com');
+if (!defined('BP_FORM_OFERTAS_TO'))   define('BP_FORM_OFERTAS_TO', 'info@bonospremium.com');
+
 $bp_forms_config = [
     'contacto' => [
-        'to'      => apply_filters('bp_form_contacto_to', 'info@bonospremium.com'),
+        'to'      => apply_filters('bp_form_contacto_to', BP_FORM_CONTACTO_TO),
         'subject' => '📩 Nuevo mensaje de contacto - BonosPremium',
     ],
     'promociona' => [
-        'to'      => apply_filters('bp_form_promociona_to', 'info@bonospremium.com'),
+        'to'      => apply_filters('bp_form_promociona_to', BP_FORM_PROMOCIONA_TO),
         'subject' => '🏪 Promociona tu negocio - BonosPremium',
     ],
     'ofertas' => [
-        'to'      => apply_filters('bp_form_ofertas_to', 'info@bonospremium.com'),
+        'to'      => apply_filters('bp_form_ofertas_to', BP_FORM_OFERTAS_TO),
         'subject' => '🎁 Solicitud de recibir ofertas - BonosPremium',
     ],
 ];
 // Filtro para sobreescribir todos los destinos desde child theme / snippet
 function bp_forms_config() {
     return apply_filters('bp_forms_config', $GLOBALS['bp_forms_config']);
+}
+
+// ============================================================
+// PÁGINAS DE FORMULARIO INTEGRADAS EN EL TEMA (sin crear páginas)
+// Las URLs /promociona-tu-negocio/, /recibir-ofertas/ y /contacta-con-nosotros/
+// funcionan automáticamente al activar el tema en CUALQUIER tienda.
+// Si la tienda ya tiene una página creada con ese slug + template, se respeta
+// (título y contenido de la página mandan). Félix 10/08: "estas paginas de los
+// formularios no hay que crearlas sino que sean del tema".
+add_action('init', function() {
+    $bp_form_rutas = [
+        'promociona-tu-negocio' => 'template-promociona.php',
+        'recibir-ofertas'       => 'template-recibir-ofertas.php',
+        'contacta-con-nosotros' => 'template-contacto.php',
+        'contacta-con-nosotors' => 'template-contacto.php', // alias histórico con typo
+    ];
+    foreach ($bp_form_rutas as $slug => $tpl) {
+        add_rewrite_rule('^' . $slug . '/?$', 'index.php?bp_form_page=' . $slug, 'top');
+    }
+    // Regenerar reglas de reescritura al cambiar la versión del tema
+    if (get_option('bp_form_routes_flushed') !== BP_LZ_VERSION) {
+        flush_rewrite_rules();
+        update_option('bp_form_routes_flushed', BP_LZ_VERSION);
+    }
+});
+
+add_filter('query_vars', function($vars) {
+    $vars[] = 'bp_form_page';
+    return $vars;
+});
+
+add_filter('template_include', function($template) {
+    $page = get_query_var('bp_form_page');
+    if (!$page) return $template;
+    $mapa = [
+        'promociona-tu-negocio' => 'template-promociona.php',
+        'recibir-ofertas'       => 'template-recibir-ofertas.php',
+        'contacta-con-nosotros' => 'template-contacto.php',
+        'contacta-con-nosotors' => 'template-contacto.php',
+    ];
+    if (!isset($mapa[$page])) return $template;
+    // La ruta del TEMA manda SIEMPRE (Félix 10/08: "estas paginas de los formularios
+    // no hay que crearlas sino que sean del tema"). Aunque la tienda tenga una página
+    // creada con el mismo slug (incluso contaminada), el template del tema gana.
+    $tpl = locate_template($mapa[$page]);
+    return $tpl ? $tpl : $template;
+});
+
+// Título por defecto de los formularios del tema (si NO hay página creada)
+function bp_form_titulo($form) {
+    if (is_page()) return get_the_title();
+    $titulos = [
+        'contacto'   => 'Contacta con nosotros',
+        'promociona' => '¡Promociona tu negocio!',
+        'ofertas'    => 'Recibir ofertas',
+    ];
+    return isset($titulos[$form]) ? $titulos[$form] : get_bloginfo('name');
+}
+
+// Texto introductorio por defecto (si NO hay página creada)
+function bp_form_intro($form) {
+    if (is_page() && have_posts()) { the_content(); return; }
+    $intros = [
+        'contacto'   => 'Cuéntanos tu consulta y te responderemos lo antes posible.',
+        'promociona' => '¿Tienes un negocio en tu zona? Promociona tus ofertas entre nuestros clientes.',
+        'ofertas'    => 'Apúntate y recibe las mejores ofertas en tu email.',
+    ];
+    echo isset($intros[$form]) ? esc_html($intros[$form]) : '';
 }
 
 // ============================================================

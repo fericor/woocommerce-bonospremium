@@ -18,10 +18,7 @@
         <div class="bp-container bp-header-inner">
             <div class="bp-header-left">
                 <button class="bp-menu-toggle" aria-label="Menú">
-                    <span></span><span></span><span></span>
-                </button>
-                <button class="bp-back-btn" aria-label="Volver">
-                    <i class="fas fa-arrow-left"></i>
+                    <i class="fas fa-bars"></i>
                 </button>
                 <nav class="bp-user-nav">
                     <?php

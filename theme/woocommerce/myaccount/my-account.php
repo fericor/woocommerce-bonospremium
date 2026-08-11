@@ -161,14 +161,6 @@ get_header(); ?>
                             <a href="<?php echo esc_url(home_url('/')); ?>" class="bp-auth-btn">Volver al inicio</a>
                         </div>
                     <?php endif; ?>
-                    <div class="bp-auth-hero">
-                        <div class="bp-auth-hero-icon"><i class="fas fa-user-circle"></i></div>
-                        <h1>Bienvenido a tu cuenta</h1>
-                        <p>Accede para ver tus bonos, pedidos y crédito disponible</p>
-                    </div>
-                    <div class="bp-auth-brand">
-                        <img src="<?php echo get_template_directory_uri(); ?>/assets/logo_rectangulo.png" alt="BonosPremium" class="bp-auth-logo" />
-                    </div>
                     <?php if (!$bp_es_logout) : ?>
                     <div class="bp-auth-content">
                         <?php
