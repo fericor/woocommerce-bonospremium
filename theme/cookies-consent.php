@@ -55,7 +55,8 @@
 .bp-cookie-text p { margin: 0 0 6px; }
 .bp-cookie-text strong { color: #ffffff; }
 .bp-cookie-text a {
-    color: #4fc3f7;
+    /* FIX Félix 11/08: color primario light de la plantilla */
+    color: var(--bp-primary-light, #33b0e3);
     font-weight: 700;
     text-decoration: none;
     font-size: 13px;
@@ -68,16 +69,19 @@
 }
 .bp-cookie-btn {
     border: none;
-    border-radius: 10px;
-    padding: 11px 20px;
+    border-radius: 8px;
+    /* FIX Félix 11/08: botones menos altos (padding vertical reducido) */
+    padding: 5px 18px;
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
     transition: all .2s;
     font-family: inherit;
+    line-height: 1.4;
 }
-.bp-cookie-accept { background: #009cdc; color: #fff; box-shadow: 0 3px 10px rgba(0,156,220,.35); }
-.bp-cookie-accept:hover { background: #0088bb; }
+/* FIX Félix 11/08: colores con las variables primarias de la plantilla */
+.bp-cookie-accept { background: var(--bp-primary); color: #fff; box-shadow: 0 3px 10px rgba(var(--bp-primary-rgb), .35); }
+.bp-cookie-accept:hover { background: var(--bp-primary-dark); }
 .bp-cookie-essential { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.6); }
 .bp-cookie-essential:hover { border-color: #ffffff; background: rgba(255,255,255,.1); }
 @media (max-width: 640px) {

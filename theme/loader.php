@@ -30,7 +30,7 @@
     width: 40px;
     height: 40px;
     border: 4px solid #e0e0e0;
-    border-top-color: #039CDC;
+    border-top-color: var(--bp-primary, #039CDC);
     border-radius: 50%;
     animation: bp-loader-spin .8s linear infinite;
 }
