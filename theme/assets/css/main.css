@@ -204,7 +204,8 @@ p { margin-bottom: 1rem;     text-align: justify; }
     /* FIX Félix 11/08: barra 20% más fina (padding vertical 12px -> 9px) */
     padding: 9px 18px;
     color: var(--bp-text-primary);
-    font-size: 16px;
+    /* FIX Félix 11/08: tamaño 16px -> 18px (2px más) */
+    font-size: 18px;
     font-weight: 500;
     letter-spacing: .5px;
     transition: all .2s;
@@ -1609,7 +1610,7 @@ input.qty { margin: 0px !important; }
     .bp-nav .bp-container { margin: 0; padding: 0; }
     .bp-nav-menu { display: flex; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; gap: 0; padding: 0 8px; }
     .bp-nav-menu::-webkit-scrollbar { display: none; }
-    .bp-nav-menu a { padding: 6px 14px; border-bottom: none; white-space: nowrap; font-size: 16px; color: var(--bp-text-primary); }
+    .bp-nav-menu a { padding: 6px 14px; border-bottom: none; white-space: nowrap; font-size: 18px; color: var(--bp-text-primary); }
     .bp-nav-menu a:hover { color: var(--bp-primary); }
 
     /* Productos: 1 por fila */
