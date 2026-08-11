@@ -4,7 +4,7 @@
  */
 
 // Definir versión del tema
-define('BP_LZ_VERSION', '1.2.1');
+define('BP_LZ_VERSION', '1.2.2');
 
 // Preconnect a los CDN de terceros (reduce latencia de DNS/TLS — Félix 10/08)
 add_action('wp_head', function() {
@@ -786,6 +786,14 @@ function bp_form_field_desde() {
     echo '</select>';
     echo '</p>';
 }
+
+// ============================================================
+// TEXTO DEL BOTÓN DE PAGO EN EL CHECKOUT (Félix 11/08)
+// "Realizar pedido" (texto por defecto de WooCommerce) -> "Finalizar compra"
+// ============================================================
+add_filter('woocommerce_order_button_text', function() {
+    return 'Finalizar compra';
+});
 
 // ============================================================
 // CRÉDITO BONOSPREMIUM - ENDPOINT Y COMPRA DE CRÉDITO
