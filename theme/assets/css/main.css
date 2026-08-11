@@ -1635,7 +1635,8 @@ input.qty { margin: 0px !important; }
     .single-product .summary h1 { font-size: 1.2rem; }
     .single-product .summary .price { font-size: 1.2rem !important; }
 
-    .bp-footer-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 20px !important; padding: 0 12px !important;  }
+    /* FIX Félix 11/08: en móvil/tablet el footer en UNA columna (no 2) */
+    .bp-footer-grid { grid-template-columns: 1fr !important; gap: 20px !important; padding: 0 12px !important;  }
     .bp-footer-widgets { padding: 30px 0 20px; }
     .bp-footer-title { font-size: 1rem; }
     .bp-footer-menu a { font-size: .8rem; }
