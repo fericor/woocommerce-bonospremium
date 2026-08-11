@@ -4,7 +4,7 @@
  */
 
 // Definir versión del tema
-define('BP_LZ_VERSION', '1.2.0');
+define('BP_LZ_VERSION', '1.2.1');
 
 // Preconnect a los CDN de terceros (reduce latencia de DNS/TLS — Félix 10/08)
 add_action('wp_head', function() {

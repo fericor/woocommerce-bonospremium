@@ -605,7 +605,7 @@ p { margin-bottom: 1rem;     text-align: justify; }
     transition: all .2s !important;
     color: #fff !important;
 }
-.bp-single-cart .single_add_to_cart_button:hover { background: #027ba8 !important; }
+.bp-single-cart .single_add_to_cart_button:hover { background: var(--bp-primary-dark) !important; }
 .bp-single-meta { font-size: .85rem; color: #888; }
 .bp-single-meta .posted_in a { color: var(--bp-primary); }
 
@@ -944,11 +944,11 @@ p { margin-bottom: 1rem;     text-align: justify; }
     font-weight: 700 !important;
     cursor: pointer;
     transition: all .2s;
-    box-shadow: 0 4px 12px rgba(3,156,220,.3);
+    box-shadow: 0 4px 12px rgba(var(--bp-primary-rgb), .3);
 }
 .bp-place-order:hover,
 #place_order:hover,
-.checkout-button:hover { background: var(--bp-primary-dark) !important; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(3,156,220,.4); }
+.checkout-button:hover { background: var(--bp-primary-dark) !important; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(var(--bp-primary-rgb), .4); }
 
 /* Login toggle - app style */
 /* Login toggle - app style collapsible */
@@ -1692,8 +1692,9 @@ input.qty { margin: 0px !important; }
         border: none !important;
         padding: 14px 20px !important;
         border-radius: 0;
-        font-weight: 700 !important;
-        font-size: 1.05rem !important;
+        /* FIX Félix 11/08: botón comprar del bottom con estos valores */
+        font-weight: 900 !important;
+        font-size: 18px !important;
         text-align: center;
     }
     .bp-single-cart .single_add_to_cart_button:hover {
@@ -2198,7 +2199,7 @@ input.qty { margin: 0px !important; }
     border-left: 4px solid #bbb;
 }
 .bp-order-card.status-completed { border-left-color: #34c759; }
-.bp-order-card.status-processing { border-left-color: #039cdc; }
+.bp-order-card.status-processing { border-left-color: var(--bp-primary); }
 .bp-order-card.status-pending { border-left-color: #ffcc00; }
 .bp-order-card.status-cancelled { border-left-color: #ff3b30; }
 .bp-order-card.status-on-hold { border-left-color: #ff9500; }
@@ -2233,7 +2234,7 @@ input.qty { margin: 0px !important; }
     letter-spacing: .3px;
 }
 .bp-order-card.status-completed .bp-order-status { background: rgba(52,199,89,.12); color: #1e7d34; }
-.bp-order-card.status-processing .bp-order-status { background: rgba(3,156,220,.12); color: #0277bd; }
+.bp-order-card.status-processing .bp-order-status { background: rgba(var(--bp-primary-rgb), .12); color: var(--bp-primary-dark); }
 .bp-order-card.status-cancelled .bp-order-status { background: rgba(255,59,48,.12); color: #c52b1f; }
 .bp-order-row {
     display: flex;
