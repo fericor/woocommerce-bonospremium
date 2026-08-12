@@ -516,11 +516,9 @@ if (!defined('BP_BREVO_FROM')) define('BP_BREVO_FROM', 'info@bonospremium.com');
 
 // Configuración de cada formulario: email destino CONFIGURABLE por tienda.
 // Cada tienda define en su wp-config.php:  define('BP_FORM_CONTACTO_TO', '...'); etc.
-// Si no se define, usa el fallback por formulario.
+// Si no se define, usa info@bonospremium.com (fallback genérico).
 if (!defined('BP_FORM_CONTACTO_TO'))  define('BP_FORM_CONTACTO_TO', 'info@bonospremium.com');
-// Félix 11/08: Promociona tu negocio -> SIEMPRE a empresas@bonospremium.com
-// (el selector "Te escribo desde" solo informa, no cambia el destino).
-if (!defined('BP_FORM_PROMOCIONA_TO')) define('BP_FORM_PROMOCIONA_TO', 'empresas@bonospremium.com');
+if (!defined('BP_FORM_PROMOCIONA_TO')) define('BP_FORM_PROMOCIONA_TO', 'info@bonospremium.com');
 if (!defined('BP_FORM_OFERTAS_TO'))   define('BP_FORM_OFERTAS_TO', 'info@bonospremium.com');
 
 $bp_forms_config = [
@@ -713,9 +711,9 @@ add_action('init', function() {
     }
 
     $fields = [
-        'contacto'   => ['nombre', 'email', 'numero_pedido', 'mensaje'],
-        'promociona' => ['nombre', 'email', 'telefono', 'negocio', 'desde', 'mensaje'],
-        'ofertas'    => ['email'],
+        'contacto'   => ['nombre', 'email', 'telefono', 'mensaje'],
+        'promociona' => ['nombre', 'email', 'telefono', 'negocio', 'web', 'mensaje'],
+        'ofertas'    => ['nombre', 'email', 'ciudad'],
     ];
 
     $data = [];
@@ -731,13 +729,13 @@ add_action('init', function() {
 
     // Construir cuerpo del correo
     $labels = [
-        'nombre'        => 'Nombre',
-        'email'         => 'Email',
-        'telefono'      => 'Teléfono',
-        'mensaje'       => 'Mensaje',
-        'negocio'       => 'Nombre del negocio',
-        'desde'         => 'Te escribo desde',
-        'numero_pedido' => 'Número del pedido',
+        'nombre'   => 'Nombre',
+        'email'    => 'Email',
+        'telefono' => 'Teléfono',
+        'mensaje'  => 'Mensaje',
+        'negocio'  => 'Nombre del negocio',
+        'web'      => 'Web / RRSS',
+        'ciudad'   => 'Ciudad',
     ];
     $body = "Formulario: {$config[$form]['subject']}\n\n";
     foreach ($data as $k => $v) {
@@ -772,20 +770,6 @@ function bp_form_field($type, $name, $label, $required = true, $extra = '') {
     );
 }
 
-// Selector "Te escribo desde" (Félix 11/08): Tenerife, Gran Canaria, Fuerteventura,
-// Lanzarote, Madrid. Solo informa — el destino SIEMPRE es empresas@bonospremium.com.
-function bp_form_field_desde() {
-    $opciones = ['Tenerife', 'Gran Canaria', 'Fuerteventura', 'Lanzarote', 'Madrid'];
-    echo '<p class="bp-form-row">';
-    echo '<label for="desde">Te escribo desde <span class="bp-form-required">*</span></label>';
-    echo '<select name="desde" id="desde" required>';
-    echo '<option value="">Selecciona tu isla/ciudad...</option>';
-    foreach ($opciones as $op) {
-        printf('<option value="%s">%s</option>', esc_attr($op), esc_html($op));
-    }
-    echo '</select>';
-    echo '</p>';
-}
 
 // ============================================================
 // TEXTO DEL BOTÓN DE PAGO EN EL CHECKOUT (Félix 11/08)

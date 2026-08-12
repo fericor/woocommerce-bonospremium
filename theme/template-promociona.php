@@ -1,8 +1,7 @@
 <?php
 /**
  * Template Name: Formulario Promociona tu negocio
- * Envía a empresas@bonospremium.com (configurable en functions.php)
- * Félix 11/08: sin intro, sin campo Web/RRSS, con selector "Te escribo desde".
+ * Envía a info@bonospremium.com (configurable en functions.php)
  */
 get_header(); ?>
 
@@ -13,6 +12,7 @@ get_header(); ?>
                 <h1 class="bp-page-title"><?php echo bp_form_titulo('promociona'); ?></h1>
             </div>
             <div class="bp-contact-body">
+                <?php bp_form_intro('promociona'); ?>
                 <?php bp_form_success('promociona'); ?>
                 <form id="bp-form-promociona" class="bp-form" method="post">
                     <input type="hidden" name="bp_form_submit" value="promociona" />
@@ -21,7 +21,7 @@ get_header(); ?>
                     <?php bp_form_field('email', 'email', 'Email'); ?>
                     <?php bp_form_field('tel', 'telefono', 'Teléfono', false); ?>
                     <?php bp_form_field('text', 'negocio', 'Nombre del negocio'); ?>
-                    <?php bp_form_field_desde(); ?>
+                    <?php bp_form_field('text', 'web', 'Web / RRSS', false); ?>
                     <p class="bp-form-row">
                         <label for="mensaje">Cuéntanos sobre tu negocio <span class="bp-form-required">*</span></label>
                         <textarea name="mensaje" id="mensaje" placeholder="Describe tu negocio y lo que ofreces..." required></textarea>
