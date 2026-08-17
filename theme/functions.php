@@ -723,7 +723,8 @@ add_action('init', function() {
 
     // Validar email
     if (!is_email($data['email'] ?? '')) {
-        wp_safe_redirect(add_query_arg('bp_form', $form, wp_get_referer() ?: home_url()) . '#bp-form-' . $form);
+        $dest = wp_get_referer() ?: home_url($_SERVER['REQUEST_URI'] ?? '/');
+        wp_safe_redirect(add_query_arg('bp_form', $form, $dest) . '#bp-form-' . $form);
         exit;
     }
 
@@ -746,7 +747,10 @@ add_action('init', function() {
 
     wp_mail($config[$form]['to'], $config[$form]['subject'], $body, $headers);
 
-    wp_safe_redirect(add_query_arg('bp_form', $form, wp_get_referer() ?: home_url()) . '#bp-form-' . $form . '&bp_ok=1');
+    // Redirigir a la página del formulario con éxito. IMPORTANTE: bp_ok debe ir en el QUERY (antes del #),
+    // no en el fragmento, o $_GET['bp_ok'] nunca existirá y no se mostrará el aviso de éxito.
+    $dest = wp_get_referer() ?: home_url($_SERVER['REQUEST_URI'] ?? '/');
+    wp_safe_redirect(add_query_arg(array('bp_form' => $form, 'bp_ok' => 1), $dest) . '#bp-form-' . $form);
     exit;
 });
 
