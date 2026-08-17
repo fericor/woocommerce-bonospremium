@@ -143,22 +143,22 @@ function bp_settings_page() {
                         <td>
                             <input type="color" id="bp-primary" name="bp[primary_color]" value="<?php echo esc_attr($s['primary_color']); ?>" />
                             <input type="text" name="bp[primary_color]" value="<?php echo esc_attr($s['primary_color']); ?>" class="small-text" />
-                            <p class="description">Base del tema: botones, enlaces, precios, header (si no pones header propio).</p>
+                            <p class="description">Color de acento del tema: enlaces, iconos y elementos destacados.</p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row"><label for="bp-header">Header (fondo)</label></th>
                         <td>
-                            <input type="color" id="bp-header" name="bp[header_bg]" value="<?php echo esc_attr($s['header_bg'] ?: $s['primary_color']); ?>" />
-                            <input type="text" name="bp[header_bg]" value="<?php echo esc_attr($s['header_bg']); ?>" class="small-text" placeholder="vacío = gradiente automático" />
-                            <p class="description">Puedes poner un gradiente: <code>linear-gradient(135deg, #039CDC, #027ba8)</code></p>
+                            <input type="color" id="bp-header" name="bp[header_bg]" value="<?php echo esc_attr($s['header_bg'] ?: '#039CDC'); ?>" />
+                            <input type="text" name="bp[header_bg]" value="<?php echo esc_attr($s['header_bg']); ?>" class="small-text" placeholder="vacío = color principal" />
+                            <p class="description">Solo afecta al header. Puedes poner un gradiente: <code>linear-gradient(135deg, #039CDC, #027ba8)</code></p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row"><label for="bp-header-mobile">Header móvil</label></th>
                         <td>
-                            <input type="color" id="bp-header-mobile" name="bp[header_bg_mobile]" value="<?php echo esc_attr($s['header_bg_mobile'] ?: $s['primary_color']); ?>" />
-                            <input type="text" name="bp[header_bg_mobile]" value="<?php echo esc_attr($s['header_bg_mobile']); ?>" class="small-text" placeholder="vacío = color principal" />
+                            <input type="color" id="bp-header-mobile" name="bp[header_bg_mobile]" value="<?php echo esc_attr($s['header_bg_mobile'] ?: '#039CDC'); ?>" />
+                            <input type="text" name="bp[header_bg_mobile]" value="<?php echo esc_attr($s['header_bg_mobile']); ?>" class="small-text" placeholder="vacío = header normal" />
                         </td>
                     </tr>
                     <tr>
@@ -185,14 +185,14 @@ function bp_settings_page() {
                     <tr>
                         <th scope="row"><label for="bp-button">Color botones</label></th>
                         <td>
-                            <input type="color" id="bp-button" name="bp[button_bg]" value="<?php echo esc_attr($s['button_bg'] ?: $s['primary_color']); ?>" />
+                            <input type="color" id="bp-button" name="bp[button_bg]" value="<?php echo esc_attr($s['button_bg'] ?: '#039CDC'); ?>" />
                             <input type="text" name="bp[button_bg]" value="<?php echo esc_attr($s['button_bg']); ?>" class="small-text" placeholder="vacío = color principal" />
                         </td>
                     </tr>
                     <tr>
                         <th scope="row"><label for="bp-sale">Color ofertas/rebajas</label></th>
                         <td>
-                            <input type="color" id="bp-sale" name="bp[sale_color]" value="<?php echo esc_attr($s['sale_color'] ?: $s['primary_color']); ?>" />
+                            <input type="color" id="bp-sale" name="bp[sale_color]" value="<?php echo esc_attr($s['sale_color'] ?: '#039CDC'); ?>" />
                             <input type="text" name="bp[sale_color]" value="<?php echo esc_attr($s['sale_color']); ?>" class="small-text" placeholder="vacío = color principal" />
                         </td>
                     </tr>

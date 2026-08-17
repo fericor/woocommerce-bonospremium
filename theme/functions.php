@@ -7,9 +7,11 @@
 require_once get_template_directory() . '/admin-bp-settings.php';
 
 // Definir versión del tema
-define('BP_LZ_VERSION', '1.2.3');
+define('BP_LZ_VERSION', '1.2.4');
 
 // Colores personalizados desde el panel (solo si hay cambios)
+// Prioridad 9999: debe ganar SIEMPRE, incluso al "CSS adicional" del Customizer
+// (wp_custom_css se imprime en wp_head con prioridad 101 y pisaba los overrides).
 add_action('wp_head', function () {
     $s = bp_get_settings();
     $vars = array();
@@ -25,8 +27,6 @@ add_action('wp_head', function () {
     $header_bg = trim($s['header_bg'] ?? '');
     if ($header_bg) {
         $vars['--bp-header-bg'] = $header_bg;
-    } elseif ($primary && $primary !== '#039CDC') {
-        $vars['--bp-header-bg'] = 'linear-gradient(135deg, ' . $primary . ', ' . bp_adjust_brightness($primary, -0.14) . ')';
     }
     if (trim($s['header_bg_mobile'] ?? '')) $vars['--bp-header-bg-mobile'] = trim($s['header_bg_mobile']);
     if (trim($s['footer_bg'] ?? ''))         $vars['--bp-footer-bg']       = trim($s['footer_bg']);
@@ -39,7 +39,7 @@ add_action('wp_head', function () {
     if (empty($vars)) return;
     $css = ':root{' . implode('', array_map(function ($k, $v) { return $k . ':' . $v . ';'; }, array_keys($vars), $vars)) . '}';
     echo "\n<style id=\"bp-theme-custom-colors\">" . $css . "</style>\n";
-}, 99);
+}, 9999);
 
 // Preconnect a los CDN de terceros (reduce latencia de DNS/TLS — Félix 10/08)
 add_action('wp_head', function() {
