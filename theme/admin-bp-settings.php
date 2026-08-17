@@ -100,7 +100,7 @@ function bp_save_settings_handler() {
     exit;
 }
 
-/* ─────────── Menú y página ─────────── */
+/* ─────────── Menú y página (tabs) ─────────── */
 
 add_action('admin_menu', function () {
     add_menu_page(
@@ -125,138 +125,159 @@ function bp_settings_page() {
             <div class="notice notice-success is-dismissible"><p><strong>✅ Ajustes guardados.</strong></p></div>
         <?php endif; ?>
 
+        <h2 class="nav-tab-wrapper" style="margin-top:12px;">
+            <a href="javascript:void(0)" class="nav-tab nav-tab-active" data-tab="tab-colores">🎨 Colores</a>
+            <a href="javascript:void(0)" class="nav-tab" data-tab="tab-smtp">✉️ SMTP Brevo</a>
+            <a href="javascript:void(0)" class="nav-tab" data-tab="tab-formularios">📨 Formularios</a>
+        </h2>
+
         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
             <input type="hidden" name="action" value="bp_save_settings" />
             <?php wp_nonce_field('bp_settings_nonce'); ?>
 
             <!-- 🎨 COLORES -->
-            <h2 style="border-bottom:1px solid #ccc;padding-bottom:8px;">🎨 Colores de la tienda</h2>
-            <table class="form-table" role="presentation">
-                <tr>
-                    <th scope="row"><label for="bp-primary">Color principal</label></th>
-                    <td>
-                        <input type="color" id="bp-primary" name="bp[primary_color]" value="<?php echo esc_attr($s['primary_color']); ?>" />
-                        <input type="text" name="bp[primary_color]" value="<?php echo esc_attr($s['primary_color']); ?>" class="small-text" />
-                        <p class="description">Base del tema: botones, enlaces, precios, header (si no pones header propio).</p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="bp-header">Header (fondo)</label></th>
-                    <td>
-                        <input type="color" id="bp-header" name="bp[header_bg]" value="<?php echo esc_attr($s['header_bg'] ?: $s['primary_color']); ?>" />
-                        <input type="text" name="bp[header_bg]" value="<?php echo esc_attr($s['header_bg']); ?>" class="small-text" placeholder="vacío = gradiente automático" />
-                        <p class="description">Puedes poner un gradiente: <code>linear-gradient(135deg, #039CDC, #027ba8)</code></p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="bp-header-mobile">Header móvil</label></th>
-                    <td>
-                        <input type="color" id="bp-header-mobile" name="bp[header_bg_mobile]" value="<?php echo esc_attr($s['header_bg_mobile'] ?: $s['primary_color']); ?>" />
-                        <input type="text" name="bp[header_bg_mobile]" value="<?php echo esc_attr($s['header_bg_mobile']); ?>" class="small-text" placeholder="vacío = color principal" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="bp-footer">Footer (fondo)</label></th>
-                    <td>
-                        <input type="color" id="bp-footer" name="bp[footer_bg]" value="<?php echo esc_attr($s['footer_bg'] ?: '#32373c'); ?>" />
-                        <input type="text" name="bp[footer_bg]" value="<?php echo esc_attr($s['footer_bg']); ?>" class="small-text" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="bp-bg">Fondo de página</label></th>
-                    <td>
-                        <input type="color" id="bp-bg" name="bp[page_bg]" value="<?php echo esc_attr($s['page_bg'] ?: '#ffffff'); ?>" />
-                        <input type="text" name="bp[page_bg]" value="<?php echo esc_attr($s['page_bg']); ?>" class="small-text" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="bp-text">Color de texto</label></th>
-                    <td>
-                        <input type="color" id="bp-text" name="bp[text_color]" value="<?php echo esc_attr($s['text_color'] ?: '#090909'); ?>" />
-                        <input type="text" name="bp[text_color]" value="<?php echo esc_attr($s['text_color']); ?>" class="small-text" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="bp-button">Color botones</label></th>
-                    <td>
-                        <input type="color" id="bp-button" name="bp[button_bg]" value="<?php echo esc_attr($s['button_bg'] ?: $s['primary_color']); ?>" />
-                        <input type="text" name="bp[button_bg]" value="<?php echo esc_attr($s['button_bg']); ?>" class="small-text" placeholder="vacío = color principal" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="bp-sale">Color ofertas/rebajas</label></th>
-                    <td>
-                        <input type="color" id="bp-sale" name="bp[sale_color]" value="<?php echo esc_attr($s['sale_color'] ?: $s['primary_color']); ?>" />
-                        <input type="text" name="bp[sale_color]" value="<?php echo esc_attr($s['sale_color']); ?>" class="small-text" placeholder="vacío = color principal" />
-                    </td>
-                </tr>
-            </table>
+            <div id="tab-colores" class="bp-tab">
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><label for="bp-primary">Color principal</label></th>
+                        <td>
+                            <input type="color" id="bp-primary" name="bp[primary_color]" value="<?php echo esc_attr($s['primary_color']); ?>" />
+                            <input type="text" name="bp[primary_color]" value="<?php echo esc_attr($s['primary_color']); ?>" class="small-text" />
+                            <p class="description">Base del tema: botones, enlaces, precios, header (si no pones header propio).</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="bp-header">Header (fondo)</label></th>
+                        <td>
+                            <input type="color" id="bp-header" name="bp[header_bg]" value="<?php echo esc_attr($s['header_bg'] ?: $s['primary_color']); ?>" />
+                            <input type="text" name="bp[header_bg]" value="<?php echo esc_attr($s['header_bg']); ?>" class="small-text" placeholder="vacío = gradiente automático" />
+                            <p class="description">Puedes poner un gradiente: <code>linear-gradient(135deg, #039CDC, #027ba8)</code></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="bp-header-mobile">Header móvil</label></th>
+                        <td>
+                            <input type="color" id="bp-header-mobile" name="bp[header_bg_mobile]" value="<?php echo esc_attr($s['header_bg_mobile'] ?: $s['primary_color']); ?>" />
+                            <input type="text" name="bp[header_bg_mobile]" value="<?php echo esc_attr($s['header_bg_mobile']); ?>" class="small-text" placeholder="vacío = color principal" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="bp-footer">Footer (fondo)</label></th>
+                        <td>
+                            <input type="color" id="bp-footer" name="bp[footer_bg]" value="<?php echo esc_attr($s['footer_bg'] ?: '#32373c'); ?>" />
+                            <input type="text" name="bp[footer_bg]" value="<?php echo esc_attr($s['footer_bg']); ?>" class="small-text" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="bp-bg">Fondo de página</label></th>
+                        <td>
+                            <input type="color" id="bp-bg" name="bp[page_bg]" value="<?php echo esc_attr($s['page_bg'] ?: '#ffffff'); ?>" />
+                            <input type="text" name="bp[page_bg]" value="<?php echo esc_attr($s['page_bg']); ?>" class="small-text" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="bp-text">Color de texto</label></th>
+                        <td>
+                            <input type="color" id="bp-text" name="bp[text_color]" value="<?php echo esc_attr($s['text_color'] ?: '#090909'); ?>" />
+                            <input type="text" name="bp[text_color]" value="<?php echo esc_attr($s['text_color']); ?>" class="small-text" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="bp-button">Color botones</label></th>
+                        <td>
+                            <input type="color" id="bp-button" name="bp[button_bg]" value="<?php echo esc_attr($s['button_bg'] ?: $s['primary_color']); ?>" />
+                            <input type="text" name="bp[button_bg]" value="<?php echo esc_attr($s['button_bg']); ?>" class="small-text" placeholder="vacío = color principal" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="bp-sale">Color ofertas/rebajas</label></th>
+                        <td>
+                            <input type="color" id="bp-sale" name="bp[sale_color]" value="<?php echo esc_attr($s['sale_color'] ?: $s['primary_color']); ?>" />
+                            <input type="text" name="bp[sale_color]" value="<?php echo esc_attr($s['sale_color']); ?>" class="small-text" placeholder="vacío = color principal" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
 
             <!-- ✉️ SMTP BREVO -->
-            <h2 style="border-bottom:1px solid #ccc;padding-bottom:8px;margin-top:30px;">✉️ SMTP Brevo (emails de la web)</h2>
-            <p class="description">Usado por <code>wp_mail()</code> y los formularios. Si usuario/contraseña están vacíos se usa el <code>mail()</code> del sistema.</p>
-            <table class="form-table" role="presentation">
-                <tr>
-                    <th scope="row"><label for="smtp-host">Servidor (host)</label></th>
-                    <td><input type="text" id="smtp-host" name="bp[smtp_host]" value="<?php echo esc_attr($s['smtp_host']); ?>" class="regular-text" /></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="smtp-port">Puerto</label></th>
-                    <td><input type="number" id="smtp-port" name="bp[smtp_port]" value="<?php echo esc_attr($s['smtp_port']); ?>" class="small-text" /> <span class="description">587 con TLS (Brevo)</span></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="smtp-user">Usuario</label></th>
-                    <td><input type="email" id="smtp-user" name="bp[smtp_user]" value="<?php echo esc_attr($s['smtp_user']); ?>" class="regular-text" placeholder="usuario@smtp-brevo.com" /></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="smtp-pass">Contraseña / SMTP Key</label></th>
-                    <td><input type="password" id="smtp-pass" name="bp[smtp_pass]" value="<?php echo esc_attr($s['smtp_pass']); ?>" class="regular-text" autocomplete="new-password" /></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="smtp-from">Remitente (desde dónde se envía)</label></th>
-                    <td><input type="email" id="smtp-from" name="bp[smtp_from]" value="<?php echo esc_attr($s['smtp_from']); ?>" class="regular-text" /></td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="smtp-from-name">Nombre del remitente</label></th>
-                    <td><input type="text" id="smtp-from-name" name="bp[smtp_from_name]" value="<?php echo esc_attr($s['smtp_from_name']); ?>" class="regular-text" /></td>
-                </tr>
-            </table>
+            <div id="tab-smtp" class="bp-tab" style="display:none;">
+                <p class="description">Usado por <code>wp_mail()</code> y los formularios. Si usuario/contraseña están vacíos se usa el <code>mail()</code> del sistema.</p>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><label for="smtp-host">Servidor (host)</label></th>
+                        <td><input type="text" id="smtp-host" name="bp[smtp_host]" value="<?php echo esc_attr($s['smtp_host']); ?>" class="regular-text" /></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="smtp-port">Puerto</label></th>
+                        <td><input type="number" id="smtp-port" name="bp[smtp_port]" value="<?php echo esc_attr($s['smtp_port']); ?>" class="small-text" /> <span class="description">587 con TLS (Brevo)</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="smtp-user">Usuario</label></th>
+                        <td><input type="email" id="smtp-user" name="bp[smtp_user]" value="<?php echo esc_attr($s['smtp_user']); ?>" class="regular-text" placeholder="usuario@smtp-brevo.com" /></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="smtp-pass">Contraseña / SMTP Key</label></th>
+                        <td><input type="password" id="smtp-pass" name="bp[smtp_pass]" value="<?php echo esc_attr($s['smtp_pass']); ?>" class="regular-text" autocomplete="new-password" /></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="smtp-from">Remitente (desde dónde se envía)</label></th>
+                        <td><input type="email" id="smtp-from" name="bp[smtp_from]" value="<?php echo esc_attr($s['smtp_from']); ?>" class="regular-text" /></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="smtp-from-name">Nombre del remitente</label></th>
+                        <td><input type="text" id="smtp-from-name" name="bp[smtp_from_name]" value="<?php echo esc_attr($s['smtp_from_name']); ?>" class="regular-text" /></td>
+                    </tr>
+                </table>
+            </div>
 
             <!-- 📨 FORMULARIOS -->
-            <h2 style="border-bottom:1px solid #ccc;padding-bottom:8px;margin-top:30px;">📨 Emails de los formularios</h2>
-            <p class="description">A qué email llega cada formulario y el asunto del correo.</p>
-            <table class="form-table" role="presentation">
-                <tr>
-                    <th scope="row">Contacto<br><small><code>/contacta-con-nosotros/</code></small></th>
-                    <td>
-                        <label>Email destino</label>
-                        <input type="email" name="bp[form_contacto_to]" value="<?php echo esc_attr($s['form_contacto_to']); ?>" class="regular-text" /><br>
-                        <label>Asunto</label>
-                        <input type="text" name="bp[form_contacto_subject]" value="<?php echo esc_attr($s['form_contacto_subject']); ?>" class="regular-text" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row">Promociona tu negocio<br><small><code>/promociona-tu-negocio/</code></small></th>
-                    <td>
-                        <label>Email destino</label>
-                        <input type="email" name="bp[form_promociona_to]" value="<?php echo esc_attr($s['form_promociona_to']); ?>" class="regular-text" /><br>
-                        <label>Asunto</label>
-                        <input type="text" name="bp[form_promociona_subject]" value="<?php echo esc_attr($s['form_promociona_subject']); ?>" class="regular-text" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row">Recibir ofertas<br><small><code>/recibir-ofertas/</code></small></th>
-                    <td>
-                        <label>Email destino</label>
-                        <input type="email" name="bp[form_ofertas_to]" value="<?php echo esc_attr($s['form_ofertas_to']); ?>" class="regular-text" /><br>
-                        <label>Asunto</label>
-                        <input type="text" name="bp[form_ofertas_subject]" value="<?php echo esc_attr($s['form_ofertas_subject']); ?>" class="regular-text" />
-                    </td>
-                </tr>
-            </table>
+            <div id="tab-formularios" class="bp-tab" style="display:none;">
+                <p class="description">A qué email llega cada formulario y el asunto del correo.</p>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row">Contacto<br><small><code>/contacta-con-nosotros/</code></small></th>
+                        <td>
+                            <label>Email destino</label>
+                            <input type="email" name="bp[form_contacto_to]" value="<?php echo esc_attr($s['form_contacto_to']); ?>" class="regular-text" /><br>
+                            <label>Asunto</label>
+                            <input type="text" name="bp[form_contacto_subject]" value="<?php echo esc_attr($s['form_contacto_subject']); ?>" class="regular-text" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Promociona tu negocio<br><small><code>/promociona-tu-negocio/</code></small></th>
+                        <td>
+                            <label>Email destino</label>
+                            <input type="email" name="bp[form_promociona_to]" value="<?php echo esc_attr($s['form_promociona_to']); ?>" class="regular-text" /><br>
+                            <label>Asunto</label>
+                            <input type="text" name="bp[form_promociona_subject]" value="<?php echo esc_attr($s['form_promociona_subject']); ?>" class="regular-text" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Recibir ofertas<br><small><code>/recibir-ofertas/</code></small></th>
+                        <td>
+                            <label>Email destino</label>
+                            <input type="email" name="bp[form_ofertas_to]" value="<?php echo esc_attr($s['form_ofertas_to']); ?>" class="regular-text" /><br>
+                            <label>Asunto</label>
+                            <input type="text" name="bp[form_ofertas_subject]" value="<?php echo esc_attr($s['form_ofertas_subject']); ?>" class="regular-text" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
 
             <p class="submit"><button type="submit" class="button button-primary button-large">💾 Guardar ajustes</button></p>
         </form>
     </div>
+
+    <script>
+    (function($) {
+        $('.nav-tab-wrapper .nav-tab').on('click', function(e) {
+            e.preventDefault();
+            $('.nav-tab-wrapper .nav-tab').removeClass('nav-tab-active');
+            $(this).addClass('nav-tab-active');
+            $('.bp-tab').hide();
+            $('#' + $(this).data('tab')).show();
+        });
+    })(jQuery);
+    </script>
     <?php
 }
