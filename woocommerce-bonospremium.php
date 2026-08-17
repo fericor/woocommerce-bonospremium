@@ -557,9 +557,9 @@ function bonospremium_ajax_function() {
 }
 
 function my_acf_init() {
-    acf_update_setting('google_api_key', 'AIzaSyDz9pICivQgezA8sJUA8qOxzfexbCXodV0');
+    // acf_update_setting('google_api_key', 'AIzaSyDz9pICivQgezA8sJUA8qOxzfexbCXodV0');
 }
-add_action('acf/init', 'my_acf_init');
+// add_action('acf/init', 'my_acf_init');
 
 
 /***************************************************************************** 
@@ -682,7 +682,7 @@ function cwpai_custom_user_reg_admin_email($wp_new_user_notification_email, $use
                 <tbody>
                     <tr>
                         <td align="center" valign="top">
-                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#039cdc;color:#fff;border-bottom:0;font-weight:bold;line-height:100%;vertical-align:middle;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;border-radius:3px 3px 0 0" bgcolor="#039cdc">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:' . BP_PRIMARY_COLOR . ';color:#fff;border-bottom:0;font-weight:bold;line-height:100%;vertical-align:middle;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;border-radius:3px 3px 0 0" bgcolor="' . BP_PRIMARY_COLOR . '">
                                 <tbody>
                                     <tr>
                                         <td style="padding:36px 48px;display:block">
@@ -706,7 +706,7 @@ function cwpai_custom_user_reg_admin_email($wp_new_user_notification_email, $use
                                                         <td valign="top" style="padding:48px 48px 32px">
                                                             <div style="color:#636363;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:14px;line-height:150%;text-align:left" align="left">
                                                                 <p style="margin:0 0 16px">Hola '.$user->user_login.',</p>
-                                                                <p style="margin:0 0 16px">Ya formas parte de BonosPremium. Su nombre de usuario es <strong>'.$user->user_login.'</strong>. Puede acceder a su área de gestion de bonos, cambiar su contraseña y más en: <a href="https://bonospremium.com/admin/" style="color:#039cdc;font-weight:normal;text-decoration:underline" target="_blank">https://bonospremium.com/admin/</a></p>
+                                                                <p style="margin:0 0 16px">Ya formas parte de BonosPremium. Su nombre de usuario es <strong>'.$user->user_login.'</strong>. Puede acceder a su área de gestion de bonos, cambiar su contraseña y más en: <a href="' . BP_STORE_URL . '/admin/" style="color:' . BP_PRIMARY_COLOR . ';font-weight:normal;text-decoration:underline" target="_blank">" . BP_STORE_URL . "/admin/</a></p>
                                                                 <p style="margin:0 0 16px">Esperamos verte pronto.</p>
                                                             </div>
                                                         </td>
@@ -748,15 +748,16 @@ function bonospremium_payment_complete( $order_id ) {
     $exite = $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(orderId) AS NUM FROM ". $wpdb->prefix ."wc_pedidos_item WHERE orderId = ".$order_id ) );
     if($exite->NUM == 0){
         
-        $user_id = get_current_user_id();
+        //$user_id = get_current_user_id();
         $order   = wc_get_order( $order_id );
+        $user_id = $order->get_user_id();
 
         $order_items = $order->get_items();
 
         $ESTADO             = cambioEstadoPedidoGetorBonos($order->get_status());
         $FECHA_CREACION     = $order->get_date_created()->date('Y-m-d H:i:s');
 
-        $SQL_FECHA_ORDER    = "SELECT distinct ID as order_id, IF(post_status = 'wc-completed', post_modified_gmt, null ) as canjeadoT FROM hx4p_posts WHERE post_type = 'shop_order' AND ID = $order_id";
+        $SQL_FECHA_ORDER    = "SELECT distinct ID as order_id, IF(post_status = 'wc-completed', post_modified_gmt, null ) as canjeadoT FROM {$wpdb->posts} WHERE post_type = 'shop_order' AND ID = $order_id";
         $ARRAY_FECHA_ORDER  = $wpdb->get_row( $wpdb->prepare( $SQL_FECHA_ORDER ) ); 
         $FECHA_MODIFICACION = $ARRAY_FECHA_ORDER->canjeadoT;
 
@@ -788,7 +789,7 @@ function bonospremium_payment_complete( $order_id ) {
             $empresaId   = $product_instance->get_meta('empresa_colaboradora');
             $comercialId = $product_instance->get_meta('comercial');
 
-            $ARRAY_CODE = $wpdb->get_row( $wpdb->prepare( "SELECT meta_value FROM hx4p_postmeta WHERE post_id = $order_id AND meta_key = '_barcode_text'" ) ); 
+            $ARRAY_CODE = $wpdb->get_row( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = $order_id AND meta_key = '_barcode_text'" ) ); 
             $QR_CODE_PEDIDO = ($empresaId == 56612)
                 ? "Cine"
                 : (($empresaId == 185053)
@@ -837,15 +838,18 @@ function insertar_pedido_db( $order_id ) {
     $exite = $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(orderId) AS NUM FROM ". $wpdb->prefix ."wc_pedidos_item WHERE orderId = ".$order_id ) );
     if($exite->NUM == 0){
         
-        $user_id = get_current_user_id();
+        // $user_id = get_current_user_id();
         $order   = wc_get_order( $order_id );
+        $user_id = $order->get_user_id();
 
         $order_items = $order->get_items();
 
         $ESTADO             = cambioEstadoPedidoGetorBonos($order->get_status());
         $FECHA_CREACION     = $order->get_date_created()->date('Y-m-d H:i:s');
 
-        $SQL_FECHA_ORDER    = "SELECT distinct ID as order_id, IF(post_status = 'wc-completed', post_modified_gmt, null ) as canjeadoT FROM hx4p_posts WHERE post_type = 'shop_order' AND ID = $ID_ORDER";
+        // $SQL_FECHA_ORDER    = "SELECT distinct ID as order_id, IF(post_status = 'wc-completed', post_modified_gmt, null ) as canjeadoT FROM {$wpdb->posts} WHERE post_type = 'shop_order' AND ID = $ID_ORDER";
+        $SQL_FECHA_ORDER    = "SELECT distinct ID as order_id, IF(post_status = 'wc-completed', post_modified_gmt, null ) as canjeadoT FROM {$wpdb->posts} WHERE post_type = 'shop_order' AND ID = $order_id";
+
         $ARRAY_FECHA_ORDER  = $wpdb->get_row( $wpdb->prepare( $SQL_FECHA_ORDER ) ); 
         $FECHA_MODIFICACION = $ARRAY_FECHA_ORDER->canjeadoT;
 
@@ -878,7 +882,7 @@ function insertar_pedido_db( $order_id ) {
             $empresaId   = $product_instance->get_meta('empresa_colaboradora');
             $comercialId = $product_instance->get_meta('comercial');
 
-            $ARRAY_CODE = $wpdb->get_row( $wpdb->prepare( "SELECT meta_value FROM hx4p_postmeta WHERE post_id = $order_id AND meta_key = '_barcode_text'" ) ); 
+            $ARRAY_CODE = $wpdb->get_row( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = $order_id AND meta_key = '_barcode_text'" ) ); 
             $QR_CODE_PEDIDO = $ARRAY_CODE->meta_value;
 
             for($i=1; $i<=$item_data['quantity']; $i++){
@@ -942,15 +946,14 @@ function cambioEstadoPedido($order_id){
             break;
     }
 
-    $wpdb->update(
-        'hx4p_wc_pedidos_item',
-        array(
-            'estado' => $ESTADO,
-        ),
-        array(
-            'orderId' => $order_id,
-        )
-    );
+    // No sobrescribir los items ya creditados (estado 'Creditado' = bono convertido a crédito)
+    // FIX 11/08: fechaModificacion = NOW() — el UPDATE anterior solo ponía estado y dejaba
+    // fechaModificacion en 0000-00-00 (Félix detectó bonos canjeados sin fecha de modificación)
+    $wpdb->query($wpdb->prepare(
+        "UPDATE " . $wpdb->prefix . "wc_pedidos_item SET estado = %s, fechaModificacion = NOW() WHERE orderId = %d AND (estado IS NULL OR estado != 'Creditado')",
+        $ESTADO,
+        $order_id
+    ));
 }
 
 function bonospremium_init(){
@@ -973,8 +976,9 @@ function bonospremium_insert_order( $order ) {
     $ESTADO             = $order->get_status();
     $FECHA_CREACION     = $order->get_date_created()->date('Y-m-d H:i:s');
     // $FECHA_MODIFICACION = $order->get_date_modified()->date('Y-m-d H:i:s');
+    $user_id            = $order->get_user_id();
 
-    $SQL_FECHA_ORDER    = "SELECT distinct ID as order_id, IF(post_status = 'wc-completed', post_modified_gmt, null ) as canjeadoT FROM hx4p_posts WHERE post_type = 'shop_order' AND ID = $ID_ORDER";
+    $SQL_FECHA_ORDER    = "SELECT distinct ID as order_id, IF(post_status = 'wc-completed', post_modified_gmt, null ) as canjeadoT FROM {$wpdb->posts} WHERE post_type = 'shop_order' AND ID = $ID_ORDER";
     $ARRAY_FECHA_ORDER  = $wpdb->get_row( $wpdb->prepare( $SQL_FECHA_ORDER ) ); 
     $FECHA_MODIFICACION = $ARRAY_FECHA_ORDER->canjeadoT;
 
@@ -993,7 +997,7 @@ function bonospremium_insert_order( $order ) {
         $product_variation_id = $item_data['variation_id'];
         $cantidad             = $item_data['quantity'];
 
-        $ARRAY_CODE = $wpdb->get_row( $wpdb->prepare( "SELECT meta_value FROM hx4p_postmeta WHERE post_id = $ID_ORDER AND meta_key = '_barcode_text'" ) ); 
+        $ARRAY_CODE = $wpdb->get_row( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = $ID_ORDER AND meta_key = '_barcode_text'" ) ); 
         $QR_CODE_PEDIDO = $ARRAY_CODE->meta_value;
 
         $product_instance = wc_get_product($product_id);
@@ -1230,7 +1234,7 @@ function enviarEmail($ORDERID, $NAME_ARRAY=[], $ENVIO=1){
     wp_mail( $to, $subject, $message, $headers, $attachments );
     
     if($ENVIO == 1){
-        wp_mail( 'pedidos@bonospremium.com', $subjectAdmin, $messageNew, $headers, $attachments );
+        wp_mail( 'pedidos@bonospremiumlz.com', $subjectAdmin, $messageNew, $headers, $attachments );
     }
 }
 
@@ -1247,7 +1251,7 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
     $PAGE_TPL = ob_get_contents();
     ob_end_clean();
 
-    $IMG_LOGO = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/wp-content/uploads/2023/09/trans.png"));
+    $IMG_LOGO = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/logo.png'));
 	
 	$order = wc_get_order($ORDERID);
 	
@@ -1267,35 +1271,35 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 
     switch ($TEMA_CITA) {
         case "Día de la Madre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_diadelamadre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_diadelamadre1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Día del Padre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_diadelpadre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_diadelpadre1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Cumpleaños Hombre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_cumpleanoshombre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_cumpleanoshombre1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Cumpleaños Mujer":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_cumpleanosmujer1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_cumpleanosmujer1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Navidad":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_navidad1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_navidad1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Papá Noel":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_papanoel1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_papanoel1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Reyes Magos":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_reyesmagos1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_reyesmagos1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "San Valentin":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_sanvalentin1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_sanvalentin1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
     }
@@ -1327,7 +1331,7 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
                 <!-- Contenedor Principal -->
                 <div style="width: 100%; padding: 0px; font-family: Arial, sans-serif; background-color: #FFFFFF; border-radius: 0px; box-sizing: border-box;">
                     <!-- Encabezado -->
-                    <div style="background-color: #019cdb; padding: 20px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-top: 0px; margin-bottom: 0px;">
+                    <div style="background-color: ' . BP_PRIMARY_COLOR . '; padding: 20px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-top: 0px; margin-bottom: 0px;">
                         <img style="width: 400px; padding: 0px;" src="'.$IMG_LOGO.'" alt="">
                     </div>'.$HTML_IMAGEN;
 
@@ -1354,18 +1358,18 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 		///////////////////////////////////////////////////////////
 		/* INCIO CODIGO PARA EL QR DEL CINE */
 		if (preg_match('/\bCINE YELMO\b/i', $NOMBRE_EMPRESA)) {
-			$TIPO_BUSCAR = $STRING_CINE_TIPO == "Entrada" ? "Entrada" : "Entrada + menú clásico";
+			$TIPO_BUSCAR = bp_cine_resolver_tipo($wpdb, $STRING_CINE_TIPO);
 				
-			$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM hx4p_wc_codes_cinema WHERE activo = 0 AND tipo = '$STRING_CINE_TIPO' AND orderId = 0 LIMIT 1" ) ); 
+			$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM {$wpdb->prefix}wc_codes_cinema WHERE activo = 0 AND tipo = '$TIPO_BUSCAR' AND orderId = 0 LIMIT 1" ) ); 
 						
 			$CODIDO_CINE      = $ARRAY_POST->codes;
-			$cineImagen       = 'https://bonospremium.com/wp-content/uploads/2025/07/ticket_cine.png';
+			$cineImagen       = BP_IMG_BASE . '/ticket_cine.png';
         	$cineImagenBase64 = "data:image/png;base64," . base64_encode(file_get_contents($cineImagen));
 			
 			// Actualizamos el estado del qr del cine
 			$wpdb->query(
 				$wpdb->prepare(
-					"UPDATE hx4p_wc_codes_cinema SET activo = %d, orderId = %d WHERE codes = %s",
+					"UPDATE {$wpdb->prefix}wc_codes_cinema SET activo = %d, orderId = %d WHERE codes = %s",
 					1,
 					$ORDERID,
 					$CODIDO_CINE
@@ -1404,7 +1408,7 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 			if ( !empty($variation_ids) ) {
 				$placeholders = implode(',', array_fill(0, count($variation_ids), '%d'));
 				$sql = "SELECT id, code, product_id 
-						FROM hx4p_series_codes 
+						FROM {$wpdb->prefix}series_codes 
 						WHERE is_active = 1 
 						AND product_id IN ($placeholders)
 						AND current_uses < max_uses 
@@ -1419,9 +1423,9 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 			}
 
 			if ( $CODIDO_WEGOO ) {
-				// 4. Guardar en hx4p_wc_codes_wegoo
+				// 4. Guardar en {$wpdb->prefix}wc_codes_wegoo
 				$wpdb->insert(
-					'hx4p_wc_codes_wegoo',
+					$wpdb->prefix . 'wc_codes_wegoo',
 					array(
 						'codes'        => $CODIDO_WEGOO,
 						'orderId'      => $ORDERID,
@@ -1443,11 +1447,11 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 				$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #11296b;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #11296b; padding: 0px; margin: 0px;font-family: monospace;">'.$CODIDO_WEGOO.'</div>';
 			} else {
 				// Fallback: sin códigos disponibles para WEGOO
-				$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #039CDC;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #039CDC; padding: 0px; margin: 0px;font-family: monospace;">'.$value->qrCode.'</div>';
+				$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: ' . BP_PRIMARY_COLOR . ';"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: ' . BP_PRIMARY_COLOR . '; padding: 0px; margin: 0px;font-family: monospace;">'.$value->qrCode.'</div>';
 			}
 		} else {
 			// FALLBACK PARA OTROS PRODUCTOS (Esto es lo que faltaba)
-			$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #039CDC;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #039CDC; padding: 0px; margin: 0px;font-family: monospace;">'.$value->qrCode.'</div>';
+			$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: ' . BP_PRIMARY_COLOR . ';"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: ' . BP_PRIMARY_COLOR . '; padding: 0px; margin: 0px;font-family: monospace;">'.$value->qrCode.'</div>';
 		}
 		/* FIN CODIGO PARA EL QR DEL CINE */
 		////////////////////////////////////////////////////////////////////
@@ -1462,7 +1466,7 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
                         <div style="color: #8e8e8e !important; font-size: 14px;">'.$NEW_COLOR_DETAILS.'</div>
                     </div>
                     <!-- Condiciones del Bono -->
-                    <div style="margin-top: 0px; padding: 10px; background-color: #019cdb; border: 0px solid #67C3E9; border-radius: 0px;">
+                    <div style="margin-top: 0px; padding: 10px; background-color: ' . BP_PRIMARY_COLOR . '; border: 0px solid #67C3E9; border-radius: 0px;">
                         <h3 style="color: #ffffff; font-size: 16px; margin: 0 0 10px;">Condiciones del Bono</h3>
                         <div class="text-color: #a5a5a5 !important;">'.$CONDICIONES.'</div>
 						'.$FECHA_COMPRA.'
@@ -1502,7 +1506,7 @@ function crearPdfOld($ORDERID, $QRCODE, $NAME_FILE=""){
     $PAGE_TPL = ob_get_contents();
     ob_end_clean();
 
-    $IMG_LOGO = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/wp-content/uploads/2023/09/trans.png"));
+    $IMG_LOGO = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/logo.png'));
 	
 	$order = wc_get_order($ORDERID);
 	
@@ -1522,35 +1526,35 @@ function crearPdfOld($ORDERID, $QRCODE, $NAME_FILE=""){
 
     switch ($TEMA_CITA) {
         case "Día de la Madre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_diadelamadre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_diadelamadre1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Día del Padre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_diadelpadre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_diadelpadre1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Cumpleaños Hombre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_cumpleanoshombre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_cumpleanoshombre1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Cumpleaños Mujer":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_cumpleanosmujer1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_cumpleanosmujer1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Navidad":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_navidad1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_navidad1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Papá Noel":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_papanoel1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_papanoel1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Reyes Magos":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_reyesmagos1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_reyesmagos1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "San Valentin":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_sanvalentin1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_sanvalentin1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
     }
@@ -1582,7 +1586,7 @@ function crearPdfOld($ORDERID, $QRCODE, $NAME_FILE=""){
                 <!-- Contenedor Principal -->
                 <div style="width: 100%; padding: 0px; font-family: Arial, sans-serif; background-color: #FFFFFF; border-radius: 0px; box-sizing: border-box;">
                     <!-- Encabezado -->
-                    <div style="background-color: #019cdb; padding: 20px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-top: 0px; margin-bottom: 0px;">
+                    <div style="background-color: ' . BP_PRIMARY_COLOR . '; padding: 20px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-top: 0px; margin-bottom: 0px;">
                         <img style="width: 400px; padding: 0px;" src="'.$IMG_LOGO.'" alt="">
                     </div>'.$HTML_IMAGEN;
 
@@ -1609,18 +1613,18 @@ function crearPdfOld($ORDERID, $QRCODE, $NAME_FILE=""){
 		///////////////////////////////////////////////////////////
 		/* INCIO CODIGO PARA EL QR DEL CINE */
 		if (preg_match('/\bCINE YELMO\b/i', $NOMBRE_EMPRESA)) {
-			$TIPO_BUSCAR = $STRING_CINE_TIPO == "Entrada" ? "Entrada" : "Entrada + menú clásico";
+			$TIPO_BUSCAR = bp_cine_resolver_tipo($wpdb, $STRING_CINE_TIPO);
 				
-			$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM hx4p_wc_codes_cinema WHERE activo = 0 AND tipo = '$STRING_CINE_TIPO' AND orderId = 0 LIMIT 1" ) ); 
+			$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM {$wpdb->prefix}wc_codes_cinema WHERE activo = 0 AND tipo = '$TIPO_BUSCAR' AND orderId = 0 LIMIT 1" ) ); 
 						
 			$CODIDO_CINE      = $ARRAY_POST->codes;
-			$cineImagen       = 'https://bonospremium.com/wp-content/uploads/2025/07/ticket_cine.png';
+			$cineImagen       = BP_IMG_BASE . '/ticket_cine.png';
         	$cineImagenBase64 = "data:image/png;base64," . base64_encode(file_get_contents($cineImagen));
 			
 			// Actualizamos el estado del qr del cine
 			$wpdb->query(
 				$wpdb->prepare(
-					"UPDATE hx4p_wc_codes_cinema SET activo = %d, orderId = %d WHERE codes = %s",
+					"UPDATE {$wpdb->prefix}wc_codes_cinema SET activo = %d, orderId = %d WHERE codes = %s",
 					1,
 					$ORDERID,
 					$CODIDO_CINE
@@ -1631,7 +1635,7 @@ function crearPdfOld($ORDERID, $QRCODE, $NAME_FILE=""){
 			
 		} else if (preg_match('/\bWEGOO\b/i', $NOMBRE_EMPRESA)) {
 				
-			$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM hx4p_wc_codes_extras WHERE activo = 0 AND tipo = '$STRING_CINE_TIPO' AND orderId = 0 LIMIT 1" ) ); 
+			$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM {$wpdb->prefix}wc_codes_extras WHERE activo = 0 AND tipo = '$STRING_CINE_TIPO' AND orderId = 0 LIMIT 1" ) ); 
 						
 			$CODIDO_WEGOO      = $ARRAY_POST->codes;
 			$wegooImagen       = 'https://www.wegoo.es/6d8552db8d9f0393f4e4dbf656063570.svg';
@@ -1640,7 +1644,7 @@ function crearPdfOld($ORDERID, $QRCODE, $NAME_FILE=""){
 			// Actualizamos el estado del qr del cine
 			$wpdb->query(
 				$wpdb->prepare(
-					"UPDATE hx4p_wc_codes_extras SET activo = %d, orderId = %d WHERE codes = %s",
+					"UPDATE {$wpdb->prefix}wc_codes_extras SET activo = %d, orderId = %d WHERE codes = %s",
 					1,
 					$ORDERID,
 					$CODIDO_WEGOO
@@ -1650,7 +1654,7 @@ function crearPdfOld($ORDERID, $QRCODE, $NAME_FILE=""){
 			$HTML_QR_OR_CINE = '<img src="'.$wegooImagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #11296b;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #11296b; padding: 0px; margin: 0px;font-family: monospace;">'.$CODIDO_WEGOO.'</div>';
 			
 		} else {
-			$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #039CDC;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #039CDC; padding: 0px; margin: 0px;font-family: monospace;">'.$value->qrCode.'</div>';
+			$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: ' . BP_PRIMARY_COLOR . ';"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: ' . BP_PRIMARY_COLOR . '; padding: 0px; margin: 0px;font-family: monospace;">'.$value->qrCode.'</div>';
 		}
 		/* FIN CODIGO PARA EL QR DEL CINE */
 		////////////////////////////////////////////////////////////////////
@@ -1665,7 +1669,7 @@ function crearPdfOld($ORDERID, $QRCODE, $NAME_FILE=""){
                         <div style="color: #8e8e8e !important; font-size: 14px;">'.$NEW_COLOR_DETAILS.'</div>
                     </div>
                     <!-- Condiciones del Bono -->
-                    <div style="margin-top: 0px; padding: 10px; background-color: #019cdb; border: 0px solid #67C3E9; border-radius: 0px;">
+                    <div style="margin-top: 0px; padding: 10px; background-color: ' . BP_PRIMARY_COLOR . '; border: 0px solid #67C3E9; border-radius: 0px;">
                         <h3 style="color: #ffffff; font-size: 16px; margin: 0 0 10px;">Condiciones del Bono</h3>
                         <div class="text-color: #a5a5a5 !important;">'.$CONDICIONES.'</div>
 						'.$FECHA_COMPRA.'
@@ -1709,7 +1713,7 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
     $PAGE_TPL = ob_get_contents();
     ob_end_clean();
 
-    $IMG_LOGO = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/wp-content/uploads/2023/09/trans.png"));
+    $IMG_LOGO = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/logo.png'));
 	
 	$order = wc_get_order($ORDERID);
 	
@@ -1723,35 +1727,35 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
 
     switch ($TEMA_CITA) {
         case "Día de la Madre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_diadelamadre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_diadelamadre1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Día del Padre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_diadelpadre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_diadelpadre1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Cumpleaños Hombre":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_cumpleanoshombre1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_cumpleanoshombre1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Cumpleaños Mujer":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_cumpleanosmujer1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_cumpleanosmujer1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Navidad":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_navidad1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_navidad1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Papá Noel":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_papanoel1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_papanoel1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "Reyes Magos":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_reyesmagos1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_reyesmagos1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
         case "San Valentin":
-            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents("https://bonospremium.com/admin/assets/imgPlugin/qr_sanvalentin1.png"));
+            $IMG_TEMA    = "data:image/png;base64," . base64_encode(file_get_contents(BP_IMG_BASE . '/qr_sanvalentin1.png'));
             $HTML_IMAGEN = ' <div> <img style="width: 100%;" src="'.$IMG_TEMA.'" alt=""> </div>';
             break;
     }
@@ -1783,7 +1787,7 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
                 <!-- Contenedor Principal -->
                 <div style="width: 100%; padding: 0px; font-family: Arial, sans-serif; background-color: #FFFFFF; border-radius: 0px; box-sizing: border-box;">
                     <!-- Encabezado -->
-                    <div style="background-color: #019cdb; padding: 20px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-top: 0px; margin-bottom: 0px;">
+                    <div style="background-color: ' . BP_PRIMARY_COLOR . '; padding: 20px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-top: 0px; margin-bottom: 0px;">
                         <img style="width: 400px; padding: 0px;" src="'.$IMG_LOGO.'" alt="">
                     </div>'.$HTML_IMAGEN;
 
@@ -1802,18 +1806,18 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
 	///////////////////////////////////////////////////////////
     /* INCIO CODIGO PARA EL QR DEL CINE */
     if (preg_match('/\bCINE YELMO\b/i', $NOMBRE_EMPRESA)) {
-        $TIPO_BUSCAR = $STRING_CINE_TIPO == "Entrada" ? "Entrada" : "Entrada + menú clásico";
+        $TIPO_BUSCAR = bp_cine_resolver_tipo($wpdb, $STRING_CINE_TIPO);
             
-        $ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM hx4p_wc_codes_cinema WHERE activo = 0 AND tipo = '$TIPO_BUSCAR' AND orderId = 0 LIMIT 1" ) ); 
+        $ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM {$wpdb->prefix}wc_codes_cinema WHERE activo = 0 AND tipo = '$TIPO_BUSCAR' AND orderId = 0 LIMIT 1" ) ); 
                     
         $CODIDO_CINE      = $ARRAY_POST->codes;
-        $cineImagen       = 'https://bonospremium.com/wp-content/uploads/2025/07/ticket_cine.png';
+        $cineImagen       = BP_IMG_BASE . '/ticket_cine.png';
         $cineImagenBase64 = "data:image/png;base64," . base64_encode(file_get_contents($cineImagen));
         
         // Actualizamos el estado del qr del cine
         $wpdb->query(
             $wpdb->prepare(
-                "UPDATE hx4p_wc_codes_cinema SET activo = %d, orderId = %d WHERE codes = %s",
+                "UPDATE {$wpdb->prefix}wc_codes_cinema SET activo = %d, orderId = %d WHERE codes = %s",
                 1,
                 $ORDERID,
                 $CODIDO_CINE
@@ -1824,7 +1828,7 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
         
     } else if (preg_match('/\bWEGOO\b/i', $NOMBRE_EMPRESA)) {
 				
-		$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM hx4p_wc_codes_extras WHERE activo = 0 AND tipo = '$STRING_CINE_TIPO' AND orderId = 0 LIMIT 1" ) ); 
+		$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM {$wpdb->prefix}wc_codes_extras WHERE activo = 0 AND tipo = '$STRING_CINE_TIPO' AND orderId = 0 LIMIT 1" ) ); 
 
 		$CODIDO_CINE      = $ARRAY_POST->codes;
 		$cineImagen       = 'https://www.wegoo.es/6d8552db8d9f0393f4e4dbf656063570.svg';
@@ -1833,7 +1837,7 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
 		// Actualizamos el estado del qr del cine
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE hx4p_wc_codes_extras SET activo = %d, orderId = %d WHERE codes = %s",
+				"UPDATE {$wpdb->prefix}wc_codes_extras SET activo = %d, orderId = %d WHERE codes = %s",
 				1,
 				$ORDERID,
 				$CODIDO_CINE
@@ -1843,7 +1847,7 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
 		$HTML_QR_OR_CINE = '<img src="'.$cineImagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #11296b;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #11296b; padding: 0px; margin: 0px;font-family: monospace;">'.$CODIDO_CINE.'</div>';
 
 	} else {
-        $HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #039CDC;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #039CDC; padding: 0px; margin: 0px;font-family: monospace;">'.$QRCODE.'</div>';
+        $HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: ' . BP_PRIMARY_COLOR . ';"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: ' . BP_PRIMARY_COLOR . '; padding: 0px; margin: 0px;font-family: monospace;">'.$QRCODE.'</div>';
     }
     /* FIN CODIGO PARA EL QR DEL CINE */
     ////////////////////////////////////////////////////////////////////
@@ -1857,7 +1861,7 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
                     <div style="color: #8e8e8e !important; font-size: 14px;">'.$NEW_COLOR_DETAILS.'</div>
                 </div>
                 <!-- Condiciones del Bono -->
-                <div style="margin-top: 0px; padding: 10px; background-color: #019cdb; border: 0px solid #67C3E9; border-radius: 0px;">
+                <div style="margin-top: 0px; padding: 10px; background-color: ' . BP_PRIMARY_COLOR . '; border: 0px solid #67C3E9; border-radius: 0px;">
                     <h3 style="color: #ffffff; font-size: 16px; margin: 0 0 10px;">Condiciones del Bono</h3>
                     <div class="text-color: #a5a5a5 !important;">'.$CONDICIONES.'</div>
                 </div>';
@@ -2048,44 +2052,6 @@ function ayudawp_selector_cantidades_script() {
             jQuery("#account_password").attr("placeholder", "Pon tu contraseña BonosPremium");
             // jQuery("#account_password_field").append('<i style="font-size: 12px;">Pon tu nueva contraseña bonos Premium</i>');
         </script>
-        <style>
-            .quantity-selector {
-                display: flex;
-                align-items: center;
-            }
-            .qty-minus, .qty-plus {
-                border: none;
-                background: #ddd;
-                padding: 5px 10px;
-                cursor: pointer;
-            }
-            .qty-minus:hover, .qty-plus:hover {
-                background: #bbb;
-            }
-            input.qty {
-                text-align: center;
-                width: 50px;
-                margin: 0 5px;
-            }
-            .unit-price {
-                margin-top: 5px;
-                font-size: 14px;
-                color: #666;
-            }
-            .unit-price strong {
-                color: #333;
-            }
-            input.qty[type="number"] {
-                -webkit-appearance: textfield;
-                -moz-appearance: textfield;
-                appearance: textfield;
-            }
-            
-            input.qty[type=number]::-webkit-inner-spin-button,
-            input.qty[type=number]::-webkit-outer-spin-button {
-                -webkit-appearance: none;
-            }
-        </style>
         <?php
     }
 }
@@ -2162,7 +2128,7 @@ function reenviar_email_pedido_api_endpoint_callback(WP_REST_Request $request) {
     if($exite->NUM >= 1){
         $ARRAY_NAME_FILE = [];
 
-        $table_name = "hx4p_wc_pedidos_item";
+        $table_name = $wpdb->prefix . 'wc_pedidos_item';
         $myrows = $wpdb->get_results( "SELECT orderId, qrCode, productId, qrCodePedido FROM ".$table_name." WHERE orderId = ".$request['id']);
             foreach ($myrows as $details) {
                 crearQrCode($request['id'], $details->qrCode, $details->productId);
@@ -2289,7 +2255,7 @@ function listar_pedidos_perdidos(WP_REST_Request $request) {
         $item = [
             'ID'       => $order->get_id(),
             'Estado'   => $estado,
-            'url'      => "https://bonospremium.com/wp-json/custom/v1/data/" . $order->get_id(),
+            'url'      => BP_STORE_URL . "/wp-json/custom/v1/data/" . $order->get_id(),
             'Date'     => $order->get_date_created() ? $order->get_date_created()->date('Y-m-d H:i:s') : '',
             'Cantidad' => count($order->get_items()),
             'Total'    => $order->get_total(),
@@ -2377,7 +2343,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => BP_STORE_URL . "/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -2390,7 +2356,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => BP_STORE_URL . "/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -2403,7 +2369,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => BP_STORE_URL . "/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -2416,7 +2382,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => BP_STORE_URL . "/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -2429,7 +2395,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => BP_STORE_URL . "/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -2442,7 +2408,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => BP_STORE_URL . "/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -2455,7 +2421,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                 $MyOrders = array(
                     "ID"       => $order_id, 
                     "Estado"   => $order_estado, 
-                    "url"      => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"      => BP_STORE_URL . "/wp-json/custom/v1/data/".$order_id,
                     "Date"     => $order_date,
                     "Cantidad" => $order_cantidad,
                     'Total'    => $order->get_total()
@@ -2470,7 +2436,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
             wc-failed
             wc-lapsed*/
 
-            // $ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT orderId FROM hx4p_wc_pedidos_item WHERE orderId = ".$orders_query->post->ID ) ); 
+            // $ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT orderId FROM {$wpdb->prefix}wc_pedidos_item WHERE orderId = ".$orders_query->post->ID ) ); 
             // $QR_CODE_PEDIDO = $ARRAY_POST->orderId;
 
             // if( ($order_estado == "wc-processing") || ($order_estado == "wc-completed")){
@@ -2478,7 +2444,7 @@ function listar_pedidos_perdidosOLD(WP_REST_Request $request) {
                     /*$MyOrders[] = array(
                         "ID"     => $order_id, 
                         "Estado" => $order_estado, 
-                        "url"    => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                        "url"    => BP_STORE_URL . "/wp-json/custom/v1/data/".$order_id,
                         "Date"   => $order_date
                     );*/
             //    }
@@ -2602,7 +2568,7 @@ function actualizar_fecha_pedido_canjeado() {
             // if($order_estado == "wc-completed"){
             if($order_estado == "wc-cancelled"){
                 $wpdb->update(
-                    'hx4p_wc_pedidos_item',
+                    $wpdb->prefix . 'wc_pedidos_item',
                     array(
                         'fechaModificacion' => $order_fecha,
                         // 'estado' => 'Canjeado',
@@ -2616,7 +2582,7 @@ function actualizar_fecha_pedido_canjeado() {
                 $MyOrders[] = array(
                     "ID"        => $order_id, 
                     "Estado"    => $order_estado, 
-                    "url"       => "https://bonospremium.com/wp-json/custom/v1/data/".$order_id,
+                    "url"       => BP_STORE_URL . "/wp-json/custom/v1/data/".$order_id,
                     "Date"      => $order_date,
                     "fCanjeado" => $order_fecha,
                 );
@@ -2678,9 +2644,9 @@ function updateLapsedOrdersOLD() {
         // Actualizar el estado del pedido a 'lapsed'
         $order->update_status('lapsed', 'Pedido caducado, automáticamente por Tarea Automática.');
 
-        // Actualizar la tabla personalizada hx4p_wc_pedidos_item
+        // Actualizar la tabla personalizada {$wpdb->prefix}wc_pedidos_item
         $wpdb->update(
-            'hx4p_wc_pedidos_item',
+            $wpdb->prefix . 'wc_pedidos_item',
             array(
                 'estado'             => 'Caducado',
                 'fechaModificacion'  => $fecha_modificacion,
@@ -2708,7 +2674,7 @@ function updateLapsedOrdersOLD() {
     $headers = array('Content-Type: text/html; charset=UTF-8');
 
     // Enviar correos 
-    wp_mail('info@bonospremium.com', 'Pedidos Caducados Automáticamente', $orders_text, $headers);
+    wp_mail('info@bonospremiumlz.com', 'Pedidos Caducados Automáticamente', $orders_text, $headers);
     // wp_mail('fericor@gmail.com', 'Pedidos Caducados Automáticamente', $orders_text, $headers);
 
     error_log('✅ Pedidos actualizados y correos enviados.');
@@ -2751,10 +2717,10 @@ function updateLapsedOrders() {
         // Actualizar el estado del pedido a 'lapsed'
         $order->update_status('lapsed', 'Pedido caducado, automáticamente por Tarea Automática.');
 
-        // Actualizar la tabla personalizada hx4p_wc_pedidos_item
+        // Actualizar la tabla personalizada {$wpdb->prefix}wc_pedidos_item
         // Solo actualizar si estado_anterior no es 'Caducado'
         $resultado = $wpdb->query( $wpdb->prepare(
-            "UPDATE hx4p_wc_wc_pedidos_item 
+            "UPDATE {$wpdb->prefix}wc_pedidos_item 
              SET estado = %s, 
                  fechaModificacion = %s, 
                  quien = %s 
@@ -2769,7 +2735,7 @@ function updateLapsedOrders() {
 
         // Si no se actualizó ninguna fila (ya estaba caducado), lo registramos
         if ($resultado === 0) {
-            error_log("⚠️ Pedido {$order_id} ya estaba caducado, no se actualizó hx4p_wc_pedidos_item");
+            error_log("⚠️ Pedido {$order_id} ya estaba caducado, no se actualizó {$wpdb->prefix}wc_pedidos_item");
         }
 
         // Agregar información a la tabla del correo
@@ -2787,7 +2753,7 @@ function updateLapsedOrders() {
 
     $headers = array('Content-Type: text/html; charset=UTF-8');
 
-    wp_mail('info@bonospremium.com', 'Pedidos Caducados Automáticamente', $orders_text, $headers);
+    wp_mail('info@bonospremiumlz.com', 'Pedidos Caducados Automáticamente', $orders_text, $headers);
 
     error_log('✅ Pedidos actualizados y correos enviados.');
 }
@@ -2840,14 +2806,6 @@ function menu_personalizado_gestor_productos() {
         remove_submenu_page('woocommerce', 'wc-addons'); // Eliminar extensiones de WooCommerce
 		
 		// Añadimos los menus a los pedidos de wc
-		/*add_submenu_page(
-			'woocommerce', // Slug del menú principal (WooCommerce)
-			'Categorias', // Título de la página
-			'Categorias', // Texto del menú
-			'auxiliar_bonospremium', // Capacidad necesaria
-			'edit-tags.php?taxonomy=product_cat&post_type=product' // URL del destino (Pedidos de WooCommerce)
-		);*/
-		
 		add_submenu_page(
 			'woocommerce',
 			'Brevo',
@@ -2915,8 +2873,8 @@ if ( ! function_exists( 'bp_check_yelmo_cine_stock' ) ) {
             $variation_name = isset($array_name[1]) ? trim($array_name[1]) : "";
         }
 
-        // Consultamos la tabla hx4p_wc_codes_cinema
-        $table_name = "hx4p_wc_codes_cinema"; 
+        // Consultamos la tabla {$wpdb->prefix}wc_codes_cinema
+        $table_name = $wpdb->prefix . 'wc_codes_cinema'; 
         $stock_count = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM $table_name WHERE activo = 0 AND tipo = %s AND orderId = 0",
             $variation_name
@@ -3012,12 +2970,12 @@ function bp_yelmo_cine_stock_script() {
                                 // CON STOCK - Muestra la cantidad disponible
                                 $button.text('Comprar').prop('disabled', false).css('opacity', '1');
                                 $price.show();
-                                // $avail.html('<div style="font-size:11px; margin:10px 0;"> ' + stock + ' disponibles</div>').show();
+                                $avail.html('<div style="font-size:11px; margin:10px 0; color:#009cdc; font-weight:600;">Quedan ' + stock + ' entradas</div>').show();
                             }
                         } else {
                             // PRODUCTO NORMAL
                             $button.text('Comprar').prop('disabled', false).css('opacity', '1');
-                            // $price.hide();
+                            $price.show();
                             $avail.show();
                         }
                     }
@@ -3088,14 +3046,14 @@ add_action('wp_head', function() {
     <style>
         .bp-contact-card { padding: 30px; border: 1px solid #f0f0f0; background: #fff; border-radius: 15px; }
         .bp-contact-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; }
-        .bp-contact-logo { width: 75px; height: 75px; border-radius: 50% !important; border: 3px solid #019cdb; object-fit: cover; }
-        .bp-contact-initials { width: 75px; height: 75px; border-radius: 50%; background: #019cdb; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 24px; }
+        .bp-contact-logo { width: 75px; height: 75px; border-radius: 50% !important; border: 3px solid ' . BP_PRIMARY_COLOR . '; object-fit: cover; }
+        .bp-contact-initials { width: 75px; height: 75px; border-radius: 50%; background: ' . BP_PRIMARY_COLOR . '; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 24px; }
         .bp-contact-title h3 { margin: 0; font-size: 20px; color: #222; font-weight: 800; }
-        .bp-locality { color: #019cdb; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .bp-locality { color: ' . BP_PRIMARY_COLOR . '; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
         .bp-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border-radius: 15px; font-weight: 700; text-decoration: none !important; cursor: pointer; border: none; width: 100%; margin-bottom: 12px; font-size: 15px; transition: 0.3s; }
-        .bp-btn-primary { background: #019cdb; color: #fff !important; }
+        .bp-btn-primary { background: ' . BP_PRIMARY_COLOR . '; color: #fff !important; }
         .bp-btn-whatsapp { background: #25D366 !important; color: #fff !important; }
-        .bp-btn-outline { background: #fff; color: #019cdb !important; border: 2px solid #019cdb; }
+        .bp-btn-outline { background: #fff; color: ' . BP_PRIMARY_COLOR . ' !important; border: 2px solid ' . BP_PRIMARY_COLOR . '; }
         .bp-social-row { display: flex; justify-content: center; gap: 20px; margin-top: 20px; border-top: 1px solid #f0f0f0; padding-top: 20px; }
         .bp-social-link { color: #444; font-size: 22px; text-decoration: none !important; }
         .bp-form-control { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e0e0e0; border-radius: 10px; box-sizing: border-box; }
@@ -3250,7 +3208,7 @@ add_shortcode('contacto_bonospremium', function() {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// VALIDACIÓN DE EXISTENCIAS PARA WEGOO (hx4p_series_codes)
+// VALIDACIÓN DE EXISTENCIAS PARA WEGOO ({$wpdb->prefix}series_codes)
 ////////////////////////////////////////////////////////////////////////////////
 
 // 1. Función helper: SUMA los usos restantes (max_uses - current_uses)
@@ -3415,16 +3373,269 @@ function bp_wegoo_simple_product_data() {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-
+// INICIO CODIGO PARA EL CRM
 ///////////////////////////////////////////////////////
-/* API PARA MOSTRAR LA INFORMACION DE LA TABLA DE PEDIDOS DE BONOSPREMIUM PERSONALZADA */
+// ============================================================
+// CONFIG MULTI-TIENDA (Ago 2026)
+// ============================================================
+define('BP_STORE_URL', get_site_url());
+
+function bp_get_store_color() {
+    $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+    $mapa = array(
+        'bonospremiumgc.com' => '#FFE418',   // Gran Canaria (amarillo)
+        'bonospremium.com'   => '#009CDC',   // Tenerife (azul)
+        'bonospremiummd.com' => '#DA131A',   // Madrid (rojo)
+        'bonospremiumfv.com' => '#C8A98A',   // Fuerteventura (beige)
+    );
+    foreach ($mapa as $dominio => $color) {
+        if (strpos($host, $dominio) !== false) return $color;
+    }
+    return '#009CDC'; // color por defecto (Lanzarote/test)
+}
+if ( ! defined('BP_PRIMARY_COLOR') ) define('BP_PRIMARY_COLOR', bp_get_store_color());
+if ( ! defined('BP_IMG_BASE') )      define('BP_IMG_BASE', BP_STORE_URL . '/wp-content/uploads/bonospremium');
+
+/**
+ * Resuelve el tipo de entrada de cine automáticamente según la tabla de la tienda.
+ * Cada tienda tiene sus propios tipos (Tenerife: Entrada / Entrada + menú clásico,
+ * Gran Canaria: Entrada cine tradicional, etc.)
+ */
+function bp_cine_resolver_tipo($wpdb, $string_tipo) {
+    $tabla = $wpdb->prefix . 'wc_codes_cinema';
+    $string_tipo = trim($string_tipo);
+
+    // 1. Match EXACTO
+    $exacto = $wpdb->get_var($wpdb->prepare(
+        "SELECT tipo FROM {$tabla} WHERE activo = 0 AND tipo = %s LIMIT 1", $string_tipo));
+    if ($exacto) return $exacto;
+
+    // 2. Match por CONTENIDO
+    $tipos = $wpdb->get_col("SELECT DISTINCT tipo FROM {$tabla} WHERE activo = 0");
+    $st = mb_strtolower($string_tipo);
+    foreach ($tipos as $t) {
+        $tl = mb_strtolower($t);
+        if (strpos($tl, $st) !== false || strpos($st, $tl) !== false) return $t;
+    }
+
+    // 3. Fallback: tipo original
+    return $string_tipo;
+}
+///////////////////////////////////////////////////////
+/**
+ * ============================================================
+ * ENDPOINTS BONOSPREMIUM — VERSIÓN COMPLETA
+ * ============================================================
+ * 
+ * PEGA TODO ESTE CÓDIGO AL FINAL DEL functions.php
+ * DE CADA TIENDA WORDPRESS:
+ *   - bonospremium.com (Tenerife)
+ *   - bonospremiumgc.com (Gran Canaria)
+ *   - bonospremiummd.com (Madrid)
+ * 
+ * Contiene TODOS los endpoints que necesita el CRM.
+ * ============================================================
+ */
+
+// ============================================================
+// 1. ENDPOINT: Asignar rol empresa colaboradora
+//    POST /wp-json/bonospremium/v1/asignar-rol-empresa
+//    Params: user_id, auth_token
+// ============================================================
 add_action('rest_api_init', function () {
-    // Volvemos al nombre original que es más limpio
+    register_rest_route('bonospremium/v1', '/asignar-rol-empresa', [
+        'methods'             => 'POST',
+        'callback'            => 'bp_asignar_rol_empresa',
+        'permission_callback' => function ($request) {
+            $token = $request->get_param('auth_token');
+            return $token === 'BonosSync2026!';
+        },
+    ]);
+});
+
+function bp_asignar_rol_empresa($request) {
+    $user_id = (int) $request->get_param('user_id');
+    if (!$user_id) {
+        return new WP_Error('missing_user', 'Se requiere user_id.', ['status' => 400]);
+    }
+    $user = get_userdata($user_id);
+    if (!$user) {
+        return new WP_Error('user_not_found', 'Usuario no encontrado.', ['status' => 404]);
+    }
+    $user->set_role('empresa_colaboradora');
+    update_user_meta($user_id, 'empresa_colaboradora', '1');
+    if (function_exists('update_field')) {
+        update_field('empresa_colaboradora', true, 'user_' . $user_id);
+    }
+    return new WP_REST_Response([
+        'success' => true,
+        'user_id' => $user_id,
+        'roles'   => $user->roles,
+        'message' => 'Rol cambiado a empresa_colaboradora correctamente.',
+    ], 200);
+}
+
+// ============================================================
+// 2. ENDPOINT: Obtener datos de un usuario
+//    GET /wp-json/bonospremium/v1/usuario?user_id=X&auth_token=...
+// ============================================================
+add_action('rest_api_init', function () {
+    register_rest_route('bonospremium/v1', '/usuario', [
+        'methods'             => 'GET',
+        'callback'            => 'bp_obtener_usuario',
+        'permission_callback' => function ($request) {
+            $token = $request->get_param('auth_token');
+            return $token === 'BonosSync2026!';
+        },
+    ]);
+});
+
+function bp_obtener_usuario($request) {
+    $user_id = (int) $request->get_param('user_id');
+    if (!$user_id) {
+        return new WP_Error('missing_user', 'Se requiere user_id.', ['status' => 400]);
+    }
+    $user = get_userdata($user_id);
+    if (!$user) {
+        return new WP_Error('user_not_found', 'Usuario no encontrado.', ['status' => 404]);
+    }
+    $billing = [
+        'first_name' => get_user_meta($user_id, 'billing_first_name', true),
+        'last_name'  => get_user_meta($user_id, 'billing_last_name', true),
+        'company'    => get_user_meta($user_id, 'billing_company', true),
+        'email'      => get_user_meta($user_id, 'billing_email', true) ?: $user->user_email,
+        'phone'      => get_user_meta($user_id, 'billing_phone', true),
+        'address_1'  => get_user_meta($user_id, 'billing_address_1', true),
+        'city'       => get_user_meta($user_id, 'billing_city', true),
+        'postcode'   => get_user_meta($user_id, 'billing_postcode', true),
+        'country'    => get_user_meta($user_id, 'billing_country', true),
+    ];
+    $data = [
+        'id'           => $user_id,
+        'email'        => $user->user_email,
+        'username'     => $user->user_login,
+        'first_name'   => $user->first_name,
+        'last_name'    => $user->last_name,
+        'display_name' => $user->display_name,
+        'roles'        => $user->roles,
+        'billing'      => $billing,
+        'meta'         => [
+            'empresa_colaboradora' => get_user_meta($user_id, 'empresa_colaboradora', true),
+            'cif'                  => get_user_meta($user_id, 'cif', true),
+            'billing_cif'          => get_user_meta($user_id, 'billing_cif', true),
+        ],
+    ];
+    return new WP_REST_Response($data, 200);
+}
+
+// ============================================================
+// 3. ENDPOINT: Listar empresas colaboradoras
+//    GET /wp-json/bonospremium/v1/empresas?auth_token=...&per_page=100&page=1
+// ============================================================
+add_action('rest_api_init', function () {
+    register_rest_route('bonospremium/v1', '/empresas', [
+        'methods'             => 'GET',
+        'callback'            => 'bp_listar_empresas_colaboradoras',
+        'permission_callback' => function ($request) {
+            $token = $request->get_param('auth_token');
+            return $token === 'BonosSync2026!';
+        },
+    ]);
+});
+
+function bp_listar_empresas_colaboradoras($request) {
+    $per_page = (int) $request->get_param('per_page') ?: 100;
+    $page     = (int) $request->get_param('page') ?: 1;
+    $offset   = ($page - 1) * $per_page;
+    $args = [
+        'role'    => 'empresa_colaboradora',
+        'number'  => $per_page,
+        'offset'  => $offset,
+        'orderby' => 'ID',
+        'order'   => 'ASC',
+    ];
+    $user_query = new WP_User_Query($args);
+    $users = $user_query->get_results();
+    if (empty($users)) {
+        return new WP_REST_Response([], 200);
+    }
+    $result = [];
+    foreach ($users as $user) {
+        $uid = $user->ID;
+        $billing = [
+            'company'   => get_user_meta($uid, 'billing_company', true),
+            'phone'     => get_user_meta($uid, 'billing_phone', true),
+            'address_1' => get_user_meta($uid, 'billing_address_1', true),
+            'city'      => get_user_meta($uid, 'billing_city', true),
+            'postcode'  => get_user_meta($uid, 'billing_postcode', true),
+            'country'   => get_user_meta($uid, 'billing_country', true),
+        ];
+        $result[] = [
+            'id'           => $uid,
+            'username'     => $user->user_login,
+            'email'        => $user->user_email,
+            'first_name'   => $user->first_name,
+            'last_name'    => $user->last_name,
+            'display_name' => $user->display_name,
+            'role'         => 'empresa_colaboradora',
+            'company'      => $billing['company'],
+            'phone'        => $billing['phone'],
+            'cif'          => get_user_meta($uid, 'cif', true) ?: get_user_meta($uid, 'billing_cif', true),
+            'billing'      => $billing,
+            'meta'         => [
+                'empresa_colaboradora' => get_user_meta($uid, 'empresa_colaboradora', true) ?: '1',
+                'cif'                  => get_user_meta($uid, 'cif', true),
+            ],
+        ];
+    }
+    return new WP_REST_Response($result, 200);
+}
+
+// ============================================================
+// 4. ENDPOINT: Asignar rol auxiliar
+//    POST /wp-json/bonospremium/v1/asignar-rol-auxiliar
+//    Params: user_id, auth_token
+// ============================================================
+add_action('rest_api_init', function () {
+    register_rest_route('bonospremium/v1', '/asignar-rol-auxiliar', [
+        'methods'             => 'POST',
+        'callback'            => 'bp_asignar_rol_auxiliar',
+        'permission_callback' => function ($request) {
+            $token = $request->get_param('auth_token');
+            return $token === 'BonosSync2026!';
+        },
+    ]);
+});
+
+function bp_asignar_rol_auxiliar($request) {
+    $user_id = (int) $request->get_param('user_id');
+    if (!$user_id) {
+        return new WP_Error('missing_user', 'Se requiere user_id.', ['status' => 400]);
+    }
+    $user = get_userdata($user_id);
+    if (!$user) {
+        return new WP_Error('user_not_found', 'Usuario no encontrado.', ['status' => 404]);
+    }
+    $user->set_role('auxiliar_bonospremium');
+    update_user_meta($user_id, 'auxiliar_bonospremium', '1');
+    return new WP_REST_Response([
+        'success' => true,
+        'user_id' => $user_id,
+        'roles'   => $user->roles,
+        'message' => 'Rol cambiado a auxiliar_bonospremium correctamente.',
+    ], 200);
+}
+
+// ============================================================
+// 5. ENDPOINT: Obtener items/pedidos (para sincronización)
+//    GET /wp-json/bonospremium/v1/items
+//    Params: auth_token, fecha_desde, fecha_hasta, dias, per_page, page
+// ============================================================
+add_action('rest_api_init', function () {
     register_rest_route('bonospremium/v1', '/items', array(
-        'methods' => 'GET',
-        'callback' => 'bp_obtener_items_personalizados',
-        'permission_callback' => function($request) {
-            // Verificamos nuestro Token Secreto de forma infalible
+        'methods'             => 'GET',
+        'callback'            => 'bp_obtener_items_personalizados',
+        'permission_callback' => function ($request) {
             $token = $request->get_param('auth_token');
             return $token === 'BonosSync2026!';
         }
@@ -3433,38 +3644,1392 @@ add_action('rest_api_init', function () {
 
 function bp_obtener_items_personalizados($request) {
     global $wpdb;
-    
-    $dias = (int) $request->get_param('dias');
-    $per_page = (int) $request->get_param('per_page');
-    $page = (int) $request->get_param('page');
-    
+    $fecha_desde = $request->get_param('fecha_desde');
+    $fecha_hasta = $request->get_param('fecha_hasta');
+    $dias        = (int) $request->get_param('dias');
+    $per_page    = (int) $request->get_param('per_page');
+    $page        = (int) $request->get_param('page');
     if ($per_page <= 0) $per_page = 50;
-    if ($page <= 0) $page = 1;
+    if ($page     <= 0) $page     = 1;
     $offset = ($page - 1) * $per_page;
-    
-	$tabla = $wpdb->prefix . 'wc_pedidos_item';
-    $where = "";
+    $tabla  = $wpdb->prefix . 'wc_pedidos_item';
+    $where  = '';
     $params = array();
-    
-    if ($dias > 0) {
-        $fecha = date('Y-m-d H:i:s', strtotime("-$dias days"));
-        $where = "WHERE fechaModificacion >= %s";
-        $params[] = $fecha;
+    if (!empty($fecha_desde) && !empty($fecha_hasta)) {
+        $where = 'WHERE fechaCreacion >= %s AND fechaCreacion <= %s';
+        $params[] = $fecha_desde;
+        $params[] = $fecha_hasta;
+    } elseif ($dias > 0) {
+        $inicio = date('Y-m-d 00:00:00', strtotime("-" . ($dias - 1) . " days"));
+        $fin    = date('Y-m-d 23:59:59');
+        $where = 'WHERE fechaCreacion >= %s AND fechaCreacion <= %s';
+        $params[] = $inicio;
+        $params[] = $fin;
     }
-    
-    $query = "SELECT * FROM {$tabla} $where ORDER BY fechaModificacion DESC LIMIT %d OFFSET %d";
+    $count_query = "SELECT COUNT(*) FROM {$tabla} {$where}";
+    $total_registros = (int) $wpdb->get_var($wpdb->prepare($count_query, $params));
+    $total_paginas = $per_page > 0 ? (int) ceil($total_registros / $per_page) : 0;
+    $query = "SELECT * FROM {$tabla} {$where} ORDER BY fechaCreacion DESC LIMIT %d OFFSET %d";
     array_push($params, $per_page, $offset);
-    
     $resultados = $wpdb->get_results($wpdb->prepare($query, $params), ARRAY_A);
-    
     if ($wpdb->last_error) {
         return new WP_Error('db_error', 'Error en base de datos: ' . $wpdb->last_error, array('status' => 500));
     }
-    
-    return new WP_REST_Response($resultados, 200);
+    $respuesta = array(
+        'data'          => $resultados,
+        'total'         => $total_registros,
+        'total_paginas' => $total_paginas,
+        'pagina'        => $page,
+        'sql'           => $wpdb->last_query,
+    );
+    return new WP_REST_Response($respuesta, 200);
 }
+
+// ============================================================
+// 6. ENDPOINT: Reportes para Contabilidad y Facturación (V2)
+//    GET /wp-json/bonospremium/v2/reporte
+//    Params: auth_token, action, fecha_desde, fecha_hasta, 
+//            campo_fecha, empresa_id, estado, page, per_page
+// ============================================================
+add_action('rest_api_init', function () {
+    register_rest_route('bonospremium/v2', '/reporte', array(
+        'methods'             => 'GET',
+        'callback'            => 'bp_v2_reporte',
+        'permission_callback' => function ($request) {
+            return $request->get_param('auth_token') === 'BonosSync2026!';
+        }
+    ));
+});
+
+function bp_v2_reporte($request) {
+    global $wpdb;
+    $action     = $request->get_param('action') ?: 'transacciones';
+    $fecha_desde = $request->get_param('fecha_desde');
+    $fecha_hasta = $request->get_param('fecha_hasta');
+    $campo_fecha = $request->get_param('campo_fecha') ?: 'fechaModificacion';
+    $empresa_id  = (int) $request->get_param('empresa_id');
+    $estado      = $request->get_param('estado');
+    $producto    = $request->get_param('producto');
+    $orderId     = (int) $request->get_param('orderId');
+    $id_item     = (int) $request->get_param('id');
+    $codigo      = $request->get_param('codigo');
+    $page        = max(1, (int) $request->get_param('page') ?: 1);
+    $per_page    = min(500, max(1, (int) $request->get_param('per_page') ?: 50));
+    $offset      = ($page - 1) * $per_page;
+    $tabla = $wpdb->prefix . 'wc_pedidos_item';
+    $where = array();
+    $params = array();
+
+    if (!empty($fecha_desde)) {
+        $where[] = "$campo_fecha >= %s";
+        $params[] = $fecha_desde . ' 00:00:00';
+    }
+    if (!empty($fecha_hasta)) {
+        $where[] = "$campo_fecha <= %s";
+        $params[] = $fecha_hasta . ' 23:59:59';
+    }
+    if ($empresa_id > 0) {
+        $where[] = "empresaId = %d";
+        $params[] = $empresa_id;
+    }
+    if (!empty($estado)) {
+        $where[] = "estado = %s";
+        $params[] = $estado;
+    }
+    if ($orderId > 0) {
+        $where[] = "orderId = %d";
+        $params[] = $orderId;
+    }
+    if (!empty($producto)) {
+        $where[] = "productName LIKE %s";
+        $params[] = '%' . $wpdb->esc_like($producto) . '%';
+    }
+    if ($id_item > 0) {
+        $where[] = "id = %d";
+        $params[] = $id_item;
+    }
+    if (!empty($codigo)) {
+        $where[] = "TRIM(qrCode) = %s";
+        $params[] = $codigo;
+        // Forzar per_page=1 para búsqueda exacta
+        $per_page = 1;
+    }
+    $where_sql = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+    $response = array('success' => true, 'action' => $action, 'store_prefix' => $wpdb->prefix);
+
+    try {
+        switch ($action) {
+            case 'kpi':
+                $query = "SELECT COUNT(*) as total_items, COUNT(DISTINCT orderId) as total_pedidos, COUNT(DISTINCT empresaId) as total_empresas, COALESCE(SUM(precioOferta), 0) as total_facturado, COALESCE(SUM(CASE WHEN estado = 'Canjeado' THEN precioOferta ELSE 0 END), 0) as total_canjeado, COALESCE(SUM(CASE WHEN estado = 'No Canjeado' THEN precioOferta ELSE 0 END), 0) as total_no_canjeado, COALESCE(SUM(CASE WHEN estado = 'Caducado' THEN precioOferta ELSE 0 END), 0) as total_caducado, COALESCE(SUM(CASE WHEN estado = 'Cancelado' THEN precioOferta ELSE 0 END), 0) as total_cancelado, COALESCE(SUM(CASE WHEN estado = 'Reembolsado' THEN precioOferta ELSE 0 END), 0) as total_reembolsado FROM $tabla $where_sql";
+                $response['data'] = $wpdb->get_row($wpdb->prepare($query, $params), ARRAY_A);
+                // Total ventas siempre por fechaCreacion (sin importar el estado)
+                $where_kpi = !empty($where_sql) && !empty($campo_fecha) ? "WHERE $campo_fecha IS NOT NULL" : "";
+                if (!empty($fecha_desde) && !empty($fecha_hasta)) {
+                    $where_kpi .= (!empty($where_kpi) ? " AND " : "WHERE ") . "fechaCreacion >= %s AND fechaCreacion <= %s";
+                    $kpi_params = [$fecha_desde, $fecha_hasta];
+                } else {
+                    $kpi_params = [];
+                }
+                $total_ventas_creacion = $wpdb->get_var($wpdb->prepare("SELECT COALESCE(SUM(precioOferta), 0) FROM $tabla $where_kpi", $kpi_params));
+                if ($total_ventas_creacion !== null) {
+                    $response['data']['total_ventas_creacion'] = (float)$total_ventas_creacion;
+                }
+                break;
+
+            case 'transacciones':
+                $total = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $tabla $where_sql", $params));
+                $all_params = array_merge($params, array($per_page, $offset));
+                $response['data'] = $wpdb->get_results($wpdb->prepare("SELECT * FROM $tabla $where_sql ORDER BY fechaCreacion DESC LIMIT %d OFFSET %d", $all_params), ARRAY_A);
+                $response['total'] = $total;
+                $response['total_paginas'] = ceil($total / $per_page);
+                $response['pagina'] = $page;
+                break;
+
+            case 'empresas':
+                $all_params = array_merge($params, array($per_page, $offset));
+                $response['data'] = $wpdb->get_results($wpdb->prepare("SELECT empresaId, COUNT(*) as cantidad, COUNT(DISTINCT orderId) as pedidos, COALESCE(SUM(precioOferta), 0) as total_facturado, COALESCE(SUM(CASE WHEN estado = 'Canjeado' THEN precioOferta ELSE 0 END), 0) as canjeados, COALESCE(SUM(CASE WHEN estado = 'No Canjeado' THEN precioOferta ELSE 0 END), 0) as no_canjeados, MIN(fechaCreacion) as primera_venta, MAX(fechaCreacion) as ultima_venta FROM $tabla $where_sql GROUP BY empresaId ORDER BY total_facturado DESC LIMIT %d OFFSET %d", $all_params), ARRAY_A);
+                $response['total'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT empresaId) FROM $tabla $where_sql", $params));
+                $response['total_paginas'] = ceil($response['total'] / $per_page);
+                break;
+
+            case 'productos':
+                $all_params = array_merge($params, array($per_page, $offset));
+                $response['data'] = $wpdb->get_results($wpdb->prepare("SELECT productId, productName, COUNT(*) as cantidad, COALESCE(SUM(precioOferta), 0) as total_facturado, COALESCE(SUM(CASE WHEN estado = 'Canjeado' THEN cantidad ELSE 0 END), 0) as canjeados, COALESCE(SUM(CASE WHEN estado = 'No Canjeado' THEN cantidad ELSE 0 END), 0) as no_canjeados FROM $tabla $where_sql GROUP BY productId, productName ORDER BY total_facturado DESC LIMIT %d OFFSET %d", $all_params), ARRAY_A);
+                $response['total'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT productId) FROM $tabla $where_sql", $params));
+                $response['total_paginas'] = ceil($response['total'] / $per_page);
+                break;
+
+            case 'estados':
+                $response['data'] = $wpdb->get_results($wpdb->prepare("SELECT estado, COUNT(*) as cantidad, COALESCE(SUM(precioOferta), 0) as total_facturado FROM $tabla $where_sql GROUP BY estado ORDER BY total_facturado DESC", $params), ARRAY_A);
+                break;
+
+            case 'fechas':
+                $campo_date = "DATE($campo_fecha)";
+                $where_fecha = !empty($where_sql) ? "$where_sql AND $campo_fecha IS NOT NULL AND $campo_fecha > '2000-01-01'" : "WHERE $campo_fecha IS NOT NULL AND $campo_fecha > '2000-01-01'";
+                $response['data'] = $wpdb->get_results($wpdb->prepare("SELECT $campo_date as fecha, COUNT(*) as cantidad, COALESCE(SUM(precioOferta), 0) as total_facturado FROM $tabla $where_fecha GROUP BY $campo_date ORDER BY fecha ASC", $params), ARRAY_A);
+                break;
+
+            case 'orden_pago':
+                $response['data'] = $wpdb->get_results($wpdb->prepare("SELECT empresaId, COUNT(*) as cantidad, COALESCE(SUM(precioOferta), 0) as total_facturado FROM $tabla $where_sql GROUP BY empresaId HAVING total_facturado > 0 ORDER BY total_facturado DESC", $params), ARRAY_A);
+                break;
+
+            case 'comerciales':
+                $total = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT comercialId) FROM $tabla $where_sql", $params));
+                $all_params = array_merge($params, array($per_page, $offset));
+                $response['data'] = $wpdb->get_results($wpdb->prepare("SELECT comercialId, COUNT(*) as cantidad, COALESCE(SUM(precioOferta), 0) as total_facturado, COALESCE(SUM(CASE WHEN estado = 'Canjeado' THEN precioOferta ELSE 0 END), 0) as canjeados, COALESCE(SUM(CASE WHEN estado = 'No Canjeado' THEN precioOferta ELSE 0 END), 0) as no_canjeados FROM $tabla $where_sql GROUP BY comercialId ORDER BY total_facturado DESC LIMIT %d OFFSET %d", $all_params), ARRAY_A);
+                $response['total'] = $total;
+                $response['total_paginas'] = ceil($total / $per_page);
+                break;
+
+            case 'facturacion_mensual':
+                $fm_where = !empty($where_sql) ? "$where_sql AND fechaCreacion >= DATE_SUB(NOW(), INTERVAL 12 MONTH)" : "WHERE fechaCreacion >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+                $response['data'] = $wpdb->get_results($wpdb->prepare("SELECT DATE_FORMAT(fechaCreacion, '%Y-%m') as mes, COALESCE(SUM(precioOferta), 0) as total_mes FROM $tabla $fm_where GROUP BY DATE_FORMAT(fechaCreacion, '%Y-%m') ORDER BY mes ASC", $params), ARRAY_A);
+                break;
+
+            case 'bonos_estado':
+                $response['data'] = $wpdb->get_results($wpdb->prepare("SELECT estado, COALESCE(SUM(precioOferta), 0) as total, COUNT(*) as cantidad FROM $tabla $where_sql GROUP BY estado ORDER BY total DESC", $params), ARRAY_A);
+                break;
+
+            case 'top_usuarios':
+                $all_params = array_merge($params, array($per_page, $offset));
+                $response['data'] = $wpdb->get_results($wpdb->prepare("SELECT userId, COUNT(*) as cantidad, COUNT(DISTINCT orderId) as pedidos, COALESCE(SUM(precioOferta), 0) as total_gastado FROM $tabla $where_sql GROUP BY userId ORDER BY total_gastado DESC LIMIT %d OFFSET %d", $all_params), ARRAY_A);
+                $response['total'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT userId) FROM $tabla $where_sql", $params));
+                $response['total_paginas'] = ceil($response['total'] / $per_page);
+                break;
+
+            case 'actualizar_estado':
+                $id_bono = (int) $request->get_param('id');
+                $nuevo_estado = $request->get_param('estado');
+                $fecha_now = $request->get_param('fecha') ?: current_time('mysql');
+                $quien = (int) $request->get_param('quien');
+                $ip = $request->get_param('ip') ?: '';
+                if (!$id_bono || empty($nuevo_estado)) {
+                    return new WP_Error('missing_data', 'id y estado son obligatorios.', ['status' => 400]);
+                }
+                $estado_anterior = $wpdb->get_var($wpdb->prepare("SELECT estado FROM $tabla WHERE id = %d", $id_bono));
+                if ($estado_anterior === null) {
+                    return new WP_Error('not_found', 'Bono no encontrado.', ['status' => 404]);
+                }
+                $result = $wpdb->update(
+                    $tabla,
+                    [
+                        'estado' => $nuevo_estado,
+                        'fechaModificacion' => $fecha_now,
+                        'quien' => $quien,
+                        'ip' => $ip,
+                        'estado_anterior' => $estado_anterior,
+                    ],
+                    ['id' => $id_bono]
+                );
+                if ($result === false) {
+                    return new WP_Error('update_failed', 'Error al actualizar el bono.', ['status' => 500]);
+                }
+                $response['success'] = true;
+                $response['message'] = "Bono #{$id_bono} actualizado a '{$nuevo_estado}'.";
+                $response['estado_anterior'] = $estado_anterior;
+                break;
+
+            default:
+                return new WP_Error('invalid_action', 'Acción no válida: ' . $action, array('status' => 400));
+        }
+    } catch (Exception $e) {
+        return new WP_Error('db_error', 'Error: ' . $e->getMessage(), array('status' => 500));
+    }
+    $response['sql'] = $wpdb->last_query;
+    return new WP_REST_Response($response, 200);
+}
+
+// ============================================================
+// 7. ENDPOINT: Eliminar usuario de WordPress
+//    POST /wp-json/bonospremium/v1/eliminar-usuario
+//    Params: user_id, auth_token
+// ============================================================
+add_action('rest_api_init', function () {
+    register_rest_route('bonospremium/v1', '/eliminar-usuario', [
+        'methods'             => 'POST',
+        'callback'            => 'bp_eliminar_usuario',
+        'permission_callback' => function ($request) {
+            return $request->get_param('auth_token') === 'BonosSync2026!';
+        },
+    ]);
+});
+
+function bp_eliminar_usuario($request) {
+    $user_id = (int) $request->get_param('user_id');
+    if (!$user_id) {
+        return new WP_Error('missing_user', 'Se requiere user_id.', ['status' => 400]);
+    }
+    require_once ABSPATH . 'wp-admin/includes/user.php';
+    $deleted = wp_delete_user($user_id);
+    if ($deleted) {
+        return new WP_REST_Response([
+            'success' => true,
+            'message' => "Usuario #{$user_id} eliminado correctamente.",
+        ], 200);
+    } else {
+        return new WP_Error('delete_failed', "No se pudo eliminar el usuario #{$user_id}.", ['status' => 500]);
+    }
+}
+
+// ============================================================
+// IMPORTANTE: Registrar roles (EJECUTAR UNA SOLA VEZ)
+// ============================================================
+// Descomenta el código siguiente, carga UNA VEZ el functions.php,
+// y luego vuelve a comentarlo para que no se ejecute en cada carga.
+// ============================================================
+/*
+add_action('init', function () {
+    if (!get_role('empresa_colaboradora')) {
+        add_role('empresa_colaboradora', 'Empresa Colaboradora', [
+            'read'          => true,
+            'edit_posts'    => false,
+            'delete_posts'  => false,
+            'upload_files'  => false,
+            'level_0'       => true,
+        ]);
+    }
+    if (!get_role('auxiliar_bonospremium')) {
+        add_role('auxiliar_bonospremium', 'Auxiliar BonosPremium', [
+            'read'         => true,
+            'edit_posts'   => false,
+            'delete_posts' => false,
+            'upload_files' => false,
+            'level_0'      => true,
+        ]);
+    }
+});
+*/
+
 /* ++++++++++ */
 
+// ============================================================
+// 8. ENDPOINTS: CRÉDITOS BP (añadidos Ago 2026)
+//    Cada tienda usa su propia tabla {$wpdb->prefix}usuario_creditos
+//    GET  /wp-json/bonospremium/v1/creditos            → listar créditos
+//    GET  /wp-json/bonospremium/v1/creditos/usuarios   → listar usuarios WP para selector
+//    POST /wp-json/bonospremium/v1/creditos/add        → crear/añadir crédito
+//    POST /wp-json/bonospremium/v1/creditos/update     → actualizar crédito
+//    POST /wp-json/bonospremium/v1/creditos/delete     → eliminar crédito
+// ============================================================
+add_action('rest_api_init', function () {
+    // Listar créditos
+    register_rest_route('bonospremium/v1', '/creditos', [
+        'methods'             => 'GET',
+        'callback'            => 'bp_creditos_listar',
+        'permission_callback' => function ($request) {
+            return $request->get_param('auth_token') === 'BonosSync2026!';
+        },
+    ]);
+    // Listar usuarios WP (selector)
+    register_rest_route('bonospremium/v1', '/creditos/usuarios', [
+        'methods'             => 'GET',
+        'callback'            => 'bp_creditos_usuarios',
+        'permission_callback' => function ($request) {
+            return $request->get_param('auth_token') === 'BonosSync2026!';
+        },
+    ]);
+    // Añadir crédito
+    register_rest_route('bonospremium/v1', '/creditos/add', [
+        'methods'             => 'POST',
+        'callback'            => 'bp_creditos_add',
+        'permission_callback' => function ($request) {
+            return $request->get_param('auth_token') === 'BonosSync2026!';
+        },
+    ]);
+    // Actualizar crédito
+    register_rest_route('bonospremium/v1', '/creditos/update', [
+        'methods'             => 'POST',
+        'callback'            => 'bp_creditos_update',
+        'permission_callback' => function ($request) {
+            return $request->get_param('auth_token') === 'BonosSync2026!';
+        },
+    ]);
+    // Eliminar crédito
+    register_rest_route('bonospremium/v1', '/creditos/delete', [
+        'methods'             => 'POST',
+        'callback'            => 'bp_creditos_delete',
+        'permission_callback' => function ($request) {
+            return $request->get_param('auth_token') === 'BonosSync2026!';
+        },
+    ]);
+});
+
+function bp_creditos_listar($request) {
+    global $wpdb;
+    $tabla = $wpdb->prefix . 'usuario_creditos';
+    $limit = min(500, max(1, (int) $request->get_param('limit') ?: 100));
+    $q = trim($request->get_param('q') ?? '');
+
+    $where = '';
+    $params = [];
+    if (strlen($q) >= 2) {
+        $where = "WHERE u.display_name LIKE %s OR u.user_email LIKE %s OR uc.user_id = %d";
+        $params = ['%' . $wpdb->esc_like($q) . '%', '%' . $wpdb->esc_like($q) . '%', is_numeric($q) ? (int)$q : 0];
+    }
+
+    $sql = "SELECT uc.id, uc.user_id, uc.saldo, uc.fecha_caducidad, uc.fecha_creacion, uc.fecha_actualizacion,
+                   COALESCE(u.display_name, '') AS display_name, COALESCE(u.user_email, '') AS user_email
+            FROM {$tabla} uc
+            LEFT JOIN {$wpdb->users} u ON u.ID = uc.user_id
+            {$where}
+            ORDER BY uc.saldo DESC
+            LIMIT {$limit}";
+
+    $rows = !empty($params) ? $wpdb->get_results($wpdb->prepare($sql, $params), ARRAY_A) : $wpdb->get_results($sql, ARRAY_A);
+    if ($wpdb->last_error) {
+        return new WP_Error('db_error', $wpdb->last_error, ['status' => 500]);
+    }
+
+    $total_saldo = $wpdb->get_var("SELECT COALESCE(SUM(saldo),0) FROM {$tabla}");
+    $total_usuarios = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$tabla}");
+
+    return new WP_REST_Response([
+        'success' => true,
+        'data' => $rows,
+        'stats' => ['total_saldo' => (float)$total_saldo, 'total_usuarios' => $total_usuarios],
+    ], 200);
+}
+
+function bp_creditos_usuarios($request) {
+    global $wpdb;
+    $q = trim($request->get_param('q') ?? '');
+    $limit = min(500, max(1, (int) $request->get_param('limit') ?: 200));
+    $tabla = $wpdb->prefix . 'usuario_creditos';
+
+    $where = '';
+    $params = [];
+    if (strlen($q) >= 2) {
+        $where = "WHERE u.display_name LIKE %s OR u.user_email LIKE %s OR u.ID = %d";
+        $params = ['%' . $wpdb->esc_like($q) . '%', '%' . $wpdb->esc_like($q) . '%', is_numeric($q) ? (int)$q : 0];
+    }
+
+    $sql = "SELECT u.ID, u.display_name, u.user_email,
+                   COALESCE(uc.saldo, 0) AS saldo, uc.id AS credito_id
+            FROM {$wpdb->users} u
+            LEFT JOIN {$tabla} uc ON uc.user_id = u.ID
+            {$where}
+            ORDER BY u.display_name ASC
+            LIMIT {$limit}";
+
+    $usuarios = !empty($params) ? $wpdb->get_results($wpdb->prepare($sql, $params), ARRAY_A) : $wpdb->get_results($sql, ARRAY_A);
+    if ($wpdb->last_error) {
+        return new WP_Error('db_error', $wpdb->last_error, ['status' => 500]);
+    }
+    foreach ($usuarios as &$u) {
+        $u['saldo'] = (float) $u['saldo'];
+    }
+    return new WP_REST_Response(['success' => true, 'usuarios' => $usuarios], 200);
+}
+
+function bp_creditos_add($request) {
+    global $wpdb;
+    $tabla = $wpdb->prefix . 'usuario_creditos';
+    $user_id = (int) $request->get_param('user_id');
+    $cantidad = (float) $request->get_param('cantidad');
+    $fecha_caducidad = trim($request->get_param('fecha_caducidad') ?? '');
+    $concepto = trim($request->get_param('concepto') ?? '');
+
+    if ($user_id <= 0 || $cantidad <= 0) {
+        return new WP_Error('missing_data', 'user_id y cantidad son obligatorios', ['status' => 400]);
+    }
+
+    $existente = $wpdb->get_row($wpdb->prepare("SELECT id, saldo FROM {$tabla} WHERE user_id = %d LIMIT 1", $user_id), ARRAY_A);
+
+    if ($existente) {
+        $nuevo_saldo = (float) $existente['saldo'] + $cantidad;
+        if (!empty($fecha_caducidad)) {
+            $wpdb->update($tabla, ['saldo' => $nuevo_saldo, 'fecha_caducidad' => $fecha_caducidad, 'fecha_actualizacion' => current_time('mysql')], ['id' => $existente['id']]);
+        } else {
+            $wpdb->update($tabla, ['saldo' => $nuevo_saldo, 'fecha_actualizacion' => current_time('mysql')], ['id' => $existente['id']]);
+        }
+        $mensaje = "Crédito actualizado: +{$cantidad}€ (nuevo saldo: {$nuevo_saldo}€)";
+    } else {
+        $wpdb->insert($tabla, ['user_id' => $user_id, 'saldo' => $cantidad, 'fecha_caducidad' => !empty($fecha_caducidad) ? $fecha_caducidad : null]);
+        $mensaje = "Crédito creado: {$cantidad}€ para usuario #{$user_id}";
+    }
+
+    if ($wpdb->last_error) {
+        return new WP_Error('db_error', $wpdb->last_error, ['status' => 500]);
+    }
+
+    return new WP_REST_Response(['success' => true, 'mensaje' => $mensaje, 'concepto' => $concepto], 200);
+}
+
+function bp_creditos_update($request) {
+    global $wpdb;
+    $tabla = $wpdb->prefix . 'usuario_creditos';
+    $id = (int) $request->get_param('id');
+    $saldo = (float) $request->get_param('saldo');
+    $fecha_caducidad = trim($request->get_param('fecha_caducidad') ?? '');
+
+    if ($id <= 0 || $saldo < 0) {
+        return new WP_Error('missing_data', 'id y saldo son obligatorios', ['status' => 400]);
+    }
+
+    $existe = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$tabla} WHERE id = %d LIMIT 1", $id));
+    if (!$existe) {
+        return new WP_Error('not_found', 'Crédito no encontrado', ['status' => 404]);
+    }
+
+    if (!empty($fecha_caducidad)) {
+        $wpdb->update($tabla, ['saldo' => $saldo, 'fecha_caducidad' => $fecha_caducidad, 'fecha_actualizacion' => current_time('mysql')], ['id' => $id]);
+    } else {
+        $wpdb->update($tabla, ['saldo' => $saldo, 'fecha_caducidad' => null, 'fecha_actualizacion' => current_time('mysql')], ['id' => $id]);
+    }
+
+    if ($wpdb->last_error) {
+        return new WP_Error('db_error', $wpdb->last_error, ['status' => 500]);
+    }
+
+    return new WP_REST_Response(['success' => true, 'mensaje' => "Crédito #{$id} actualizado a {$saldo}€"], 200);
+}
+
+function bp_creditos_delete($request) {
+    global $wpdb;
+    $tabla = $wpdb->prefix . 'usuario_creditos';
+    $id = (int) $request->get_param('id');
+
+    if ($id <= 0) {
+        return new WP_Error('missing_data', 'id es obligatorio', ['status' => 400]);
+    }
+
+    $existe = $wpdb->get_row($wpdb->prepare("SELECT user_id, saldo FROM {$tabla} WHERE id = %d LIMIT 1", $id), ARRAY_A);
+    if (!$existe) {
+        return new WP_Error('not_found', 'Crédito no encontrado', ['status' => 404]);
+    }
+
+    $wpdb->delete($tabla, ['id' => $id]);
+    if ($wpdb->last_error) {
+        return new WP_Error('db_error', $wpdb->last_error, ['status' => 500]);
+    }
+
+    return new WP_REST_Response(['success' => true, 'mensaje' => "Crédito #{$id} eliminado"], 200);
+}
+
+////////////////////////////////////////////////////////////////////////
+// 📬 ALERTA STOCK CINE (cron servidor cada hora) — aviso si quedan <= 15 entradas
+function bp_cine_stock_alert_check() {
+    global $wpdb;
+
+    $tabla = $wpdb->prefix . 'wc_codes_cinema';   // multi-tienda (cada tienda su prefijo)
+    $umbral = 15;
+
+    // Entradas libres: activo=0 y sin pedido asignado
+    $total_libres = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$tabla} WHERE activo = 0 AND orderId = 0");
+
+    // Desglose por tipo (sirve para cualquier tienda: TF, GC, FV...)
+    $por_tipo = $wpdb->get_results(
+        "SELECT tipo, COUNT(*) AS libres FROM {$tabla} WHERE activo = 0 AND orderId = 0 GROUP BY tipo ORDER BY libres ASC",
+        ARRAY_A
+    );
+
+    // Anti-spam: solo avisa cuando CRUZA el umbral (baja de 15 habiendo estado por encima)
+    $flag = 'bp_cine_alert_sent_' . md5($wpdb->prefix);
+    if ($total_libres > $umbral) {
+        delete_option($flag); // se repuso: limpiar flag para volver a avisar si baja
+        return array('success' => true, 'total_libres' => $total_libres, 'status' => 'ok');
+    }
+    if (get_option($flag)) {
+        return array('success' => true, 'total_libres' => $total_libres, 'status' => 'ya_avisado');
+    }
+
+    // Identificar la tienda
+    $tienda = get_bloginfo('name') ?: 'Tienda';
+    $tienda_url = get_site_url();
+
+    $lineas_tipo = '';
+    foreach ($por_tipo as $t) {
+        $lineas_tipo .= "• {$t['tipo']}: {$t['libres']} entradas\n";
+    }
+
+    $asunto = "⚠️ Stock bajo de entradas de cine — {$tienda}";
+    $mensaje  = "Tienda: {$tienda} ({$tienda_url})\n\n";
+    $mensaje .= "Quedan {$total_libres} entradas de cine libres (umbral: {$umbral}).\n\n";
+    $mensaje .= "Desglose por tipo:\n{$lineas_tipo}\n";
+    $mensaje .= "Revisa y repón el stock cuando sea posible.\n";
+
+    $ok_info = wp_mail('info@bonospremiumlz.com', $asunto, $mensaje);
+    $ok_fericor = wp_mail('fericor@gmail.com', $asunto, $mensaje);
+
+    update_option($flag, time());
+
+    return array('success' => true, 'total_libres' => $total_libres, 'status' => 'avisado', 'mail_info' => $ok_info, 'mail_fericor' => $ok_fericor);
+}
+
+// Endpoint REST para que el cron del servidor lo dispare (auth por token)
+add_action('rest_api_init', function () {
+    register_rest_route('bonospremium/v1', '/cine-stock-alert', array(
+        'methods'  => 'GET',
+        'permission_callback' => function ($request) {
+            $token = $request->get_param('auth_token');
+            return $token === 'BonosSync2026!';
+        },
+        'callback' => function () {
+            $resultado = bp_cine_stock_alert_check();
+            return new WP_REST_Response($resultado, 200);
+        },
+    ));
+});
+
+// ============================================================
+// BONO DE ABOGADOS (formulario de preguntas + archivos) — SOLO LZ
+// ============================================================
+
+// 1. Detectar si un producto (o item de wc_pedidos_item) es bono de ABOGADOS
+if ( ! function_exists( 'bp_es_bono_abogado' ) ) {
+    function bp_es_bono_abogado( $product_id ) {
+        if ( ! $product_id ) return false;
+        $producto = wc_get_product( $product_id );
+        if ( ! $producto ) return false;
+        // FIX 11/08 (Félix): detectar el bono de abogados por las ETIQUETAS del producto
+        // (product_tag) en lugar del nombre del establecimiento. Se mantiene el
+        // establecimiento como fallback para no romper tiendas que ya lo usan (LZ).
+        $tags = wp_get_post_terms( $product_id, 'product_tag', array( 'fields' => 'names' ) );
+        if ( ! is_wp_error( $tags ) ) {
+            foreach ( (array) $tags as $tag ) {
+                if ( preg_match( '/\bABOGADOS?\b/i', $tag ) ) return true;
+            }
+        }
+        $nombre = $producto->get_meta( 'nombre_establecimiento' );
+        return $nombre && preg_match( '/\bABOGADOS?\b/i', $nombre );
+    }
+}
+
+// Tipo de formulario de un bono de abogado (meta 'tipo_formulario_bono').
+// Cada bono de abogado puede tener SU PROPIO formulario con sus preguntas.
+// Si el producto no define tipo, usa 'ABOGADO' (formulario genérico).
+if ( ! function_exists( 'bp_abogados_tipo_de_bono' ) ) {
+    function bp_abogados_tipo_de_bono( $product_id ) {
+        if ( ! $product_id ) return 'ABOGADO';
+        $producto = wc_get_product( $product_id );
+        if ( ! $producto ) return 'ABOGADO';
+        $tipo = $producto->get_meta( 'tipo_formulario_bono' );
+        return $tipo ? strtoupper( trim( $tipo ) ) : 'ABOGADO';
+    }
+}
+
+// Email del despacho/abogado para un bono (meta 'email_formulario_bono').
+// Si está definido, el email del formulario se envía al cliente Y copia a este email.
+if ( ! function_exists( 'bp_abogados_email_despacho' ) ) {
+    function bp_abogados_email_despacho( $product_id ) {
+        if ( ! $product_id ) return '';
+        $producto = wc_get_product( $product_id );
+        if ( ! $producto ) return '';
+        $email = $producto->get_meta( 'email_formulario_bono' );
+        return is_email( $email ) ? $email : '';
+    }
+}
+
+// 2. Conexión de SOLO LECTURA a la BD del CRM (crm_preguntas_bono)
+//    Credenciales en el archivo crm_abogados.env del plugin (usuario MySQL dedicado con GRANT SELECT).
+if ( ! function_exists( 'bp_abogados_db' ) ) {
+    function bp_abogados_db() {
+        $env_file = plugin_dir_path( __FILE__ ) . 'crm_abogados.env';
+        if ( ! file_exists( $env_file ) ) return null;
+        $vars = array();
+        foreach ( file( $env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) as $linea ) {
+            if ( strpos( $linea, '=' ) === false ) continue;
+            list( $k, $v ) = explode( '=', $linea, 2 );
+            $vars[ trim( $k ) ] = trim( $v );
+        }
+        try {
+            return new PDO(
+                'mysql:host=' . ( $vars['DB_HOST'] ?? 'localhost' ) . ';dbname=' . ( $vars['DB_NAME'] ?? '' ) . ';charset=utf8mb4',
+                $vars['DB_USER'] ?? '',
+                $vars['DB_PASS'] ?? ''
+            );
+        } catch ( Exception $e ) {
+            return null;
+        }
+    }
+}
+
+// 2b. Configuración del correo de salida (SMTP Gmail) definida en el CRM
+//     Tabla crm_config_email (store_id = 0 genérica o la de esta tienda).
+if ( ! function_exists( 'bp_abogados_config_email' ) ) {
+    function bp_abogados_config_email() {
+        $pdo = bp_abogados_db();
+        if ( ! $pdo ) return null;
+
+        // STORE_ID de esta tienda (del crm_abogados.env)
+        $store_id = 0;
+        $env_file = plugin_dir_path( __FILE__ ) . 'crm_abogados.env';
+        if ( file_exists( $env_file ) ) {
+            foreach ( file( $env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) as $linea ) {
+                if ( strpos( $linea, 'STORE_ID=' ) === 0 ) {
+                    $store_id = (int) trim( str_replace( 'STORE_ID=', '', $linea ) );
+                    break;
+                }
+            }
+        }
+
+        try {
+            // Config específica de la tienda; si no, la genérica (store_id=0)
+            $stmt = $pdo->prepare( "SELECT email_salida, email_remite, app_password, host_smtp, puerto, seguridad, activo FROM crm_config_email WHERE store_id = ? AND activo = 1 LIMIT 1" );
+            $stmt->execute( array( $store_id ) );
+            $cfg = $stmt->fetch( PDO::FETCH_ASSOC );
+            if ( ! $cfg ) {
+                $stmt2 = $pdo->prepare( "SELECT email_salida, email_remite, app_password, host_smtp, puerto, seguridad, activo FROM crm_config_email WHERE store_id = 0 AND activo = 1 LIMIT 1" );
+                $stmt2->execute();
+                $cfg = $stmt2->fetch( PDO::FETCH_ASSOC );
+            }
+            return $cfg ?: null;
+        } catch ( Exception $e ) {
+            return null;
+        }
+    }
+}
+
+// 2c. Enviar con SMTP Gmail configurado; si no hay config o falla, wp_mail normal.
+//     $adjuntos: array de arrays ['path' => ruta_absoluta, 'name' => nombre_visible].
+if ( ! function_exists( 'bp_abogados_enviar_email_smtp' ) ) {
+    function bp_abogados_enviar_email_smtp( $to, $subject, $body, $headers = array(), $adjuntos = array() ) {
+        $cfg = bp_abogados_config_email();
+        if ( empty( $cfg ) || empty( $cfg['email_salida'] ) || empty( $cfg['app_password'] ) ) {
+            return bp_abogados_wp_mail_adjuntos( $to, $subject, $body, $headers, $adjuntos );
+        }
+        require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
+        require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
+        $mail = new PHPMailer\PHPMailer\PHPMailer( true );
+        try {
+            $mail->isSMTP();
+            $mail->Host       = $cfg['host_smtp'] ?: 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $cfg['email_salida'];
+            $mail->Password   = $cfg['app_password'];
+            $mail->SMTPSecure = ( $cfg['seguridad'] === 'ssl' ) ? 'ssl' : 'tls';
+            $mail->Port       = (int) ( $cfg['puerto'] ?: 587 );
+            $mail->CharSet    = 'UTF-8';
+            // Remitente visible: email_remite si existe; si no, la cuenta de salida.
+            // Gmail autentica con la cuenta de salida; si el remitente difiere y no es
+            // un alias verificado, Gmail lo reescribe. Reply-To a la cuenta de salida.
+            $from = ! empty( $cfg['email_remite'] ) ? $cfg['email_remite'] : $cfg['email_salida'];
+            $mail->setFrom( $from, get_bloginfo( 'name' ) );
+            if ( ! empty( $cfg['email_remite'] ) && $cfg['email_remite'] !== $cfg['email_salida'] ) {
+                $mail->addReplyTo( $cfg['email_salida'] );
+            }
+            $mail->addAddress( $to );
+            foreach ( (array) $headers as $h ) {
+                if ( stripos( $h, 'Cc:' ) === 0 ) {
+                    $mail->addCC( trim( substr( $h, 4 ) ) );
+                }
+            }
+            // Adjuntos
+            foreach ( (array) $adjuntos as $adj ) {
+                if ( empty( $adj['path'] ) || ! file_exists( $adj['path'] ) ) continue;
+                $nombre = ! empty( $adj['name'] ) ? $adj['name'] : basename( $adj['path'] );
+                $mail->addAttachment( $adj['path'], $nombre );
+            }
+            $mail->isHTML( true );
+            $mail->Subject = $subject;
+            $mail->Body    = $body;
+            $mail->send();
+            return true;
+        } catch ( Exception $e ) {
+            error_log( 'BP abogados SMTP: ' . $e->getMessage() );
+            return bp_abogados_wp_mail_adjuntos( $to, $subject, $body, $headers, $adjuntos );
+        }
+    }
+}
+
+// 2d. wp_mail con adjuntos (para el fallback sin SMTP configurado)
+if ( ! function_exists( 'bp_abogados_wp_mail_adjuntos' ) ) {
+    function bp_abogados_wp_mail_adjuntos( $to, $subject, $body, $headers = array(), $adjuntos = array() ) {
+        $atts = array();
+        foreach ( (array) $adjuntos as $adj ) {
+            if ( ! empty( $adj['path'] ) && file_exists( $adj['path'] ) ) {
+                $atts[] = $adj['path'];
+            }
+        }
+        return wp_mail( $to, $subject, $body, $headers, $atts );
+    }
+}
+
+// 3. Obtener las preguntas del tipo de bono (desde el CRM)
+if ( ! function_exists( 'bp_abogados_get_preguntas' ) ) {
+    function bp_abogados_get_preguntas( $tipo_bono = 'ABOGADO', $store_id = 0 ) {
+        $pdo = bp_abogados_db();
+        if ( ! $pdo ) return array();
+        // Si no se pasa store_id, usar el de esta tienda (STORE_ID del crm_abogados.env)
+        if ( ! $store_id ) {
+            $env_file = plugin_dir_path( __FILE__ ) . 'crm_abogados.env';
+            if ( file_exists( $env_file ) ) {
+                foreach ( file( $env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) as $linea ) {
+                    if ( strpos( $linea, 'STORE_ID=' ) === 0 ) {
+                        $store_id = (int) trim( str_replace( 'STORE_ID=', '', $linea ) );
+                        break;
+                    }
+                }
+            }
+        }
+        try {
+            $stmt = $pdo->prepare(
+                "SELECT etiqueta, tipo_campo, opciones_json, requerido, orden
+                 FROM crm_preguntas_bono
+                 WHERE tipo_bono = ? AND activo = 1 AND (store_id = 0 OR store_id = ?)
+                 ORDER BY orden ASC, id ASC"
+            );
+            $stmt->execute( array( $tipo_bono, (int)$store_id ) );
+            $preguntas = $stmt->fetchAll( PDO::FETCH_ASSOC );
+            foreach ( $preguntas as &$p ) {
+                $p['opciones'] = $p['opciones_json'] ? json_decode( $p['opciones_json'], true ) : array();
+                unset( $p['opciones_json'] );
+            }
+            return $preguntas;
+        } catch ( Exception $e ) {
+            return array();
+        }
+    }
+}
+
+// 4. Tras la generación de bonos (payment_complete), crear la fila de formulario PENDIENTE
+//    para cada bono de abogados del pedido (si el tipo tiene preguntas definidas).
+add_action( 'woocommerce_thankyou', 'bp_abogados_crear_formularios_pendientes', 20 );
+function bp_abogados_crear_formularios_pendientes( $order_id ) {
+    if ( ! $order_id ) return;
+    global $wpdb;
+
+    $preguntas = bp_abogados_get_preguntas( 'ABOGADO' );
+    if ( empty( $preguntas ) ) return; // no hay preguntas definidas → no crear formularios
+
+    $items = $wpdb->get_results( $wpdb->prepare(
+        "SELECT id, qrCode, productId FROM {$wpdb->prefix}wc_pedidos_item WHERE orderId = %d",
+        $order_id
+    ) );
+    if ( empty( $items ) ) return;
+
+    $tabla = $wpdb->prefix . 'wc_formulario_bonos';
+    foreach ( $items as $item ) {
+        if ( ! bp_es_bono_abogado( $item->productId ) ) continue;
+        $ya = $wpdb->get_var( $wpdb->prepare(
+            "SELECT id FROM {$tabla} WHERE qrCode = %s LIMIT 1", $item->qrCode ) );
+        if ( $ya ) continue;
+        $wpdb->insert( $tabla, array(
+            'order_id'  => $order_id,
+            'item_id'   => $item->id,
+            'qrCode'    => $item->qrCode,
+            'tipo_bono' => bp_abogados_tipo_de_bono( $item->productId ),
+            'estado'    => 'pendiente',
+        ) );
+    }
+}
+
+// 5. ¿El carrito contiene algún bono de ABOGADOS?
+if ( ! function_exists( 'bp_carrito_tiene_abogados' ) ) {
+    function bp_carrito_tiene_abogados() {
+        if ( ! WC()->cart ) return false;
+        foreach ( WC()->cart->get_cart() as $item ) {
+            if ( bp_es_bono_abogado( $item['product_id'] ) ) return true;
+        }
+        return false;
+    }
+}
+
+// 6. Mostrar el formulario de preguntas en el checkout (obligatorio si hay preguntas requeridas)
+//    Cada bono de abogado puede tener SU PROPIO tipo de formulario (meta tipo_formulario_bono).
+//    Se muestra en su propio card a ancho completo, FUERA de las columnas de datos personales
+//    (hook custom bp_checkout_after_order_review lanzado por form-checkout.php del tema).
+add_action( 'bp_checkout_after_order_review', 'bp_abogados_form_checkout', 20 );
+add_action( 'woocommerce_checkout_before_order_review', 'bp_abogados_form_checkout', 20 );
+
+// 6b. VALIDACIÓN en el proceso de checkout: si el bono de abogados tiene preguntas OBLIGATORIAS,
+//     no se puede finalizar la compra hasta rellenarlas (Félix 10/08: quitar la opción de
+//     completar después; los campos requeridos bloquean el pago).
+add_action( 'woocommerce_checkout_process', 'bp_abogados_validar_checkout', 30 );
+if ( ! function_exists( 'bp_abogados_validar_checkout' ) ) {
+    function bp_abogados_validar_checkout() {
+        if ( ! bp_carrito_tiene_abogados() ) return;
+
+        // Tipos de bono presentes en el carrito
+        $tipos = array();
+        if ( WC()->cart ) {
+            foreach ( WC()->cart->get_cart() as $item ) {
+                if ( ! bp_es_bono_abogado( $item['product_id'] ) ) continue;
+                $tipos[ bp_abogados_tipo_de_bono( $item['product_id'] ) ] = true;
+            }
+        }
+        if ( empty( $tipos ) ) return;
+
+        // Respuestas enviadas desde el formulario (hidden bp_abogados_datos)
+        $datos      = isset( $_POST['bp_abogados_datos'] ) ? json_decode( wp_unslash( $_POST['bp_abogados_datos'] ), true ) : array();
+        $respuestas = isset( $datos['respuestas'] ) && is_array( $datos['respuestas'] ) ? $datos['respuestas'] : array();
+        $archivos   = isset( $datos['archivos'] ) && is_array( $datos['archivos'] ) ? $datos['archivos'] : array();
+        $arch_etiq  = array();
+        foreach ( $archivos as $a ) {
+            if ( ! empty( $a['etiqueta'] ) && ! empty( $a['url'] ) ) $arch_etiq[ $a['etiqueta'] ] = true;
+        }
+
+        foreach ( array_keys( $tipos ) as $tipo ) {
+            $preguntas = bp_abogados_get_preguntas( $tipo );
+            foreach ( $preguntas as $p ) {
+                if ( (int) $p['requerido'] !== 1 ) continue;
+                $etiqueta = $p['etiqueta'];
+                $rellena  = false;
+                if ( $p['tipo_campo'] === 'archivo' ) {
+                    $rellena = ! empty( $arch_etiq[ $etiqueta ] );
+                } else {
+                    $rellena = isset( $respuestas[ $etiqueta ] ) && trim( (string) $respuestas[ $etiqueta ] ) !== '';
+                }
+                if ( ! $rellena ) {
+                    wc_add_notice(
+                        sprintf( 'Debes completar el campo obligatorio "%s" del formulario de tu bono de abogados para continuar con la compra.', esc_html( $etiqueta ) ),
+                        'error'
+                    );
+                }
+            }
+        }
+    }
+}
+
+function bp_abogados_form_checkout( $checkout ) {
+    // FIX 11/08: el formulario se engancha a 2 hooks (custom tema + estándar WC);
+    // si un tema lanzara ambos, no duplicar el card.
+    static $bp_abogados_form_mostrado = false;
+    if ( $bp_abogados_form_mostrado ) return;
+    $bp_abogados_form_mostrado = true;
+
+    if ( ! bp_carrito_tiene_abogados() ) return;
+
+    // Tipos de bono presentes en el carrito (puede haber varios)
+    $tipos = array();
+    if ( WC()->cart ) {
+        foreach ( WC()->cart->get_cart() as $item ) {
+            if ( ! bp_es_bono_abogado( $item['product_id'] ) ) continue;
+            $tipo = bp_abogados_tipo_de_bono( $item['product_id'] );
+            $tipos[ $tipo ] = true;
+        }
+    }
+    if ( empty( $tipos ) ) return;
+    $tipos = array_keys( $tipos );
+
+    // Cargar preguntas de cada tipo
+    $bloques = array();
+    foreach ( $tipos as $tipo ) {
+        $preguntas = bp_abogados_get_preguntas( $tipo );
+        if ( empty( $preguntas ) ) continue;
+        $bloques[] = array( 'tipo' => $tipo, 'preguntas' => $preguntas );
+    }
+    if ( empty( $bloques ) ) return;
+    ?>
+    <div class="bp-abogados-checkout-box" style="background:#ffffff;border:2px solid #009cdc;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,156,220,0.12);">
+        <div style="background:#009cdc;padding:14px 18px;display:flex;align-items:center;gap:12px;">
+            <span style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </span>
+            <div>
+                <h3 style="margin:0;color:#ffffff;font-size:15px;font-weight:700;">Datos para tu bono de abogados</h3>
+                <p style="margin:2px 0 0;font-size:12px;color:rgba(255,255,255,0.85);">Completa este formulario para continuar con la compra. Los campos marcados con * son obligatorios.</p>
+            </div>
+        </div>
+        <div style="padding:18px 18px 20px;">
+        <?php foreach ( $bloques as $bi => $bloque ) : ?>
+            <div style="<?php echo $bi > 0 ? 'margin-top:20px;padding-top:18px;border-top:1px dashed #d1d5db;' : ''; ?>">
+                <?php if ( count( $bloques ) > 1 ) : ?>
+                    <p style="font-size:12px;font-weight:700;color:#009cdc;text-transform:uppercase;margin:0 0 10px;">Formulario: <?php echo esc_html( $bloque['tipo'] ); ?></p>
+                <?php endif; ?>
+                <div id="bp-abogados-preguntas-<?php echo esc_attr( $bi ); ?>">
+                    <p style="font-size:13px;color:#9ca3af;">Cargando preguntas...</p>
+                </div>
+            </div>
+        <?php endforeach; ?>
+        <input type="hidden" id="bp-abogados-datos" name="bp_abogados_datos" value="">
+        </div>
+    </div>
+    <script>
+    (function() {
+        var bloques = <?php echo json_encode( $bloques, JSON_UNESCAPED_UNICODE ); ?>;
+        bloques.forEach(function(bloque, bi) {
+            var cont = document.getElementById('bp-abogados-preguntas-' + bi);
+            if (!cont) return;
+            var html = '';
+            bloque.preguntas.forEach(function(p) {
+                var req = p.requerido == 1 ? ' *' : '';
+                html += '<div style="margin-bottom:14px;">';
+                html += '<label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">' + p.etiqueta + req + '</label>';
+                if (p.tipo_campo === 'textarea') {
+                    html += '<textarea data-etiqueta="' + p.etiqueta + '" class="bp-abg-campo" oninput="bpAbgRecoger()" onchange="bpAbgRecoger()" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;" rows="3"></textarea>';
+                } else if (p.tipo_campo === 'select') {
+                    html += '<select data-etiqueta="' + p.etiqueta + '" class="bp-abg-campo" onchange="bpAbgRecoger()" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;background:#fff;"><option value="">Selecciona...</option>';
+                    (p.opciones || []).forEach(function(o) { html += '<option value="' + o + '">' + o + '</option>'; });
+                    html += '</select>';
+                } else if (p.tipo_campo === 'archivo') {
+                    html += '<input type="file" data-etiqueta="' + p.etiqueta + '" class="bp-abg-archivo" onchange="bpAbgSubirArchivo(this)" style="width:100%;font-size:13px;">';
+                    html += '<div class="bp-abg-archivo-ok" style="font-size:12px;color:#059669;margin-top:4px;display:none;">Archivo subido correctamente</div>';
+                } else {
+                    html += '<input type="text" data-etiqueta="' + p.etiqueta + '" class="bp-abg-campo" oninput="bpAbgRecoger()" onchange="bpAbgRecoger()" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;">';
+                }
+                html += '</div>';
+            });
+            cont.innerHTML = html;
+
+            // Subida de archivos (inline, sin depender de otros scripts)
+            cont.querySelectorAll('.bp-abg-archivo').forEach(function(input) {
+                input.addEventListener('change', function() {
+                    if (!input.files || !input.files[0]) return;
+                    var fd = new FormData();
+                    fd.append('archivo', input.files[0]);
+                    fetch('<?php echo esc_url_raw( rest_url( 'bonospremium/v1/abogados-subir-archivo' ) ); ?>', { method: 'POST', body: fd })
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) {
+                        var ok = input.parentNode.querySelector('.bp-abg-archivo-ok');
+                        if (ok) ok.style.display = d.success ? 'block' : 'none';
+                        input.setAttribute('data-archivo-url', d.success ? d.url : '');
+                        if (window.bpAbgRecoger) bpAbgRecoger();
+                    }).catch(function() {});
+                });
+            });
+        });
+
+        // Función GLOBAL de recogida (llamada desde oninput/onchange INLINE de cada campo)
+        // y desde el onsubmit del form de checkout — funciona aunque addEventListener falle.
+        window.bpAbgRecoger = function() {
+            var res = {};
+            document.querySelectorAll('.bp-abg-campo').forEach(function(c) {
+                if (c.value) res[c.getAttribute('data-etiqueta')] = c.value;
+            });
+            var arch = [];
+            document.querySelectorAll('.bp-abg-archivo').forEach(function(c) {
+                var url = c.getAttribute('data-archivo-url');
+                var path = c.getAttribute('data-archivo-path');
+                var name = c.getAttribute('data-archivo-name');
+                if (url) arch.push({ etiqueta: c.getAttribute('data-etiqueta'), url: url, path: path, name: name });
+            });
+            var inputDatos = document.getElementById('bp-abogados-datos');
+            if (inputDatos) inputDatos.value = JSON.stringify({ respuestas: res, archivos: arch });
+        };
+        // Subida de archivo vía función global (onchange inline del input file)
+        window.bpAbgSubirArchivo = function(input) {
+            if (!input.files || !input.files[0]) return;
+            var fd = new FormData();
+            fd.append('archivo', input.files[0]);
+            fetch('<?php echo esc_url_raw( rest_url( 'bonospremium/v1/abogados-subir-archivo' ) ); ?>', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var ok = input.parentNode.querySelector('.bp-abg-archivo-ok');
+                if (ok) ok.style.display = d.success ? 'block' : 'none';
+                if (d.success) {
+                    input.setAttribute('data-archivo-url', d.url || '');
+                    input.setAttribute('data-archivo-path', d.path || '');
+                    input.setAttribute('data-archivo-name', d.name || '');
+                }
+                if (window.bpAbgRecoger) bpAbgRecoger();
+            }).catch(function() {});
+        };
+        // Enlazar al submit del form de checkout: recoger SIEMPRE antes de enviar
+        if (typeof jQuery !== 'undefined') {
+            jQuery(document).on('submit', 'form.checkout', function() {
+                if (window.bpAbgRecoger) bpAbgRecoger();
+            });
+        }
+    })();
+    </script>
+    <?php
+}
+
+// 7. Guardar respuestas del formulario del checkout al crear el pedido (sin enviar email aún).
+//    Hook: woocommerce_checkout_order_processed — se dispara DESPUÉS de $order->save(),
+//    cuando el pedido YA tiene su ID/número real (woocommerce_checkout_create_order
+//    corre ANTES del save → get_id() = 0 → email salía con "Pedido #0". Félix 10/08).
+//    El EMAIL se envía SOLO cuando el pago se confirma (ver 7c).
+add_action( 'woocommerce_checkout_order_processed', 'bp_abogados_guardar_respuestas_checkout', 20, 3 );
+function bp_abogados_guardar_respuestas_checkout( $order_id, $posted_data = array(), $order = null ) {
+    $datos = isset( $_POST['bp_abogados_datos'] ) ? json_decode( wp_unslash( $_POST['bp_abogados_datos'] ), true ) : null;
+    if ( empty( $datos ) ) return;
+    if ( ! $order_id ) return;
+    // ⚠️ update_post_meta directo (NO $order->update_meta_data): en LZ el guardado vía
+    // WC_Order no persiste (debug 05/08: update_meta_data+save → ''; update_post_meta → OK).
+    update_post_meta( $order_id, '_bp_abogados_datos', $datos );
+}
+
+// 7c. Enviar el email del formulario SOLO cuando el pago del pedido está confirmado
+//     (Félix 10/08: no enviar antes de confirmar el pago). Se dispara en:
+//     - woocommerce_payment_complete (pago confirmado por el gateway)
+//     - woocommerce_order_status_processing / completed (cambio de estado tras pago)
+//     El flag _bp_abogados_email_enviado evita duplicados.
+add_action( 'woocommerce_payment_complete', 'bp_abogados_enviar_email_pago_confirmado', 20 );
+add_action( 'woocommerce_order_status_processing', 'bp_abogados_enviar_email_pago_confirmado', 20 );
+add_action( 'woocommerce_order_status_completed', 'bp_abogados_enviar_email_pago_confirmado', 20 );
+if ( ! function_exists( 'bp_abogados_enviar_email_pago_confirmado' ) ) {
+    function bp_abogados_enviar_email_pago_confirmado( $order_id ) {
+        if ( ! $order_id ) return;
+        // Anti-duplicado: si ya se envió (otro hook del pago o el thankyou), salir
+        if ( get_post_meta( $order_id, '_bp_abogados_email_enviado', true ) ) return;
+
+        $datos = get_post_meta( $order_id, '_bp_abogados_datos', true );
+        if ( empty( $datos ) ) return;
+
+        $order = wc_get_order( $order_id );
+        if ( ! $order ) return;
+        // Solo si el pago está confirmado (processing o completed)
+        if ( ! $order->is_paid() ) return;
+
+        bp_abogados_enviar_email_desde_datos( $order, $datos, (int) $order_id );
+    }
+}
+
+// 7b. Email del formulario construido DIRECTAMENTE desde los datos del checkout
+//     (no necesita filas en wc_formulario_bonos ni el hook thankyou).
+if ( ! function_exists( 'bp_abogados_enviar_email_desde_datos' ) ) {
+    function bp_abogados_enviar_email_desde_datos( $order, $datos, $order_id_fallback = 0 ) {
+        if ( ! $order ) return;
+        // Número de pedido: preferir el ID real pasado por el hook (order_processed lo da
+        // ya guardado como int); si no, get_order_number() del objeto; nunca 0.
+        $order_id = is_numeric( $order_id_fallback ) ? (int) $order_id_fallback : 0;
+        if ( ! $order_id && method_exists( $order, 'get_order_number' ) ) {
+            $order_id = (int) $order->get_order_number();
+        }
+        if ( ! $order_id && method_exists( $order, 'get_id' ) ) {
+            $order_id = (int) $order->get_id();
+        }
+        if ( ! $order_id ) return; // sin número de pedido no se envía (evita "Pedido #0")
+
+        $respuestas = isset( $datos['respuestas'] ) && is_array( $datos['respuestas'] ) ? $datos['respuestas'] : array();
+        $archivos   = isset( $datos['archivos'] ) && is_array( $datos['archivos'] ) ? $datos['archivos'] : array();
+        if ( empty( $respuestas ) && empty( $archivos ) ) return;
+
+        // 📧 El email va SOLO al despacho/abogado (email_formulario_bono del producto).
+        //    NO se envía al cliente (Félix 10/08). Si el producto no define email,
+        //    fallback a la cuenta de salida configurada en el CRM.
+        $to = '';
+        foreach ( $order->get_items() as $item ) {
+            $product_id = $item->get_product_id();
+            if ( ! bp_es_bono_abogado( $product_id ) ) continue;
+            $email_desp = bp_abogados_email_despacho( $product_id );
+            if ( $email_desp ) { $to = $email_desp; break; }
+        }
+        if ( ! $to ) {
+            $cfg = bp_abogados_config_email();
+            if ( ! empty( $cfg['email_salida'] ) ) $to = $cfg['email_salida'];
+        }
+        if ( ! $to ) return;
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        $subject = 'Datos del bono de abogados - Pedido #' . $order_id;
+
+        $body  = '<h2>Datos recibidos de tu bono de abogados</h2>';
+        $body .= '<p>Pedido: <strong>#' . $order_id . '</strong></p>';
+        $body .= '<table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;">';
+        foreach ( $respuestas as $etiqueta => $valor ) {
+            $body .= '<tr><td style="border:1px solid #e5e7eb;padding:8px;font-weight:bold;width:40%;">' . esc_html( $etiqueta ) . '</td>';
+            $body .= '<td style="border:1px solid #e5e7eb;padding:8px;">' . esc_html( $valor ) . '</td></tr>';
+        }
+        // Adjuntos: se mandan COMO ARCHIVOS ADJUNTOS al email (no quedan en el servidor)
+        $adjuntos = array();
+        foreach ( $archivos as $arch ) {
+            if ( empty( $arch['path'] ) || ! file_exists( $arch['path'] ) ) continue;
+            $adjuntos[] = array(
+                'path' => $arch['path'],
+                'name' => ! empty( $arch['name'] ) ? $arch['name'] : basename( $arch['path'] ),
+            );
+            $body .= '<tr><td style="border:1px solid #e5e7eb;padding:8px;font-weight:bold;">' . esc_html( $arch['etiqueta'] ?? 'Archivo' ) . '</td>';
+            $body .= '<td style="border:1px solid #e5e7eb;padding:8px;">Adjunto: ' . esc_html( $adjuntos[ count( $adjuntos ) - 1 ]['name'] ) . '</td></tr>';
+        }
+        $body .= '</table>';
+
+        // Enviar con SMTP Gmail configurado en el CRM (si existe); fallback a wp_mail
+        bp_abogados_enviar_email_smtp( $to, $subject, $body, $headers, $adjuntos );
+        // 🗑️ Borrar los temporales del servidor (los adjuntos van solo en el email)
+        foreach ( $adjuntos as $adj ) {
+            @unlink( $adj['path'] );
+        }
+        // Flag anti-duplicado: el thankyou no debe reenviar
+        update_post_meta( $order_id, '_bp_abogados_email_enviado', 1 );
+    }
+}
+
+// 8. Completar las filas de formulario con las respuestas del checkout (tras generar bonos)
+add_action( 'woocommerce_thankyou', 'bp_abogados_aplicar_respuestas_checkout', 30 );
+function bp_abogados_aplicar_respuestas_checkout( $order_id ) {
+    if ( ! $order_id ) return;
+    $order = wc_get_order( $order_id );
+    if ( ! $order ) return;
+    $datos = get_post_meta( $order_id, '_bp_abogados_datos', true );
+    if ( empty( $datos ) ) return;
+
+    global $wpdb;
+    $tabla = $wpdb->prefix . 'wc_formulario_bonos';
+    $filas = $wpdb->get_results( $wpdb->prepare(
+        "SELECT id, qrCode FROM {$tabla} WHERE order_id = %d AND estado = 'pendiente'",
+        $order_id
+    ) );
+    if ( empty( $filas ) ) return;
+    $respuestas_json = isset( $datos['respuestas'] ) ? wp_json_encode( $datos['respuestas'], JSON_UNESCAPED_UNICODE ) : null;
+    $archivos_json   = isset( $datos['archivos'] ) ? wp_json_encode( $datos['archivos'], JSON_UNESCAPED_UNICODE ) : null;
+    $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( $_SERVER['REMOTE_ADDR'] ) : '';
+
+    foreach ( $filas as $fila ) {
+        $wpdb->update( $tabla, array(
+            'respuestas_json' => $respuestas_json,
+            'archivos_json'   => $archivos_json,
+            'estado'          => 'completado',
+            'ip'              => $ip,
+            'fecha_envio'     => current_time( 'mysql' ),
+        ), array( 'id' => $fila->id ) );
+    }
+
+    // Email al cliente con los datos (solo si NO se envió ya en el checkout — flag anti-duplicado)
+    if ( ! get_post_meta( $order_id, '_bp_abogados_email_enviado', true ) ) {
+        bp_abogados_enviar_email( $order_id );
+    }
+}
+
+// 9. Email al cliente con las respuestas del formulario
+if ( ! function_exists( 'bp_abogados_enviar_email' ) ) {
+    function bp_abogados_enviar_email( $order_id ) {
+        if ( ! $order_id ) return;
+        global $wpdb;
+        $order = wc_get_order( $order_id );
+        if ( ! $order ) return;
+
+        $tabla = $wpdb->prefix . 'wc_formulario_bonos';
+        $filas = $wpdb->get_results( $wpdb->prepare(
+            "SELECT * FROM {$tabla} WHERE order_id = %d", $order_id ) );
+        if ( empty( $filas ) ) return;
+
+        $respuestas = array();
+        $archivos   = array();
+        foreach ( $filas as $fila ) {
+            $r = $fila->respuestas_json ? json_decode( $fila->respuestas_json, true ) : array();
+            $a = $fila->archivos_json ? json_decode( $fila->archivos_json, true ) : array();
+            foreach ( $r as $k => $v ) if ( $v !== '' ) $respuestas[ $k ] = $v;
+            foreach ( $a as $x ) if ( ! empty( $x['url'] ) ) $archivos[] = $x;
+        }
+        if ( empty( $respuestas ) && empty( $archivos ) ) return;
+
+        // 📧 El email va SOLO al despacho/abogado (email_formulario_bono del producto).
+        //    NO se envía al cliente (Félix 10/08). Fallback a la cuenta de salida del CRM.
+        $to = '';
+        foreach ( $order->get_items() as $item ) {
+            $product_id = $item->get_product_id();
+            if ( ! bp_es_bono_abogado( $product_id ) ) continue;
+            $email_desp = bp_abogados_email_despacho( $product_id );
+            if ( $email_desp ) { $to = $email_desp; break; }
+        }
+        if ( ! $to ) {
+            $cfg = bp_abogados_config_email();
+            if ( ! empty( $cfg['email_salida'] ) ) $to = $cfg['email_salida'];
+        }
+        if ( ! $to ) return;
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        $subject = 'Datos del bono de abogados - Pedido #' . $order_id;
+
+        $body  = '<h2>Datos recibidos de tu bono de abogados</h2>';
+        $body .= '<p>Pedido: <strong>#' . $order_id . '</strong></p>';
+        $body .= '<table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;">';
+        foreach ( $respuestas as $etiqueta => $valor ) {
+            $body .= '<tr><td style="border:1px solid #e5e7eb;padding:8px;font-weight:bold;width:40%;">' . esc_html( $etiqueta ) . '</td>';
+            $body .= '<td style="border:1px solid #e5e7eb;padding:8px;">' . esc_html( $valor ) . '</td></tr>';
+        }
+        // Adjuntos: si hay paths temporales disponibles se adjuntan al email
+        $adjuntos = array();
+        foreach ( $archivos as $arch ) {
+            if ( ! empty( $arch['path'] ) && file_exists( $arch['path'] ) ) {
+                $adjuntos[] = array(
+                    'path' => $arch['path'],
+                    'name' => ! empty( $arch['name'] ) ? $arch['name'] : basename( $arch['path'] ),
+                );
+                $body .= '<tr><td style="border:1px solid #e5e7eb;padding:8px;font-weight:bold;">' . esc_html( $arch['etiqueta'] ) . '</td>';
+                $body .= '<td style="border:1px solid #e5e7eb;padding:8px;">Adjunto: ' . esc_html( $adjuntos[ count( $adjuntos ) - 1 ]['name'] ) . '</td></tr>';
+            } else {
+                $body .= '<tr><td style="border:1px solid #e5e7eb;padding:8px;font-weight:bold;">' . esc_html( $arch['etiqueta'] ) . '</td>';
+                $body .= '<td style="border:1px solid #e5e7eb;padding:8px;"><a href="' . esc_url( $arch['url'] ) . '">Ver archivo</a></td></tr>';
+            }
+        }
+        $body .= '</table>';
+
+        // Enviar con SMTP Gmail configurado en el CRM (si existe); fallback a wp_mail
+        bp_abogados_enviar_email_smtp( $to, $subject, $body, $headers, $adjuntos );
+        // Borrar temporales adjuntados (no quedan en el servidor)
+        foreach ( $adjuntos as $adj ) {
+            @unlink( $adj['path'] );
+        }
+    }
+}
+
+// 10. Endpoint REST: subir archivo del formulario de abogados.
+//     Se guarda en un directorio TEMPORAL: el archivo se ADJUNTA al email del formulario
+//     y se borra del servidor tras el envío (Félix 10/08: los adjuntos no se guardan).
+//     Limpieza automática: los temporales con más de 24h se eliminan en cada subida.
+add_action( 'rest_api_init', function () {
+    register_rest_route( 'bonospremium/v1', '/abogados-subir-archivo', array(
+        'methods'  => 'POST',
+        'permission_callback' => '__return_true',
+        'callback' => function () {
+            if ( empty( $_FILES['archivo'] ) ) {
+                return new WP_REST_Response( array( 'success' => false, 'error' => 'No se recibió archivo' ), 400 );
+            }
+            $archivo = $_FILES['archivo'];
+            $ext = strtolower( pathinfo( $archivo['name'], PATHINFO_EXTENSION ) );
+            $permitidas = array( 'pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png' );
+            if ( ! in_array( $ext, $permitidas ) ) {
+                return new WP_REST_Response( array( 'success' => false, 'error' => 'Tipo de archivo no permitido (pdf, doc, docx, jpg, png)' ), 400 );
+            }
+            if ( $archivo['size'] > 5 * 1024 * 1024 ) {
+                return new WP_REST_Response( array( 'success' => false, 'error' => 'El archivo supera 5 MB' ), 400 );
+            }
+            // Directorio TEMPORAL (no se conserva)
+            $dir = WP_CONTENT_DIR . '/uploads/bonospremium/formularios_tmp';
+            if ( ! file_exists( $dir ) ) wp_mkdir_p( $dir );
+
+            // Limpieza de temporales antiguos (> 24 h) — subidas abandonadas sin pedido
+            foreach ( glob( $dir . '/*' ) ?: array() as $viejo ) {
+                if ( is_file( $viejo ) && ( time() - filemtime( $viejo ) ) > 24 * 3600 ) {
+                    @unlink( $viejo );
+                }
+            }
+
+            $nombre = 'abogado_' . time() . '_' . wp_generate_password( 6, false ) . '.' . $ext;
+            if ( ! move_uploaded_file( $archivo['tmp_name'], $dir . '/' . $nombre ) ) {
+                return new WP_REST_Response( array( 'success' => false, 'error' => 'Error al guardar el archivo' ), 500 );
+            }
+            return new WP_REST_Response( array(
+                'success' => true,
+                'url'     => content_url( 'uploads/bonospremium/formularios_tmp/' . $nombre ),
+                'path'    => $dir . '/' . $nombre,
+                'name'    => $archivo['name'],
+            ), 200 );
+        },
+    ) );
+} );
+
+// 11. Mostrar en view-order SOLO los datos ya enviados del bono de abogados.
+//     (Antes mostraba el formulario para completar pendientes — Félix 10/08: la opción de
+//     completar después se elimina; el formulario se rellena OBLIGATORIAMENTE en el checkout.)
+add_action( 'woocommerce_view_order', 'bp_abogados_form_completar_desde_bono', 20 );
+function bp_abogados_form_completar_desde_bono( $order_id ) {
+    if ( ! $order_id ) return;
+    global $wpdb;
+    $tabla = $wpdb->prefix . 'wc_formulario_bonos';
+
+    // === Mostrar datos ya guardados (fichas completadas) ===
+    $completadas = $wpdb->get_results( $wpdb->prepare(
+        "SELECT tipo_bono, respuestas_json, archivos_json, fecha_envio FROM {$tabla} WHERE order_id = %d AND estado = 'completado' ORDER BY id ASC",
+        $order_id
+    ) );
+    foreach ( $completadas as $fila ) {
+        $respuestas = json_decode( $fila->respuestas_json, true );
+        $archivos   = json_decode( $fila->archivos_json, true );
+        if ( empty( $respuestas ) && empty( $archivos ) ) continue;
+        $tipo = $fila->tipo_bono ?: 'ABOGADO';
+        $fecha = $fila->fecha_envio ? date_i18n( 'd/m/Y H:i', strtotime( $fila->fecha_envio ) ) : '';
+        ?>
+        <div class="bp-abogados-datos-box" style="margin-top:30px;background:#ffffff;border:2px solid #009cdc;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,156,220,0.12);">
+            <div style="background:#009cdc;padding:14px 18px;display:flex;align-items:center;gap:12px;">
+                <span style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </span>
+                <div>
+                    <h3 style="margin:0;color:#ffffff;font-size:15px;font-weight:700;">Datos de tu bono de abogados<?php echo $tipo !== 'ABOGADO' ? ' (' . esc_html( $tipo ) . ')' : ''; ?></h3>
+                    <p style="margin:2px 0 0;color:rgba(255,255,255,0.85);font-size:12px;"><?php echo $fecha ? 'Enviado el ' . esc_html( $fecha ) : 'Formulario completado'; ?></p>
+                </div>
+            </div>
+            <div style="padding:18px 20px 20px;">
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                <?php foreach ( $respuestas as $etiqueta => $valor ) : ?>
+                    <tr>
+                        <td style="padding:8px 12px 8px 0;font-weight:600;color:#374151;vertical-align:top;width:38%;border-bottom:1px solid #f3f4f6;"><?php echo esc_html( $etiqueta ); ?></td>
+                        <td style="padding:8px 0;color:#111827;border-bottom:1px solid #f3f4f6;"><?php echo esc_html( $valor ); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                <?php if ( ! empty( $archivos ) && is_array( $archivos ) ) : foreach ( $archivos as $arch ) : ?>
+                    <tr>
+                        <td style="padding:8px 12px 8px 0;font-weight:600;color:#374151;vertical-align:top;width:38%;border-bottom:1px solid #f3f4f6;"><?php echo esc_html( $arch['etiqueta'] ?? 'Archivo' ); ?></td>
+                        <td style="padding:8px 0;border-bottom:1px solid #f3f4f6;">
+                            <?php if ( ! empty( $arch['url'] ) ) : ?>
+                                <a href="<?php echo esc_url( $arch['url'] ); ?>" target="_blank" rel="noopener" style="color:#009cdc;font-weight:600;text-decoration:none;"><?php echo esc_html( $arch['name'] ?? 'Ver archivo adjunto' ); ?></a>
+                            <?php else : ?>
+                                <span style="color:#374151;">Adjunto enviado por email: <?php echo esc_html( $arch['name'] ?? '' ); ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; endif; ?>
+                </table>
+            </div>
+        </div>
+        <?php
+    }
+}
+
+// 12. Endpoint REST: completar formulario desde el bono (view-order)
+add_action( 'rest_api_init', function () {
+    register_rest_route( 'bonospremium/v1', '/abogados-completar-bono', array(
+        'methods'  => 'POST',
+        'permission_callback' => '__return_true',
+        'callback' => function () {
+            $order_id = (int)( $_POST['order_id'] ?? 0 );
+            if ( ! $order_id ) {
+                return new WP_REST_Response( array( 'success' => false, 'error' => 'Pedido no válido' ), 400 );
+            }
+            $respuestas = isset( $_POST['respuestas'] ) ? json_decode( wp_unslash( $_POST['respuestas'] ), true ) : array();
+            $archivos   = isset( $_POST['archivos'] ) ? json_decode( wp_unslash( $_POST['archivos'] ), true ) : array();
+            if ( ! is_array( $respuestas ) ) $respuestas = array();
+            if ( ! is_array( $archivos ) ) $archivos = array();
+
+            global $wpdb;
+            $tabla = $wpdb->prefix . 'wc_formulario_bonos';
+            $filas = $wpdb->get_results( $wpdb->prepare(
+                "SELECT id FROM {$tabla} WHERE order_id = %d AND estado = 'pendiente'",
+                $order_id
+            ) );
+            if ( empty( $filas ) ) {
+                return new WP_REST_Response( array( 'success' => false, 'error' => 'No hay formularios pendientes para este pedido' ), 400 );
+            }
+            $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( $_SERVER['REMOTE_ADDR'] ) : '';
+            foreach ( $filas as $fila ) {
+                $wpdb->update( $tabla, array(
+                    'respuestas_json' => wp_json_encode( $respuestas, JSON_UNESCAPED_UNICODE ),
+                    'archivos_json'   => wp_json_encode( $archivos, JSON_UNESCAPED_UNICODE ),
+                    'estado'          => 'completado',
+                    'ip'              => $ip,
+                    'fecha_envio'     => current_time( 'mysql' ),
+                ), array( 'id' => $fila->id ) );
+            }
+            bp_abogados_enviar_email( $order_id );
+            return new WP_REST_Response( array( 'success' => true ), 200 );
+        },
+    ) );
+} );
+
+// FIN CODIGO PARA EL CRM
 
 
 
@@ -3497,13 +5062,15 @@ function custom_checkout_field($checkout){
                 if(PLANTILLA == "Reyes Magos"){ IMAGEN = "qr_reyesmagos1"; }
                 if(PLANTILLA == "San Valentin"){ IMAGEN = "qr_sanvalentin1"; }
                 
-                HTML_IMG_PLANTILLA = "<img src=\"https://bonospremium.com/admin/assets/imgPlugin/"+IMAGEN+".png\" style=\"width: 600px; padding: 0px;\">";
+            var BP_JS_IMG_BASE = '' + BP_IMG_BASE + '';
+            var BP_JS_COLOR   = '' + BP_PRIMARY_COLOR + '';
+                HTML_IMG_PLANTILLA = "<img src=\"" + BP_JS_IMG_BASE + "/"+IMAGEN+".png\" style=\"width: 600px; padding: 0px;\">";
             }
 
             console.log(PLANTILLA);
 
 
-            let HTML_PLANTILLA = "<div style=\"width: 100%; background-color: #039CDC; padding: 0px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-bottom: 0px;\"> <img style=\"width: 300px; padding: 20px;\" src=\"https://bonospremium.com/wp-content/uploads/2023/09/trans.png\" alt=\"\"> </div> <div style=\"text-align: center;\"> "+HTML_IMG_PLANTILLA+" <p style=\"font-style: oblique;\">"+TEXTO+"</p> </div>";
+            let HTML_PLANTILLA = "<div style=\"width: 100%; background-color: " + BP_JS_COLOR + "; padding: 0px; border-radius: 0px; color: #FFFFFF; text-align: center; margin-bottom: 0px;\"> <img style=\"width: 300px; padding: 20px;\" src=\"" + BP_JS_IMG_BASE + "/logo.png\" alt=\"\"> </div> <div style=\"text-align: center;\"> "+HTML_IMG_PLANTILLA+" <p style=\"font-style: oblique;\">"+TEXTO+"</p> </div>";
 
             jQuery().simpleModal({
                 name: "BonoPremium",
@@ -3517,3 +5084,45 @@ function custom_checkout_field($checkout){
     </script>
 
 <?php } ?>
+
+<?php
+// ============================================================
+// CONFIRMAR EMAIL EN EL CHECKOUT (Félix 11/08) — SOLO LZ
+// Añade el campo "Confirmar email" al formulario de registro del checkout
+// y valida que coincida con el email.
+// ============================================================
+add_filter( 'woocommerce_checkout_fields', 'bp_lz_campo_confirmar_email', 1001 );
+function bp_lz_campo_confirmar_email( $fields ) {
+    // Si el usuario ya está logueado, el email ya está confirmado en su cuenta: no pedir repetición
+    if ( is_user_logged_in() ) return $fields;
+    if ( ! isset( $fields['billing']['billing_email'] ) ) return $fields;
+    $fields['billing']['billing_email_confirm'] = array(
+        'label'       => 'Confirmar email',
+        'placeholder' => 'Repite tu email',
+        'required'    => true,
+        'type'        => 'email',
+        'class'       => array( 'form-row-wide' ),
+        'clear'       => true,
+        'priority'    => 111,
+        'autocomplete'=> 'off',
+    );
+    return $fields;
+}
+
+// Validar que coinciden antes de procesar el pedido
+add_action( 'woocommerce_checkout_process', 'bp_lz_validar_email_confirm', 10 );
+function bp_lz_validar_email_confirm() {
+    if ( is_user_logged_in() ) return; // si está logueado no existe el campo de confirmación
+    $email   = isset( $_POST['billing_email'] ) ? sanitize_email( wp_unslash( $_POST['billing_email'] ) ) : '';
+    $confirm = isset( $_POST['billing_email_confirm'] ) ? sanitize_email( wp_unslash( $_POST['billing_email_confirm'] ) ) : '';
+    if ( $email && $confirm !== $email ) {
+        wc_add_notice( 'El email de confirmación no coincide con el email introducido.', 'error' );
+    }
+}
+
+// No guardar el campo de confirmación como meta del pedido
+add_filter( 'woocommerce_checkout_posted_data', 'bp_lz_quitar_email_confirm_del_pedido', 20 );
+function bp_lz_quitar_email_confirm_del_pedido( $data ) {
+    unset( $data['billing_email_confirm'] );
+    return $data;
+}
