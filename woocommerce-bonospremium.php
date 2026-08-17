@@ -603,6 +603,26 @@ function agregar_estado_cambiado_wc( $estados ) {
     return $estados;
 }
 
+// ESTADO NUEVO: wc-creditado (pedido cuyos bonos se han devuelto a crédito)
+add_filter( 'wc_order_statuses', 'agregar_estado_creditado_wc' );
+function agregar_estado_creditado_wc( $estados ) {
+    $estados['wc-creditado'] = 'Recargado';
+    return $estados;
+}
+
+// Registrar el post_status para que WooCommerce acepte update_status('creditado')
+add_action( 'init', 'registrar_estado_creditado_wc' );
+function registrar_estado_creditado_wc() {
+    register_post_status( 'wc-creditado', array(
+        'label'                     => 'Recargado',
+        'public'                    => true,
+        'exclude_from_search'       => false,
+        'show_in_admin_all_list'    => true,
+        'show_in_admin_status_list' => true,
+        'label_count'               => _n_noop( 'Recargado (%s)', 'Recargados (%s)' ),
+    ) );
+}
+
 
 // CAMBIAMOS EL NOMBRE DE LOS ESTADOS DE WC A UNOS PERSONALIZADOS
 add_filter( 'wc_order_statuses', 'custom_woocommerce_order_statuses' );
@@ -1382,6 +1402,20 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
     
 			$ID_PRODUCTO = $value->productId;
 
+			// ═══ WEGOO: si el item YA tiene qrCode compuesto {orderId}_{codigoWegoo}, reutilizarlo (reenvío de email) ═══
+			$qr_ya_compuesto = trim($value->qrCode ?? '');
+			if (strpos($qr_ya_compuesto, '_') !== false && strpos($qr_ya_compuesto, (string)$ORDERID) === 0) {
+				$CODIDO_WEGOO = trim(substr($qr_ya_compuesto, strrpos($qr_ya_compuesto, '_') + 1));
+				$CODIGO_COMPUESTO = $qr_ya_compuesto;
+				$nombreImagenCompuesto = ABSPATH . 'qrProductos/qr_' . $CODIGO_COMPUESTO . '.png';
+				if (file_exists($nombreImagenCompuesto)) {
+					$imagenBase64 = "data:image/png;base64," . base64_encode(file_get_contents($nombreImagenCompuesto));
+					$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #11296b;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #11296b; padding: 0px; margin: 0px;font-family: monospace;">'.$CODIGO_COMPUESTO.'</div>';
+				} else {
+					$HTML_QR_OR_CINE = '<div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #11296b; padding: 0px; margin: 0px;font-family: monospace;">'.$CODIGO_COMPUESTO.'</div>';
+				}
+			} else {
+
 			// 1. Detectar si el ID es una variación o un producto padre
 			$post_type = $wpdb->get_var( $wpdb->prepare( 
 				"SELECT post_type FROM {$wpdb->posts} WHERE ID = %d", 
@@ -1444,11 +1478,37 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 					)
 				);
 
-				$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #11296b;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #11296b; padding: 0px; margin: 0px;font-family: monospace;">'.$CODIDO_WEGOO.'</div>';
+				// ═══ WEGOO: código compuesto orderId_codigoWegoo (Félix 07/08/2026) ═══
+				// El QR del bono codifica {pedido}_{codigoWegoo} para relacionar el canje con el pedido
+				$CODIGO_COMPUESTO = $ORDERID . '_' . $CODIDO_WEGOO;
+
+				// Actualizar el qrCode del item (relaciona pedido ↔ código wegoo)
+				if (isset($value->id)) {
+					$wpdb->update(
+						$wpdb->prefix . 'wc_pedidos_item',
+						array('qrCode' => $CODIGO_COMPUESTO),
+						array('id' => (int)$value->id)
+					);
+				}
+
+				// Regenerar el PNG del QR con el código compuesto
+				$RUTA_QR_COMP = WP_PLUGIN_DIR . '/woocommerce-bonospremium';
+				if (!class_exists('QRcode')) {
+					include $RUTA_QR_COMP . '/librerias/phpqrcode/qrlib.php';
+				}
+				$nombreImagenCompuesto = ABSPATH . 'qrProductos/qr_' . $CODIGO_COMPUESTO . '.png';
+				if (!file_exists($nombreImagenCompuesto)) {
+					QRcode::png($CODIGO_COMPUESTO, $nombreImagenCompuesto, QR_ECLEVEL_L, 10, 1, false);
+				}
+				$imagenBase64 = "data:image/png;base64," . base64_encode(file_get_contents($nombreImagenCompuesto));
+				// ═══ FIN WEGOO compuesto ═══
+
+				$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: #11296b;"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: #11296b; padding: 0px; margin: 0px;font-family: monospace;">'.$CODIGO_COMPUESTO.'</div>';
 			} else {
 				// Fallback: sin códigos disponibles para WEGOO
 				$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: ' . BP_PRIMARY_COLOR . ';"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: ' . BP_PRIMARY_COLOR . '; padding: 0px; margin: 0px;font-family: monospace;">'.$value->qrCode.'</div>';
 			}
+			} // cierre else WEGOO compuesto
 		} else {
 			// FALLBACK PARA OTROS PRODUCTOS (Esto es lo que faltaba)
 			$HTML_QR_OR_CINE = '<img src="'.$imagenBase64.'" style="width: 200px; height: auto; margin-top: 30px; padding: 0px; color: ' . BP_PRIMARY_COLOR . ';"> <div class="text-container" style="width: 100%; text-align: center; font-size: 23px;letter-spacing: 1px; color: ' . BP_PRIMARY_COLOR . '; padding: 0px; margin: 0px;font-family: monospace;">'.$value->qrCode.'</div>';
@@ -2052,6 +2112,44 @@ function ayudawp_selector_cantidades_script() {
             jQuery("#account_password").attr("placeholder", "Pon tu contraseña BonosPremium");
             // jQuery("#account_password_field").append('<i style="font-size: 12px;">Pon tu nueva contraseña bonos Premium</i>');
         </script>
+        <style>
+            .quantity-selector {
+                display: flex;
+                align-items: center;
+            }
+            .qty-minus, .qty-plus {
+                border: none;
+                background: #ddd;
+                padding: 5px 10px;
+                cursor: pointer;
+            }
+            .qty-minus:hover, .qty-plus:hover {
+                background: #bbb;
+            }
+            input.qty {
+                text-align: center;
+                width: 50px;
+                margin: 0 5px;
+            }
+            .unit-price {
+                margin-top: 5px;
+                font-size: 14px;
+                color: #666;
+            }
+            .unit-price strong {
+                color: #333;
+            }
+            input.qty[type="number"] {
+                -webkit-appearance: textfield;
+                -moz-appearance: textfield;
+                appearance: textfield;
+            }
+            
+            input.qty[type=number]::-webkit-inner-spin-button,
+            input.qty[type=number]::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+            }
+        </style>
         <?php
     }
 }
@@ -3870,6 +3968,137 @@ function bp_v2_reporte($request) {
                 break;
 
             default:
+            case 'restar_bono':
+                // Resta 1 unidad del line_item del pedido en WooCommerce (retorno de bono → crédito).
+                // Si el pedido se queda sin bonos → total 0 + estado 'wc-creditado'.
+                // ⚠️ Implementado con SQL DIRECTO (sin wc_get_order) porque el object cache de
+                // Redis devolvía el pedido obsoleto entre requests HTTP consecutivas (la 2ª
+                // llamada no veía la 1ª resta). SQL directo = determinista.
+                $order_id_restar = (int) $request->get_param('orderId');
+                $product_id_restar = (int) $request->get_param('productId');
+                $bono_id_restar = (int) $request->get_param('id');
+                if (!$order_id_restar || !$product_id_restar) {
+                    return new WP_Error('missing_data', 'orderId y productId son obligatorios.', ['status' => 400]);
+                }
+
+                $tabla_items = $wpdb->prefix . 'woocommerce_order_items';
+                $tabla_itemmeta = $wpdb->prefix . 'woocommerce_order_itemmeta';
+
+                // 1. Buscar el line_item del producto en el pedido
+                $item_row = $wpdb->get_row($wpdb->prepare(
+                    "SELECT oi.order_item_id, oi.order_item_name FROM {$tabla_items} oi
+                     WHERE oi.order_id = %d AND oi.order_item_type = 'line_item'
+                       AND EXISTS (SELECT 1 FROM {$tabla_itemmeta} im WHERE im.order_item_id = oi.order_item_id AND im.meta_key = '_product_id' AND im.meta_value = %d)
+                     ORDER BY oi.order_item_id ASC LIMIT 1",
+                    $order_id_restar, $product_id_restar
+                ));
+
+                if (!$item_row) {
+                    $response['success'] = false;
+                    $response['message'] = "No se encontró el producto #{$product_id_restar} en el pedido #{$order_id_restar}.";
+                    break;
+                }
+                $order_item_id = (int)$item_row->order_item_id;
+
+                // 2. Leer metas actuales del item
+                $metas = $wpdb->get_results($wpdb->prepare("SELECT meta_key, meta_value FROM {$tabla_itemmeta} WHERE order_item_id = %d", $order_item_id));
+                $meta_map = [];
+                foreach ($metas as $m) {
+                    $meta_map[$m->meta_key] = $m->meta_value;
+                }
+                $qty_item = (int)($meta_map['_qty'] ?? 1);
+                $subtotal_item = (float)($meta_map['_line_subtotal'] ?? 0);
+                $total_item = (float)($meta_map['_line_total'] ?? 0);
+                $subtotal_tax_item = (float)($meta_map['_line_subtotal_tax'] ?? 0);
+                $total_tax_item = (float)($meta_map['_line_total_tax'] ?? 0);
+
+                // 3. Modificar: restar 1 unidad (o eliminar el item si era el último)
+                if ($qty_item > 1) {
+                    $nuevo_qty = $qty_item - 1;
+                    $factor = $nuevo_qty / $qty_item;
+                    $wpdb->update($tabla_itemmeta, ['meta_value' => $nuevo_qty], ['order_item_id' => $order_item_id, 'meta_key' => '_qty']);
+                    $wpdb->update($tabla_itemmeta, ['meta_value' => round($subtotal_item * $factor, 2)], ['order_item_id' => $order_item_id, 'meta_key' => '_line_subtotal']);
+                    $wpdb->update($tabla_itemmeta, ['meta_value' => round($total_item * $factor, 2)], ['order_item_id' => $order_item_id, 'meta_key' => '_line_total']);
+                    $wpdb->update($tabla_itemmeta, ['meta_value' => round($subtotal_tax_item * $factor, 2)], ['order_item_id' => $order_item_id, 'meta_key' => '_line_subtotal_tax']);
+                    $wpdb->update($tabla_itemmeta, ['meta_value' => round($total_tax_item * $factor, 2)], ['order_item_id' => $order_item_id, 'meta_key' => '_line_total_tax']);
+                } else {
+                    $wpdb->delete($tabla_itemmeta, ['order_item_id' => $order_item_id]);
+                    $wpdb->delete($tabla_items, ['order_item_id' => $order_item_id]);
+                }
+
+                // 4. Recalcular totales del pedido (suma de line_items + fees + envío)
+                $nuevos = $wpdb->get_row($wpdb->prepare(
+                    "SELECT COALESCE(SUM(CASE WHEN im2.meta_key='_line_subtotal' THEN CAST(im2.meta_value AS DECIMAL(10,2)) END),0) AS subtotal,
+                            COALESCE(SUM(CASE WHEN im2.meta_key='_line_total' THEN CAST(im2.meta_value AS DECIMAL(10,2)) END),0) AS total,
+                            COALESCE(SUM(CASE WHEN im2.meta_key='_line_total_tax' THEN CAST(im2.meta_value AS DECIMAL(10,2)) END),0) AS tax
+                     FROM {$tabla_items} oi2
+                     JOIN {$tabla_itemmeta} im2 ON im2.order_item_id = oi2.order_item_id
+                     WHERE oi2.order_id = %d AND oi2.order_item_type = 'line_item'",
+                    $order_id_restar
+                ));
+                $nuevo_subtotal = (float)($nuevos->subtotal ?? 0);
+                $nuevo_total_items = (float)($nuevos->total ?? 0);
+                $nuevo_tax_items = (float)($nuevos->tax ?? 0);
+
+                // Fees (type 'fee') también suman al total
+                $fees_row = $wpdb->get_row($wpdb->prepare(
+                    "SELECT COALESCE(SUM(CAST(im3.meta_value AS DECIMAL(10,2))),0) AS total
+                     FROM {$tabla_items} oi3 JOIN {$tabla_itemmeta} im3 ON im3.order_item_id = oi3.order_item_id AND im3.meta_key = '_line_total'
+                     WHERE oi3.order_id = %d AND oi3.order_item_type = 'fee'",
+                    $order_id_restar
+                ));
+                $total_fees = (float)($fees_row->total ?? 0);
+
+                // Envío e impuestos del pedido (postmeta)
+                $pm = [];
+                $pedido_metas = $wpdb->get_results($wpdb->prepare(
+                    "SELECT meta_key, meta_value FROM {$wpdb->prefix}postmeta WHERE post_id = %d AND meta_key IN ('_order_shipping','_order_shipping_tax','_order_tax','_order_total')",
+                    $order_id_restar
+                ));
+                foreach ($pedido_metas as $m) {
+                    $pm[$m->meta_key] = (float)$m->meta_value;
+                }
+                $shipping = $pm['_order_shipping'] ?? 0;
+                $shipping_tax = $pm['_order_shipping_tax'] ?? 0;
+
+                $nuevo_total = round($nuevo_total_items + $total_fees + $shipping, 2);
+                $nuevo_tax = round($nuevo_tax_items + $shipping_tax, 2);
+
+                $wpdb->update($wpdb->prefix . 'postmeta', ['meta_value' => $nuevo_total], ['post_id' => $order_id_restar, 'meta_key' => '_order_total']);
+                $wpdb->update($wpdb->prefix . 'postmeta', ['meta_value' => $nuevo_subtotal], ['post_id' => $order_id_restar, 'meta_key' => '_order_subtotal']);
+                $wpdb->update($wpdb->prefix . 'postmeta', ['meta_value' => $nuevo_tax], ['post_id' => $order_id_restar, 'meta_key' => '_order_tax']);
+
+                // 5. ¿Quedan bonos? (suma de _qty de los line_items restantes)
+                $bonos_restantes = (int)$wpdb->get_var($wpdb->prepare(
+                    "SELECT COALESCE(SUM(CASE WHEN im4.meta_key='_qty' THEN CAST(im4.meta_value AS UNSIGNED) END),0)
+                     FROM {$tabla_items} oi4 JOIN {$tabla_itemmeta} im4 ON im4.order_item_id = oi4.order_item_id
+                     WHERE oi4.order_id = %d AND oi4.order_item_type = 'line_item'",
+                    $order_id_restar
+                ));
+
+                $pedido_creditado = false;
+                if ($bonos_restantes <= 0) {
+                    // Ya no quedan bonos → total 0 + estado wc-creditado
+                    $wpdb->update($wpdb->prefix . 'posts', ['post_status' => 'wc-creditado'], ['ID' => $order_id_restar, 'post_type' => 'shop_order']);
+                    $wpdb->update($wpdb->prefix . 'postmeta', ['meta_value' => 0], ['post_id' => $order_id_restar, 'meta_key' => '_order_total']);
+                    $pedido_creditado = true;
+                }
+
+                // 6. Limpiar cache del pedido (para que el front/admin lo vean actualizado)
+                wc_delete_shop_order_transients($order_id_restar);
+                wp_cache_delete($order_id_restar, 'orders');
+                if (class_exists('WC_Cache_Helper')) {
+                    WC_Cache_Helper::invalidate_cache_group('orders');
+                }
+
+                $response['success'] = true;
+                $response['message'] = "Bono restado del pedido #{$order_id_restar}" . ($pedido_creditado ? ' — pedido marcado como Recargado (wc-creditado)' : " — quedan {$bonos_restantes} bonos");
+                $response['item'] = $item_row->order_item_name;
+                $response['bonos_restantes'] = $bonos_restantes;
+                $response['pedido_creditado'] = $pedido_creditado;
+                $response['estado_pedido'] = $pedido_creditado ? 'creditado' : 'processing';
+                break;
+
                 return new WP_Error('invalid_action', 'Acción no válida: ' . $action, array('status' => 400));
         }
     } catch (Exception $e) {
@@ -4551,7 +4780,7 @@ function bp_abogados_form_checkout( $checkout ) {
     }
     if ( empty( $bloques ) ) return;
     ?>
-    <div class="bp-abogados-checkout-box" style="background:#ffffff;border:2px solid #009cdc;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,156,220,0.12);">
+    <div class="bp-abogados-checkout-box" style="margin-top:28px;background:#ffffff;border:2px solid #009cdc;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,156,220,0.12);">
         <div style="background:#009cdc;padding:14px 18px;display:flex;align-items:center;gap:12px;">
             <span style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
