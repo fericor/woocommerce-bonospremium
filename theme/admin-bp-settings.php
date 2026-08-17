@@ -100,6 +100,48 @@ function bp_save_settings_handler() {
     exit;
 }
 
+/* ─────────── Enviar email de prueba ─────────── */
+
+add_action('admin_post_bp_test_email', 'bp_send_test_email_handler');
+function bp_send_test_email_handler() {
+    if (!current_user_can('manage_options')) wp_die('Sin permisos');
+    check_admin_referer('bp_test_email_nonce');
+
+    $to = isset($_POST['bp_test_to']) ? sanitize_email($_POST['bp_test_to']) : '';
+    $result = 'error';
+    $msg = '';
+
+    if (!is_email($to)) {
+        $msg = 'Email de destino no válido.';
+    } else {
+        $subject = '🔔 Email de prueba - BonosPremium';
+        $body = "Este es un email de prueba enviado desde el panel BonosPremium.\n\n";
+        $body .= "Si estás leyendo esto, la configuración SMTP funciona correctamente.\n";
+        $body .= 'Fecha: ' . date('d/m/Y H:i:s') . "\n";
+        $body .= 'Transporte: ' . (defined('BP_BREVO_USER') && BP_BREVO_USER ? 'SMTP Brevo' : 'mail() del sistema') . "\n";
+
+        $sent = wp_mail($to, $subject, $body);
+
+        // Capturar errores SMTP si los hay
+        global $phpmailer;
+        $smtp_err = '';
+        if ($phpmailer && is_a($phpmailer, 'PHPMailer\PHPMailer\PHPMailer')) {
+            $smtp_err = $phpmailer->ErrorInfo;
+        }
+
+        if ($sent) {
+            $result = 'success';
+            $msg = 'Email de prueba enviado a ' . $to . '. Revisa la bandeja de entrada (y spam).';
+        } else {
+            $msg = 'El email NO se pudo enviar. Error: ' . ($smtp_err ? $smtp_err : 'desconocido (revisa las credenciales SMTP)');
+        }
+    }
+
+    $back = wp_get_referer() ?: admin_url('admin.php?page=bp-settings');
+    wp_safe_redirect(add_query_arg(array('bp_test' => $result, 'bp_test_msg' => urlencode($msg)), $back));
+    exit;
+}
+
 /* ─────────── Menú y página (tabs) ─────────── */
 
 add_action('admin_menu', function () {
@@ -125,13 +167,22 @@ function bp_settings_page() {
             <div class="notice notice-success is-dismissible"><p><strong>✅ Ajustes guardados.</strong></p></div>
         <?php endif; ?>
 
+        <?php
+        // Aviso del resultado del email de prueba
+        if (isset($_GET['bp_test'])) {
+            $bp_test_msg = isset($_GET['bp_test_msg']) ? wp_unslash($_GET['bp_test_msg']) : '';
+            $bp_test_cls = ($_GET['bp_test'] === 'success') ? 'notice-success' : 'notice-error';
+            echo '<div class="notice ' . $bp_test_cls . ' is-dismissible"><p>' . esc_html($bp_test_msg) . '</p></div>';
+        }
+        ?>
+
         <h2 class="nav-tab-wrapper" style="margin-top:12px;">
             <a href="javascript:void(0)" class="nav-tab nav-tab-active" data-tab="tab-colores">🎨 Colores</a>
             <a href="javascript:void(0)" class="nav-tab" data-tab="tab-smtp">✉️ SMTP Brevo</a>
             <a href="javascript:void(0)" class="nav-tab" data-tab="tab-formularios">📨 Formularios</a>
         </h2>
 
-        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="bp-settings-form">
             <input type="hidden" name="action" value="bp_save_settings" />
             <?php wp_nonce_field('bp_settings_nonce'); ?>
 
@@ -227,6 +278,14 @@ function bp_settings_page() {
                         <th scope="row"><label for="smtp-from-name">Nombre del remitente</label></th>
                         <td><input type="text" id="smtp-from-name" name="bp[smtp_from_name]" value="<?php echo esc_attr($s['smtp_from_name']); ?>" class="regular-text" /></td>
                     </tr>
+                    <tr>
+                        <th scope="row"><label for="bp-test-to">📨 Email de prueba</label></th>
+                        <td>
+                            <input type="email" id="bp-test-to" name="bp_test_to" value="<?php echo esc_attr(wp_get_current_user()->user_email); ?>" class="regular-text" placeholder="email@destino.com" />
+                            <button type="submit" name="bp_send_test" class="button" style="margin-left:6px;">🚀 Enviar prueba</button>
+                            <p class="description">Guarda los ajustes primero y luego pulsa <strong>Enviar prueba</strong> para comprobar que el SMTP funciona. Llegará un email con el resultado.</p>
+                        </td>
+                    </tr>
                 </table>
             </div>
 
@@ -288,6 +347,15 @@ function bp_settings_page() {
                 var v = $text.val().trim();
                 if (/^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{6}$/.test(v)) $color.val(v);
             });
+        });
+
+        // Botón "Enviar prueba": cambia el action del form al handler de prueba
+        $('#bp-send-test').on('click', function(e) {
+            e.preventDefault();
+            var $form = $('#bp-settings-form');
+            $form.find('input[name="action"]').val('bp_test_email');
+            $form.find('#_wpnonce').val('<?php echo wp_create_nonce('bp_test_email_nonce'); ?>');
+            $form.submit();
         });
     })(jQuery);
     </script>
