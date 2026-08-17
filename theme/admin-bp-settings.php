@@ -277,6 +277,18 @@ function bp_settings_page() {
             $('.bp-tab').hide();
             $('#' + $(this).data('tab')).show();
         });
+
+        // Sincronizar picker de color <-> campo texto (mismo name, se envía el texto)
+        $('input[type="color"]').each(function() {
+            var $color = $(this);
+            var $text = $color.next('input[type="text"]');
+            if (!$text.length) return;
+            $color.on('input change', function() { $text.val($color.val()); });
+            $text.on('input change', function() {
+                var v = $text.val().trim();
+                if (/^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{6}$/.test(v)) $color.val(v);
+            });
+        });
     })(jQuery);
     </script>
     <?php
