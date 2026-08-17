@@ -3,8 +3,43 @@
  * BonosPremium Lanzarote - Theme Functions
  */
 
+// Panel de ajustes de la tienda (colores, SMTP Brevo, emails de formularios)
+require_once get_template_directory() . '/admin-bp-settings.php';
+
 // Definir versión del tema
-define('BP_LZ_VERSION', '1.2.2');
+define('BP_LZ_VERSION', '1.2.3');
+
+// Colores personalizados desde el panel (solo si hay cambios)
+add_action('wp_head', function () {
+    $s = bp_get_settings();
+    $vars = array();
+
+    $primary = trim($s['primary_color'] ?? '');
+    if ($primary && $primary !== '#039CDC') {
+        $vars['--bp-primary']       = $primary;
+        $vars['--bp-primary-dark']  = bp_adjust_brightness($primary, -0.14);
+        $vars['--bp-primary-light'] = bp_adjust_brightness($primary, 0.14);
+        $vars['--bp-primary-rgb']   = bp_hex_to_rgb($primary);
+    }
+
+    $header_bg = trim($s['header_bg'] ?? '');
+    if ($header_bg) {
+        $vars['--bp-header-bg'] = $header_bg;
+    } elseif ($primary && $primary !== '#039CDC') {
+        $vars['--bp-header-bg'] = 'linear-gradient(135deg, ' . $primary . ', ' . bp_adjust_brightness($primary, -0.14) . ')';
+    }
+    if (trim($s['header_bg_mobile'] ?? '')) $vars['--bp-header-bg-mobile'] = trim($s['header_bg_mobile']);
+    if (trim($s['footer_bg'] ?? ''))         $vars['--bp-footer-bg']       = trim($s['footer_bg']);
+    if (trim($s['page_bg'] ?? ''))           $vars['--bp-bg']              = trim($s['page_bg']);
+    if (trim($s['text_color'] ?? ''))        $vars['--bp-text']            = trim($s['text_color']);
+    if (trim($s['button_bg'] ?? ''))         $vars['--bp-button-bg']       = trim($s['button_bg']);
+    if (trim($s['button_hover'] ?? ''))      $vars['--bp-button-hover']    = trim($s['button_hover']);
+    if (trim($s['sale_color'] ?? ''))        $vars['--bp-sale-color']      = trim($s['sale_color']);
+
+    if (empty($vars)) return;
+    $css = ':root{' . implode('', array_map(function ($k, $v) { return $k . ':' . $v . ';'; }, array_keys($vars), $vars)) . '}';
+    echo "\n<style id=\"bp-theme-custom-colors\">" . $css . "</style>\n";
+}, 99);
 
 // Preconnect a los CDN de terceros (reduce latencia de DNS/TLS — Félix 10/08)
 add_action('wp_head', function() {
@@ -523,16 +558,16 @@ if (!defined('BP_FORM_OFERTAS_TO'))   define('BP_FORM_OFERTAS_TO', 'info@bonospr
 
 $bp_forms_config = [
     'contacto' => [
-        'to'      => apply_filters('bp_form_contacto_to', BP_FORM_CONTACTO_TO),
-        'subject' => '📩 Nuevo mensaje de contacto - BonosPremium',
+        'to'      => bp_get_setting('form_contacto_to', apply_filters('bp_form_contacto_to', BP_FORM_CONTACTO_TO)),
+        'subject' => bp_get_setting('form_contacto_subject', '📩 Nuevo mensaje de contacto - BonosPremium'),
     ],
     'promociona' => [
-        'to'      => apply_filters('bp_form_promociona_to', BP_FORM_PROMOCIONA_TO),
-        'subject' => '🏪 Promociona tu negocio - BonosPremium',
+        'to'      => bp_get_setting('form_promociona_to', apply_filters('bp_form_promociona_to', BP_FORM_PROMOCIONA_TO)),
+        'subject' => bp_get_setting('form_promociona_subject', '🏪 Promociona tu negocio - BonosPremium'),
     ],
     'ofertas' => [
-        'to'      => apply_filters('bp_form_ofertas_to', BP_FORM_OFERTAS_TO),
-        'subject' => '🎁 Solicitud de recibir ofertas - BonosPremium',
+        'to'      => bp_get_setting('form_ofertas_to', apply_filters('bp_form_ofertas_to', BP_FORM_OFERTAS_TO)),
+        'subject' => bp_get_setting('form_ofertas_subject', '🎁 Solicitud de recibir ofertas - BonosPremium'),
     ],
 ];
 // Filtro para sobreescribir todos los destinos desde child theme / snippet
@@ -679,17 +714,20 @@ function bp_verify_recaptcha() {
 }
 
 // Configurar PHPMailer para SMTP Brevo (solo si hay credenciales definidas)
+// Las credenciales se pueden configurar en el panel BonosPremium > Ajustes (admin) o en wp-config.php
 add_action('phpmailer_init', function($phpmailer) {
-    if (empty(BP_BREVO_USER) || empty(BP_BREVO_PASS)) return; // credenciales aún no configuradas
+    $smtp_user = bp_get_setting('smtp_user', BP_BREVO_USER);
+    $smtp_pass = bp_get_setting('smtp_pass', BP_BREVO_PASS);
+    if (empty($smtp_user) || empty($smtp_pass)) return; // credenciales aún no configuradas
     $phpmailer->isSMTP();
-    $phpmailer->Host       = BP_BREVO_HOST;
-    $phpmailer->Port       = BP_BREVO_PORT;
+    $phpmailer->Host       = bp_get_setting('smtp_host', BP_BREVO_HOST);
+    $phpmailer->Port       = (int) bp_get_setting('smtp_port', BP_BREVO_PORT);
     $phpmailer->SMTPAuth   = true;
-    $phpmailer->Username   = BP_BREVO_USER;
-    $phpmailer->Password   = BP_BREVO_PASS;
+    $phpmailer->Username   = $smtp_user;
+    $phpmailer->Password   = $smtp_pass;
     $phpmailer->SMTPSecure = 'tls';
-    $phpmailer->From       = BP_BREVO_FROM;
-    $phpmailer->FromName   = 'BonosPremium';
+    $phpmailer->From       = bp_get_setting('smtp_from', BP_BREVO_FROM);
+    $phpmailer->FromName   = bp_get_setting('smtp_from_name', 'BonosPremium');
 });
 
 // Procesar envíos de formularios
