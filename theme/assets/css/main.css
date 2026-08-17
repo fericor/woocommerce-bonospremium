@@ -19,7 +19,7 @@
     --bp-text-black: #000;
     --bp-text-light: #555;
     --bp-text-muted: #999;
-    --bp-bg: #f8f9fa;
+    --bp-bg: #ffffff; /*#f8f9fa;*/
     --bp-card-bg: #fff;
     --bp-border: #f0f0f0;
     --bp-wishlist-color: #e74c3c;
@@ -43,8 +43,28 @@ body {
     /* FIX Félix 11/08: sin margen por defecto del navegador (espacio blanco arriba) */
     margin: 0;
 }
-a { color: var(--bp-primary); text-decoration: none; transition: color .2s; }
-a:hover { color: var(--bp-primary-dark); }
+/* TU CÓDIGO ACTUAL */
+a {
+    color: var(--bp-primary);
+    text-decoration: none;
+    transition: color .2s;
+    /* AÑADIMOS ESTO PARA EL DESTELLO TÁCTIL */
+    -webkit-tap-highlight-color: transparent;
+}
+
+a:hover {
+    color: var(--bp-primary-dark);
+    background: none;
+}
+
+/* NUEVO CÓDIGO PARA ELIMINAR EL RECUADRO EN MÓVIL */
+a:focus,
+a:active,
+a:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
 img { max-width: 100%; height: auto; }
 ul { list-style: none; }
 li { list-style: none; }
@@ -74,7 +94,7 @@ p { margin-bottom: 1rem;     text-align: justify; }
 
 /* Logo */
 .bp-logo a { display: flex; align-items: center; gap: 8px; }
-.bp-logo img { max-height: 65px; width: auto; }
+.bp-logo img { max-height: 55px; width: auto; }
 .bp-logo-text {
     font-size: 1.4rem;
     font-weight: 800;
@@ -125,8 +145,8 @@ p { margin-bottom: 1rem;     text-align: justify; }
 
 /* Header actions */
 .bp-header-right { display: flex; align-items: center; gap: 8px; }
-.bp-header-action { background: transparent; border: none; color: rgba(255,255,255,.85); font-size: 1.1rem; padding: 6px; transition: color .2s; position: relative; cursor: pointer; }
-.bp-header-action:hover { color: #fff; }
+.bp-header-action { background: transparent; border: none; color: rgba(255,255,255,.85); font-size: 1.1rem; padding: 6px; transition: color .2s;* position: relative; cursor: pointer; }
+.bp-header-action:hover { color: #fff; background: none; }
 .bp-cart-count {
     position: absolute;
     top: -4px;
@@ -201,21 +221,19 @@ p { margin-bottom: 1rem;     text-align: justify; }
 .bp-nav-menu li { flex-shrink: 0; }
 .bp-nav-menu a {
     display: block;
-    /* FIX Félix 11/08: barra 20% más fina (padding vertical 12px -> 9px) */
-    padding: 9px 18px;
+    padding: 12px 18px;
     color: var(--bp-text-primary);
     /* FIX Félix 11/08: tamaño 16px -> 18px (2px más) */
-    font-size: 18px;
+    font-size: 13px;
     font-weight: 500;
     letter-spacing: .5px;
     transition: all .2s;
     white-space: nowrap;
 }
-/* FIX Félix 11/08: al pinchar NO rectángulo transparente, solo texto azul */
 .bp-nav-menu a:hover,
 .bp-nav-menu .current-menu-item a {
     color: var(--bp-primary);
-    background: none;
+    /*background: rgba(3,156,220,.05);*/
 }
 
 /* === PRODUCT GRID === */
@@ -266,32 +284,16 @@ p { margin-bottom: 1rem;     text-align: justify; }
     background: #005a8c;
     color: #fff;
 }
+/* Page */
+.bp-contact-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 0px !important;
+}
 
 /* Page title */
-.bp-page-title,
-.page-title,
-.woocommerce-products-header h1,
-.bp-shop-title {
-    font-size: 1.4rem !important;
-    font-weight: 700 !important;
-    color: #222 !important;
-    margin-bottom: 25px !important;
-    padding-bottom: 12px !important;
-    border-bottom: 3px solid var(--bp-primary) !important;
-    position: relative;
-}
-.bp-page-title::after,
-.page-title::after,
-.woocommerce-products-header h1::after,
-.bp-shop-title::after {
-    content: '';
-    position: absolute;
-    bottom: -3px;
-    left: 0;
-    width: 50px;
-    height: 3px;
-    background: var(--bp-primary-dark);
-}
+.bp-page-title { color: var(--bp-primary); }
 
 /* Products grid */
 .bp-products-grid {
@@ -313,7 +315,7 @@ p { margin-bottom: 1rem;     text-align: justify; }
     border-radius: 0;
     overflow: hidden;
     transition: all .3s cubic-bezier(.4,0,.2,1);
-    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    /*box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);*/
     border: none;
     width: 100%;
     margin: 5px;
@@ -340,7 +342,7 @@ p { margin-bottom: 1rem;     text-align: justify; }
 
 /* Product name (under establishment) */
 .bp-product-name {
-    font-size: .9rem;
+    font-size: 15px;
     font-weight: 400;
     color: var(--bp-text-black);
     line-height: 1.3;
@@ -350,22 +352,17 @@ p { margin-bottom: 1rem;     text-align: justify; }
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    /* FIX Félix 11/08: descripción pegada a la izquierda */
-    text-align: left;
-    padding-left: 0;
 }
 .bp-product-card:hover {
-    box-shadow: 0 8px 25px rgba(0,0,0,.1);
-    transform: translateY(-3px);
+    /*box-shadow: 0 8px 25px rgba(0,0,0,.1);
+    transform: translateY(-3px);*/
 }
 
 /* Product image */
 .bp-product-image-wrap {
     position: relative;
     overflow: hidden;
-    /* FIX Félix 11/08: foto en formato 4:3 */
-    aspect-ratio: 4 / 3;
-    height: auto;
+    height: 195px;
     background: #f5f5f5;
     width: 100%;
     border-radius: 0;
@@ -408,9 +405,6 @@ p { margin-bottom: 1rem;     text-align: justify; }
     font-weight: 600;
     line-height: 1.4;
     margin-bottom: 10px;
-    /* FIX Félix 11/08: título pegado a la izquierda */
-    text-align: left;
-    padding-left: 0;
 }
 .bp-product-title a {
     color: #222;
@@ -418,6 +412,7 @@ p { margin-bottom: 1rem;     text-align: justify; }
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+	text-transform: uppercase;
 }
 .bp-product-title a:hover { color: var(--bp-primary); }
 
@@ -441,43 +436,33 @@ p { margin-bottom: 1rem;     text-align: justify; }
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
-    /* FIX Félix 11/08: precio pegado a la izquierda */
-    justify-content: flex-start;
 }
 .bp-price-original {
-    font-size: .95rem;
+    font-size: 18px;
     color: #999;
     text-decoration: line-through;
-    /* FIX Félix 11/08: bajado 2px para quedar en línea con la ubicación */
-    transform: translateY(2px);
 }
 .bp-price-sale {
-    font-size: 1.55rem;
-    /* FIX Félix 11/08: sin negrita */
-    font-weight: 400;
+    font-size: 25px;
     color: var(--bp-primary);
-    /* FIX Félix 11/08: bajado 1px para quedar en línea con la ubicación */
-    transform: translateY(1px);
 }
 
 /* Product bottom row: price left, city right */
 .bp-product-bottom {
     display: flex;
-    align-items: flex-end;
     justify-content: space-between;
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 10px;
 }
 .bp-product-city {
-    font-size: .75rem;
+    font-size: 15px;
     color: var(--bp-text-black);
     white-space: nowrap;
     display: flex;
     align-items: center;
     gap: 3px;
 }
-/* FIX Félix 11/08: quitar el icono azul de ubicación (solo texto) */
-.bp-product-city i { display: none; }
+.bp-product-city i { font-size: .7rem; color: var(--bp-primary); }
 
 /* === SINGLE PRODUCT === */
 .bp-single-product {
@@ -579,10 +564,8 @@ p { margin-bottom: 1rem;     text-align: justify; }
     padding: 15px 0;
     text-align: center;
 }
-.bp-single-price .bp-price-original { font-size: 1rem; }
+.bp-single-price .bp-price-original { font-size: 18px; }
 .bp-single-price .bp-price-sale {
-    font-size: 2rem;
-    font-weight: 700;
     color: var(--bp-primary);
 }
 .bp-single-cart { margin-bottom: 25px; }
@@ -666,12 +649,6 @@ p { margin-bottom: 1rem;     text-align: justify; }
     overflow: hidden;
 }
 
-/* === CART / CHECKOUT === */
-.bp-checkout-page .bp-container {
-    padding-top: 0;
-    padding-bottom: 0;
-}
-
 /* Checkout en grid: 2 columnas en desktop */
 .bp-checkout-page .bp-checkout-grid {
     display: grid;
@@ -683,10 +660,6 @@ p { margin-bottom: 1rem;     text-align: justify; }
     display: flex;
     flex-direction: column;
     gap: 16px;
-}
-
-.bp-page-title {
-    display: none;
 }
 
 /* Checkout - flujo vertical app */
@@ -704,9 +677,9 @@ p { margin-bottom: 1rem;     text-align: justify; }
 /* Formularios custom (contacto, promociona, ofertas) */
 .bp-form {
     background: #fff;
-    padding: 30px;
+    padding: 15px;
     box-shadow: 0 1px 3px rgba(0,0,0,.06);
-    border: 1px solid #f0f0f0;
+    border: 0px solid #f0f0f0;
 }
 .bp-form-row {
     margin-bottom: 15px;
@@ -727,11 +700,12 @@ p { margin-bottom: 1rem;     text-align: justify; }
 .bp-form-row textarea,
 .bp-form-row select {
     width: 100%;
-    padding: 14px 16px;
-    border: 2px solid #e0e0e0;
-    font-size: .95rem;
-    background: #fff;
-    transition: border-color .2s;
+    padding: 8px 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 0px;
+    font-size: 1rem;
+    background: #fafbfc;
+    transition: all .2s;
     box-sizing: border-box;
     font-family: inherit;
 }
@@ -785,14 +759,12 @@ p { margin-bottom: 1rem;     text-align: justify; }
     background: #fff;
     border-radius: 0;
     padding: 20px 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    border: 1px solid #f0f0f0;
 }
 .bp-checkout-section h3 {
     font-size: .85rem;
     font-weight: 700;
     color: var(--bp-primary);
-    margin-bottom: 15px;
+    margin-bottom: 0px;
     padding-bottom: 0;
     border-bottom: none;
     text-transform: uppercase;
@@ -903,7 +875,7 @@ p { margin-bottom: 1rem;     text-align: justify; }
     padding: 14px 16px;
     background: #fff;
     border-radius: 0;
-    border: 1.5px solid #e8e8e8;
+    border: 0px solid #e8e8e8;
     transition: all .2s;
 }
 .wc_payment_method:hover {
@@ -932,7 +904,6 @@ p { margin-bottom: 1rem;     text-align: justify; }
 .bp-place-order,
 #place_order,
 .checkout-button {
-    width: calc(100% - 32px) !important;
     margin: 16px auto !important;
     display: block !important;
     background: var(--bp-primary) !important;
@@ -940,8 +911,7 @@ p { margin-bottom: 1rem;     text-align: justify; }
     border: none !important;
     padding: 16px !important;
     border-radius: 0;
-    font-size: 1.05rem !important;
-    font-weight: 700 !important;
+    font-weight: 900 !important;
     cursor: pointer;
     transition: all .2s;
     box-shadow: 0 4px 12px rgba(var(--bp-primary-rgb), .3);
@@ -985,7 +955,7 @@ p { margin-bottom: 1rem;     text-align: justify; }
     background: #ffffff !important;
 }
 #add_payment_method #payment, .woocommerce-cart #payment, .woocommerce-checkout #payment { background: transparent !important; }
-ul.wc_payment_methods.payment_methods.methods { padding: 0 !important;}
+ul.wc_payment_methods.payment_methods.methods { padding: 0 !important; border: 0px !important; }
 
 /* Login form - app style (SOLO el del checkout/carrito: oculto hasta abrir) */
 form.woocommerce-form-login {
@@ -1040,7 +1010,7 @@ form.woocommerce-form-login.bp-login-open {
         border-left: none;
         border-top: 1px solid #f0f0f0;
         padding-left: 0 !important;
-        padding-top: 22px;
+        padding-top: 22px !important;
     }
 }
 .woocommerce-form-login p { font-size: .8rem; color: #888; text-align: center; margin-bottom: 12px; }
@@ -1060,7 +1030,7 @@ form.woocommerce-form-login.bp-login-open {
     outline: none;
 }
 .woocommerce-form-login .button {
-    width: 100%;
+    /*width: 100%;
     background: var(--bp-primary) !important;
     color: #fff !important;
     border: none !important;
@@ -1069,7 +1039,7 @@ form.woocommerce-form-login.bp-login-open {
     font-weight: 700 !important;
     font-size: .95rem !important;
     cursor: pointer;
-    transition: background .2s;
+    transition: background .2s;*/
 }
 .woocommerce-form-login .button:hover {
     background: var(--bp-primary-dark) !important;
@@ -1220,6 +1190,11 @@ form.woocommerce-form-login.bp-login-open {
     letter-spacing: .3px;
 }
 
+.woocommerce table.shop_table {
+    border: 1px solid color-mix(in srgb, currentColor 20%, transparent) !important;
+    border-radius: 0px !important;
+}
+
 /* Create account */
 /* Shipping fields */
 .woocommerce-shipping-fields { margin-top: 0; }
@@ -1245,8 +1220,20 @@ form.woocommerce-form-login.bp-login-open {
 /* Quantity buttons - primary color */
 .woocommerce table.shop_table td {
     text-align: right !important;
+	align-content: flex-start;
 }
-input.qty { margin: 0px !important; }
+input.qty {
+    border-top: 1px solid var(--bp-primary);
+    border-bottom: 1px solid var(--bp-primary);
+    border-left: 0;
+    border-radius: 0;
+    height: 30px;
+}
+.quantity-selector {
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
 .qty-minus, .qty-plus {
     border: none !important;
     background: var(--bp-primary) !important;
@@ -1281,13 +1268,14 @@ input.qty { margin: 0px !important; }
 .woocommerce form .form-row { padding: 0; margin: 0 0 12px; }
 .woocommerce form .form-row .input-text, 
 .woocommerce form .form-row select {
-    border: 1.5px solid #e0e0e0;
-    border-radius: 0;
-    padding: 12px 14px;
+    padding: 8px 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 0px;
     font-size: 1rem;
-    background: #fff;
-    font-family: inherit;
+    background: #fafbfc;
     transition: all .2s;
+    box-sizing: border-box;
+    font-family: inherit;
 }
 .woocommerce form .form-row .input-text:focus,
 .woocommerce form .form-row select:focus {
@@ -1297,8 +1285,7 @@ input.qty { margin: 0px !important; }
 }
 
 @media (max-width: 480px) {
-    .bp-checkout-page .bp-container { padding: 0 16px; }
-    .bp-checkout-section { padding: 16px 14px; }
+    .bp-checkout-section { padding: 0px; }
     .bp-checkout-card { padding: 16px 14px; }
 }
 
@@ -1321,16 +1308,6 @@ input.qty { margin: 0px !important; }
 }
 .bp-btn-primary:hover { background: var(--bp-primary-dark); color: #fff; }
 
-
-/* === MY ACCOUNT - APP STYLE v2 === */
-/* En desktop/tablet grande: ancho amplio y contenido en grid; en móvil: compacto (app) */
-.bp-account-page .bp-container {
-    padding: 0 20px;
-}
-.bp-account-app {
-    min-height: 100vh;
-}
-
 /* Grid del Mi Cuenta (logueado): menú + contenido en 2 columnas (solo no-móvil) */
 .bp-account-page .bp-account-layout {
     display: block;
@@ -1342,11 +1319,7 @@ input.qty { margin: 0px !important; }
         gap: 24px;
         align-items: start;
     }
-    .bp-account-page .bp-prof-menu {
-        padding: 20px 0;
-    }
     .bp-account-page .bp-prof-content {
-        padding: 20px 0;
         border-left: 1px solid #eee;
         padding-left: 24px;
     }
@@ -1372,10 +1345,6 @@ input.qty { margin: 0px !important; }
 .bp-auth-app .woocommerce > p:first-of-type,
 .bp-auth-app .bp-auth-content > p:first-of-type {
     display: none;
-}
-.bp-auth-app {
-    margin: 0 auto;
-    padding: 0 16px 40px;
 }
 /* Cabecera hero azul con gradiente: ELIMINADO visualmente (Félix 11/08) —
    la página Mi cuenta queda limpia: solo el formulario, sin texto ni logo.
@@ -1424,11 +1393,8 @@ input.qty { margin: 0px !important; }
 }
 /* Contenido: formularios nativos de WooCommerce (login/registro) */
 .bp-auth-content {
-    background: #fff;
-    border: 1px solid #f0f0f0;
-    border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0,0,0,.07);
-    padding: 28px 24px;
+    border-radius: 0px;
+    padding: 0px 24px;
 }
 .bp-auth-content .woocommerce h2 {
     font-size: 1.15rem;
@@ -1468,9 +1434,9 @@ input.qty { margin: 0px !important; }
 .bp-auth-content .form-row input[type="email"],
 .bp-auth-content .form-row input[type="password"] {
     width: 100%;
-    padding: 14px 16px;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 12px;
+    padding: 8px 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 0px;
     font-size: 1rem;
     background: #fafbfc;
     transition: all .2s;
@@ -1485,16 +1451,15 @@ input.qty { margin: 0px !important; }
 }
 .bp-auth-content .button {
     width: 100%;
-    background: linear-gradient(135deg, var(--bp-primary) 0%, var(--bp-primary-dark) 100%) !important;
+    background: var(--bp-primary) /* linear-gradient(135deg, var(--bp-primary) 0%, var(--bp-primary-dark) 100%)*/ !important;
     color: #fff !important;
     border: none !important;
     padding: 15px !important;
-    border-radius: 12px !important;
     font-weight: 800 !important;
     font-size: 1rem !important;
     letter-spacing: .3px;
     transition: all .2s;
-    box-shadow: 0 4px 14px rgba(var(--bp-primary-rgb), .28);
+    /*box-shadow: 0 4px 14px rgba(var(--bp-primary-rgb), .28);*/
 }
 .bp-auth-content .button:hover {
     transform: translateY(-1px);
@@ -1516,7 +1481,6 @@ input.qty { margin: 0px !important; }
 .bp-auth-content .woocommerce-LostPassword a {
     font-size: .8rem;
     color: var(--bp-primary);
-    font-weight: 600;
 }
 .bp-auth-content .woocommerce-form-login .rememberme {
     font-size: .85rem;
@@ -1534,10 +1498,6 @@ input.qty { margin: 0px !important; }
 
 /* ===== AUTH RESPONSIVE ===== */
 @media (max-width: 768px) {
-    .bp-auth-app {
-        max-width: 100%;
-        padding: 0 0 36px;
-    }
     .bp-auth-hero {
         border-radius: 0 0 24px 24px;
         padding: 30px 20px 20px;
@@ -1552,30 +1512,17 @@ input.qty { margin: 0px !important; }
     .bp-auth-hero h1 {
         font-size: 1.3rem;
     }
-    .bp-auth-content {
-        border-radius: 18px;
-        padding: 24px 18px;
-        margin: 0 14px;
-    }
     .bp-auth-brand {
         padding: 22px 16px 18px;
-    }
-    .bp-checkout-extra {
-        margin-top: 18px;
     }
 	
 	.container, .bp-container {
 		margin: 0;
-		padding: 0;
+		padding: 0 18px;
 	}
-    /* En móvil el Mi Cuenta vuelve al ancho compacto app en flujo vertical */
-    .bp-account-page .bp-container { max-width: 480px; padding: 0; }
     .bp-account-page .bp-account-layout { display: block; }
     .bp-account-page .bp-prof-content { border-left: none; padding-left: 0; }
-    .bp-prof-content { padding: 0 16px 30px; }
-    .bp-auth-app { padding: 0 16px 40px; }
     /* Checkout: vuelve a 1 columna compacta app en móvil */
-    .bp-checkout-page .bp-container { max-width: 480px; }
     .bp-checkout-page .bp-checkout-grid { grid-template-columns: 1fr; gap: 0; }
     .bp-checkout-page .bp-checkout-col { display: contents; }
     .bp-checkout-page .bp-checkout-col-form .bp-checkout-section,
@@ -1606,24 +1553,29 @@ input.qty { margin: 0px !important; }
         font-size: .75rem;
         text-transform: uppercase;
     }
-    .bp-nav { display: block; background: #fff; border-bottom: none; box-shadow: none; overflow: hidden; margin-top: 0; }
+    .bp-nav { display: block; background: #fff; border-bottom: none; box-shadow: none; overflow: hidden; margin-top: 0; box-shadow: 0px 0px 5px -1px rgba(0, 0, 0, 0.5); }
     .bp-nav .bp-container { margin: 0; padding: 0; }
     .bp-nav-menu { display: flex; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; gap: 0; padding: 0 8px; }
     .bp-nav-menu::-webkit-scrollbar { display: none; }
-    .bp-nav-menu a { padding: 6px 14px; border-bottom: none; white-space: nowrap; font-size: 18px; color: var(--bp-text-primary); }
-    .bp-nav-menu a:hover { color: var(--bp-primary); }
+    .bp-nav-menu a { padding: 8px 14px; border-bottom: none; white-space: nowrap; font-size: 13px; color: var(--bp-text-primary); text-transform: uppercase; }
+    .bp-nav-menu a:hover { /*color: var(--bp-primary);*/ }
 
     /* Productos: 1 por fila */
-    .bp-products-grid { grid-template-columns: 1fr !important; gap: 10px !important; padding: 15px 15px !important; }
+    .bp-products-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
     .bp-product-card { width: 100%; border-radius: 0; margin: 0; }
-    .bp-product-image-wrap { width: 100%; aspect-ratio: 4 / 3; height: auto; }
+    .bp-product-image-wrap {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4/3;
+        object-fit: cover;
+    }
     .bp-product-image-wrap img { width: 100% !important; height: 100% !important; object-fit: cover; }
-    .bp-product-info { padding: 12px 14px 16px; }
+    .bp-product-info { padding: 12px 0px 16px; }
     .bp-product-title { font-size: 1.25rem; margin-bottom: 0px; }
-    .bp-product-name { font-size: .95rem; }
-    .bp-price-sale { font-size: 1.6rem; }
-    .bp-price-original { font-size: 1rem; }
-    .bp-product-city { font-size: .85rem; }
+    .bp-product-name { font-size: 15px; }
+    .bp-price-sale { font-size: 25px; }
+    .bp-price-original { font-size: 18px; }
+    .bp-product-city { font-size: 15px; }
     .bp-wishlist-btn { width: 36px; height: 36px; font-size: 1.5rem; top: 8px; right: 8px; }
     .woocommerce-products-header { padding: 0 8px; }
     .woocommerce-products-header h1 { font-size: 1.3rem; }
@@ -1644,7 +1596,6 @@ input.qty { margin: 0px !important; }
     /* Hide desktop search */
     .bp-header-search { display: none; }
 
-    .bp-prof-content { padding: 0 16px 30px; }
     .bp-auth-panel { padding: 24px 16px 30px; }
 
     .bp-single-product { grid-template-columns: 1fr; gap: 20px; padding: 0; }
@@ -1653,7 +1604,7 @@ input.qty { margin: 0px !important; }
     .bp-single-desc { padding: 0 15px; }
     .bp-single-city { padding: 0 15px; }
     .bp-single-price { margin-left: 15px; margin-right: 15px; }
-    .bp-single-price .bp-price-sale { font-size: 1.8rem; }
+    .bp-single-price .bp-price-sale { }
     .bp-cart-spacer {
         display: block;
         height: 90px;
@@ -1710,14 +1661,9 @@ input.qty { margin: 0px !important; }
         line-height: 1.2 !important;
         text-align: left;
     }
-    .bp-account-page .bp-container { max-width: 100%; padding: 0 14px; }
-    .bp-prof-menu {
-        padding: 10px 0 20px;
-    }
     .bp-prof-group {
         margin: 10px 0;
         background: #fff;
-        border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 1px 4px rgba(0,0,0,.05);
     }
@@ -1864,12 +1810,8 @@ input.qty { margin: 0px !important; }
 }
 
 /* App-style menu - agrupado en cards */
-.bp-prof-menu {
-    padding: 16px;
-}
 .bp-prof-group {
     background: #fff;
-    border: 1px solid #f0f0f0;
     box-shadow: 0 1px 3px rgba(0,0,0,.04);
     margin-bottom: 16px;
     overflow: hidden;
@@ -1921,9 +1863,6 @@ input.qty { margin: 0px !important; }
 .bp-prof-logout:active { background: #fff0f0; }
 
 /* Content area - APP STYLE for all sections */
-.bp-prof-content {
-    padding: 0 20px 30px;
-}
 .bp-prof-content h2,
 .bp-prof-content h3 {
     font-size: 1.15rem;
@@ -2131,9 +2070,9 @@ input.qty { margin: 0px !important; }
     border: none !important;
     padding: 14px 24px !important;
     border-radius: 0 !important;
-    font-size: 1rem !important;
-    font-weight: 700 !important;
+    font-weight: 400 !important;
     cursor: pointer;
+	font-size: 18px !important;
     transition: all .2s;
 }
 .woocommerce-MyAccount-content .button:hover,
@@ -2527,7 +2466,7 @@ input.qty { margin: 0px !important; }
 .bp-logo { grid-column: 2; text-align: center; }
 /* FIX Félix 11/08: logo 65px (5px menos) — con especificidad suficiente
    para ganar a la regla base .bp-logo img { max-height: 70px } */
-.bp-header .bp-logo img.bp-logo-img { width: auto; display: block; margin: 0 auto; }
+.bp-header .bp-logo img.bp-logo-img { width: auto; display: block; margin: 0 auto; padding-right: 20px; }
 
 .bp-menu-toggle { display: flex; padding: 6px 20px; cursor: pointer; color: #fff; align-items: center; }
 .bp-menu-toggle i { font-size: 1.4rem; color: #fff; }
@@ -2567,7 +2506,7 @@ input.qty { margin: 0px !important; }
 }
 .bp-user-nav-menu li:last-child a { border-bottom: none; }
 .bp-user-nav-menu a:hover {
-    background: var(--bp-user-menu-text, #fff);
+    background: var(--bp-text-white, #fff);
     color: var(--bp-primary);
 }
 
@@ -2592,11 +2531,11 @@ input.qty { margin: 0px !important; }
 .bp-search-close { font-size: 1.2rem !important; padding: 10px 14px !important; }
 
 @media (max-width: 480px) {
-    .bp-products-grid { grid-template-columns: 1fr !important; gap: 10px !important; padding: 15px 15px !important; }
+    .bp-products-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
     .bp-footer-grid { grid-template-columns: 1fr; }
     .bp-product-card { width: 100%; margin: 0; }
     .bp-product-title { font-size: 1rem; }
-    .bp-price-sale { font-size: 1.3rem; }
+    .bp-price-sale { font-size: 25px; }
 }
 
 /* === UTILITIES === */
@@ -2647,13 +2586,13 @@ input.qty { margin: 0px !important; }
 
 /* Ícono decorativo en una esquina sin tapar el texto */
 .woocommerce-error::before {
-    content: "⚠️";
+    /*content: "⚠️";
     position: absolute;
     top: 50%;
     left: 16px;
     transform: translateY(-50%);
     font-size: 28px;
-    line-height: 1;
+    line-height: 1;*/
 }
 
 /* Elementos de lista */
@@ -3132,8 +3071,8 @@ input.qty { margin: 0px !important; }
 
 li.product .wlfmc-add-to-wishlist {
     position: absolute !important;
-    top: 12px !important;
-    right: 12px !important;
+    top: 0px !important;
+    right: 0px !important;
     left: auto !important;
     bottom: auto !important;
     z-index: 20;
@@ -3160,7 +3099,8 @@ li.product .wlfmc-add-button a:hover {
 /* El icono corazón: blanco por defecto */
 li.product .wlfmc-icon-heart {
     color: var(--bp-text-white) !important;
-    font-size: 1.3rem !important;
+    font-size: 22px !important;
+    font-weight: bold;
     transition: color .2s;
     text-shadow: 0 1px 3px rgba(0,0,0,.4);
 }
@@ -3179,8 +3119,6 @@ li.product .wlfmc-add-button a.wlfmc-btn-outofstock .wlfmc-icon-heart { color: v
     gap: 14px;
     padding: 18px 16px;
     background: linear-gradient(135deg, var(--bp-primary) 0%, rgba(0,0,0,.15) 100%), var(--bp-primary);
-    margin: 12px 12px 4px;
-    border-radius: 16px;
 }
 .bp-prof-avatar img {
     width: 56px;
@@ -3216,8 +3154,6 @@ li.product .wlfmc-add-button a.wlfmc-btn-outofstock .wlfmc-icon-heart { color: v
 /* Desktop: header de perfil compacto */
 @media (min-width: 769px) {
     .bp-prof-header {
-        margin: 0 0 14px;
-        border-radius: 14px;
         padding: 16px;
     }
     .bp-prof-avatar img { width: 48px; height: 48px; }
@@ -3264,11 +3200,6 @@ li.product .wlfmc-add-button a.wlfmc-btn-outofstock .wlfmc-icon-heart { color: v
 }
 .bp-auth-btn:hover { opacity: .9; color: #fff; }
 
-/* ===== CHECKOUT EXTRA (formularios a ancho de columna, entre info personal y pedido) ===== */
-.bp-checkout-extra {
-    margin-top: 24px;
-    width: 100%;
-}
 /* ===== SINGLE PRODUCT: botón comprar bajo el precio en DESKTOP ===== */
 /* En PC el botón se muestra justo debajo del precio (flex order).
    En móvil se mantiene al final (orden DOM actual). Félix 10/08. */

@@ -410,7 +410,7 @@ add_action('woocommerce_before_shop_loop_item', function() {
     echo '<span class="bp-price-sale">' . wc_price($sale_price) . '</span>';
     echo '</div>';
     if (!empty($city)) {
-        echo '<span class="bp-product-city"><i class="fas fa-map-marker-alt"></i> ' . esc_html($city) . '</span>';
+        echo '<span class="bp-product-city"> ' . esc_html($city) . '</span>';
     }
     echo '</div>';
     echo '</div>';
@@ -770,6 +770,31 @@ function bp_form_field($type, $name, $label, $required = true, $extra = '') {
     );
 }
 
+function bp_form_select($name, $label, $options, $selected = '', $required = true, $extra = '') {
+    $output = sprintf(
+        '<p class="bp-form-row"><label for="%s">%s %s</label>',
+        esc_attr($name),
+        esc_html($label),
+        $required ? '<span class="bp-form-required">*</span>' : '<span class="bp-form-opt">(opcional)</span>'
+    );
+    $output .= sprintf('<select name="%s" id="%s" %s %s>',
+        esc_attr($name),
+        esc_attr($name),
+        $required ? 'required' : '',
+        $extra
+    );
+    foreach ($options as $value => $text) {
+        $selected_attr = selected($selected, $value, false);
+        $output .= sprintf('<option value="%s" %s>%s</option>',
+            esc_attr($value),
+            $selected_attr,
+            esc_html($text)
+        );
+    }
+    $output .= '</select></p>';
+    echo $output;
+}
+
 
 // ============================================================
 // TEXTO DEL BOTÓN DE PAGO EN EL CHECKOUT (Félix 11/08)
@@ -777,6 +802,10 @@ function bp_form_field($type, $name, $label, $required = true, $extra = '') {
 // ============================================================
 add_filter('woocommerce_order_button_text', function() {
     return 'Finalizar compra';
+});
+add_filter( 'woocommerce_checkout_fields', function( $fields ) {
+    $fields['billing']['billing_email']['label'] = 'Email';
+    return $fields;
 });
 
 // ============================================================

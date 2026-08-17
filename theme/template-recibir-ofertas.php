@@ -19,7 +19,7 @@ get_header(); ?>
                     <?php wp_nonce_field('bp_form_ofertas', 'bp_form_nonce'); ?>
                     <?php bp_form_field('text', 'nombre', 'Nombre'); ?>
                     <?php bp_form_field('email', 'email', 'Email'); ?>
-                    <?php bp_form_field('text', 'ciudad', 'Ciudad'); ?>
+                    <?php // bp_form_field('text', 'ciudad', 'Ciudad'); ?>
                     <p class="bp-form-row">
                         <button type="submit" class="bp-form-submit">Quiero recibir ofertas</button>
                     </p>

@@ -4,7 +4,7 @@
  * BonosPremium Theme
  */
 get_header(); ?>
-<main class="bp-main-content bp-account-page">
+<main class="bp-main-content">
     <div class="bp-container">
         <div class="bp-account-app">
             <?php if (is_user_logged_in()) : 
