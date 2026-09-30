@@ -178,7 +178,6 @@ add_action('acf/init', function() {
 // Soporte para WooCommerce
 add_action('after_setup_theme', function() {
     add_theme_support('woocommerce');
-    // add_theme_support(.wc-product-gallery-zoom.); // DESACTIVADO por bug imagen inmensa
     add_theme_support('wc-product-gallery-lightbox');
     add_theme_support('wc-product-gallery-slider');
     add_theme_support('post-thumbnails');
@@ -1698,3 +1697,11 @@ jQuery(function(jq) {
 </script><?php
     }
 });
+
+/* ─── Desactivar zoom en galería de producto ─── */
+
+/* ─── Desactivar zoom en galería de producto ─── */
+add_action('wp', function() {
+    remove_theme_support('wc-product-gallery-zoom');
+    wp_dequeue_script('zoom');
+}, 100);

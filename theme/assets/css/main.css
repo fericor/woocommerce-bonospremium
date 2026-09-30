@@ -1859,16 +1859,13 @@ input.qty {
     }
     .bp-single-cart .single_add_to_cart_button,
 .bp-single-cart .bp-comprar-btn {
-        flex: 1;
-        background: var(--bp-button-bg, var(--bp-primary)) !important;
-        color: var(--bp-text-white) !important;
-        border: none !important;
-        padding: 12px 20px !important;   /* 14-2=12px vertical (Félix 25/08) */
-        border-radius: 5px;              /* Félix 25/08 */
-        /* FIX Félix 11/08: botón comprar del bottom con estos valores */
-        font-weight: 900 !important;
-        font-size: 58px !important;
-        text-align: center;
+		flex: 1;
+        width: auto !important;
+        padding: 15px 20px !important;
+        font-size: 1.2rem !important;
+		font-weight: 600 !important;
+		text-align: center;
+	
     }
 
     /* LZ 25/08: en móvil el selector de variaciones y el botón comprar a todo el ancho */
@@ -1925,9 +1922,10 @@ input.qty {
     .bp-single-summary:has(.variations_form) .single_variation_wrap .variations_button .single_add_to_cart_button {
         flex: 1;
         width: auto !important;
-        padding: 18px 20px !important;
-        font-size: 1.2rem !important;
+        padding: 19px 20px !important;
+        font-size: 1.15rem !important;
 		font-weight: 600 !important;
+		margin-top: 5px !important;
     }
     .bp-single-summary:has(.variations_form) .single_variation_wrap .woocommerce-variation-price,
     .bp-single-summary:has(.variations_form) .single_variation_wrap .woocommerce-variation-availability {
