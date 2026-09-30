@@ -10,7 +10,8 @@ $checkout = WC()->checkout();
 
 <?php wc_get_template('checkout/form-login.php', array('checkout' => $checkout)); ?>
 
-<form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url(wc_get_checkout_url()); ?>" enctype="multipart/form-data" onsubmit="if(window.bpAbgRecoger)bpAbgRecoger();">
+<form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url(wc_get_checkout_url()); ?>"
+      enctype="multipart/form-data" onsubmit="if(window.bpAbgRecoger)bpAbgRecoger();">
     <div class="bp-checkout-grid">
 
         <!-- Columna izquierda: formulario -->
@@ -21,7 +22,6 @@ $checkout = WC()->checkout();
 
             <!-- Información adicional -->
             <div class="bp-checkout-section">
-                <h3 class="bp-section-title">Información adicional</h3>
                 <?php wc_get_template('checkout/form-shipping.php', array('checkout' => $checkout)); ?>
             </div>
 
@@ -35,7 +35,6 @@ $checkout = WC()->checkout();
         <div class="bp-checkout-col bp-checkout-col-summary">
             <!-- Tu pedido -->
             <div class="bp-checkout-section">
-                <h3 class="bp-section-title">Tu pedido</h3>
                 <?php wc_get_template('checkout/review-order.php'); ?>
             </div>
 
@@ -60,5 +59,25 @@ jQuery(function($) {
         $('.bp-payment-box').slideUp();
         $(this).closest('.bp-payment-method').find('.bp-payment-box').slideDown();
     });
+
+    /* ─── Ocultar formulario de abogados si se quita el producto del carrito ─── */
+    function bp_abg_toggle_extra() {
+        var tiene_abg = false;
+        $('.shop_table .cart_item').each(function(){
+            if ($(this).text().toLowerCase().indexOf('abogado') !== -1 ||
+                $(this).text().toLowerCase().indexOf('abog') !== -1) {
+                tiene_abg = true;
+                return false;
+            }
+        });
+        if (tiene_abg) {
+            $('.bp-checkout-extra').show();
+        } else {
+            $('.bp-checkout-extra').hide();
+        }
+    }
+    // Al cargar y cada vez que WooCommerce refresca el checkout
+    bp_abg_toggle_extra();
+    $(document.body).on('updated_checkout', bp_abg_toggle_extra);
 });
 </script>

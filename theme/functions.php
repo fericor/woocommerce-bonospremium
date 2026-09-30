@@ -6,8 +6,16 @@
 // Panel de ajustes de la tienda (colores, SMTP Brevo, emails de formularios)
 require_once get_template_directory() . '/admin-bp-settings.php';
 
-// Definir versión del tema
-define('BP_LZ_VERSION', '1.2.4');
+// Versión dinámica basada en la fecha de modificación del style.css principal.
+// Si no se puede leer el archivo, cae al número manual como respaldo.
+if (!defined('BP_LZ_VERSION')) {
+    $bp_style_file = get_template_directory() . '/style.css';
+    if (file_exists($bp_style_file)) {
+        define('BP_LZ_VERSION', (string) filemtime($bp_style_file));
+    } else {
+        define('BP_LZ_VERSION', '1.4.71');
+    }
+}
 
 // Colores personalizados desde el panel (solo si hay cambios)
 // Prioridad 9999: debe ganar SIEMPRE, incluso al "CSS adicional" del Customizer
@@ -90,10 +98,87 @@ add_action('wp_head', function() {
     <?php endif;
 }, 1);
 
+// ============================================================
+// GOOGLE ANALYTICS (GA4) + TAG MANAGER — desde el panel Integraciones
+// Solo se carga el código si el ID está configurado en el panel.
+// El Consent Mode v2 se declara ANTES (bloque de arriba, priority 1).
+// ============================================================
+add_action('wp_head', function() {
+    $ga_id  = bp_get_setting('ga_id', '');
+    $gtm_id = bp_get_setting('gtm_id', '');
+
+    if (!empty($gtm_id)) :
+    ?>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','<?php echo esc_js($gtm_id); ?>');</script>
+    <!-- End Google Tag Manager -->
+    <?php
+    endif;
+
+    if (!empty($ga_id)) :
+    ?>
+    <!-- Google Analytics GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo esc_js($ga_id); ?>"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '<?php echo esc_js($ga_id); ?>', { send_page_view: true });
+    </script>
+    <!-- End Google Analytics -->
+    <?php
+    endif;
+}, 2);
+
+// Noscript de GTM (obligatorio para que GTM funcione sin JS)
+add_action('wp_body_open', function() {
+    $gtm_id = bp_get_setting('gtm_id', '');
+    if (empty($gtm_id)) return;
+    ?>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo esc_attr($gtm_id); ?>"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <?php
+});
+
+// ============================================================
+// GOOGLE MAPS — API key desde el panel Integraciones
+// Si la key está vacía, el plugin usa su modo sin key.
+// ============================================================
+add_filter('pre_option_wpgmza_google_maps_api_key', function($value) {
+    $key = bp_get_setting('maps_api_key', '');
+    if (!empty($key)) return $key;
+    return $value;
+});
+
+// API key para los campos ACF tipo "Google Map" (campo "Mapa" de los productos)
+// Sin este filtro, ACF carga Google Maps sin key → error "¿Eres el propietario de este sitio web?"
+// ⚠️ En ACF 6.x el filtro es 'acf/fields/google_map/api' (recibe el array completo).
+// También se fija el setting para que el resto del campo lo use.
+add_filter('acf/fields/google_map/api', function($api) {
+    $key = bp_get_setting('maps_api_key', '');
+    if (!empty($key)) {
+        $api['key'] = $key;
+        acf_update_setting('google_api_key', $key);
+    }
+    return $api;
+});
+add_action('acf/init', function() {
+    $key = bp_get_setting('maps_api_key', '');
+    if (!empty($key)) {
+        acf_update_setting('google_api_key', $key);
+    }
+});
+
 // Soporte para WooCommerce
 add_action('after_setup_theme', function() {
     add_theme_support('woocommerce');
-    add_theme_support('wc-product-gallery-zoom');
+    // add_theme_support(.wc-product-gallery-zoom.); // DESACTIVADO por bug imagen inmensa
     add_theme_support('wc-product-gallery-lightbox');
     add_theme_support('wc-product-gallery-slider');
     add_theme_support('post-thumbnails');
@@ -128,6 +213,14 @@ add_filter('woocommerce_get_image_size_shop_thumbnail', function($size) {
 // JPEG quality al máximo
 add_filter('jpeg_quality', function($quality) { return 90; });
 
+// Cache-busting PRODUCCIÓN (Félix 09/09): el HTML revalida siempre (no-cache →
+// el navegador pregunta al servidor, que responde 304 si no cambió, sin descargar
+// todo) y los CSS/JS llevan ver=BP_LZ_VERSION con caché LARGA (immutable) en nginx:
+// al subir una versión nueva la URL cambia → los navegadores descargan solo lo nuevo.
+add_action('send_headers', function() {
+    header('Cache-Control: no-cache, must-revalidate');
+});
+
 // Cargar estilos y scripts
 add_action('wp_enqueue_scripts', function() {
     // Google Fonts: Inter
@@ -138,10 +231,27 @@ add_action('wp_enqueue_scripts', function() {
     
     // Estilos del tema
     wp_enqueue_style('bp-lz-style', get_stylesheet_uri(), [], BP_LZ_VERSION);
-    wp_enqueue_style('bp-lz-main', get_template_directory_uri() . '/assets/css/main.css', ['bp-lz-style'], BP_LZ_VERSION);
+    $bp_main_css = get_template_directory() . '/assets/css/main.css';
+	$bp_main_js  = get_template_directory() . '/assets/js/main.js';
+	$bp_main_css_ver = file_exists($bp_main_css) ? filemtime($bp_main_css) : BP_LZ_VERSION;
+	$bp_main_js_ver  = file_exists($bp_main_js)  ? filemtime($bp_main_js)  : BP_LZ_VERSION;
+
+	wp_enqueue_style('bp-lz-main', get_template_directory_uri() . '/assets/css/main.css', ['bp-lz-style'], $bp_main_css_ver);
+	wp_enqueue_script('bp-lz-main', get_template_directory_uri() . '/assets/js/main.js', ['jquery'], $bp_main_js_ver, true);
     
-    // JavaScript
-    wp_enqueue_script('bp-lz-main', get_template_directory_uri() . '/assets/js/main.js', ['jquery'], BP_LZ_VERSION, true);
+    // MapTiler SDK JS v4.1.0 (ejemplo oficial "Display a map" LZ 08/09)
+    wp_enqueue_style('bp-lz-maptiler', 'https://cdn.maptiler.com/maptiler-sdk-js/v4.1.0/maptiler-sdk.css', [], '4.1.0');
+    wp_enqueue_script('bp-lz-maptiler', 'https://cdn.maptiler.com/maptiler-sdk-js/v4.1.0/maptiler-sdk.umd.min.js', [], '4.1.0', true);
+    
+    // Barra de compartir + mapa de bonos (27/08) — GLOBAL (03/09): el modal del
+    // mapa vive en footer.php y se abre desde la ficha de producto (botón de la
+    // barra superior) y desde el menú de WP (enlace con clase bp-open-map).
+    wp_enqueue_script('bp-lz-compartir', get_template_directory_uri() . '/assets/js/bono-compartir.js', ['jquery', 'bp-lz-maptiler'], BP_LZ_VERSION, true);
+    wp_localize_script('bp-lz-compartir', 'bp_compartir', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'maptiler_api_key' => bp_get_setting('maptiler_api_key', ''),
+        'template_uri' => get_template_directory_uri(),
+    ]);
     
     // Localize script para AJAX
     wp_localize_script('bp-lz-main', 'bp_lz_ajax', [
@@ -153,6 +263,162 @@ add_action('wp_enqueue_scripts', function() {
         'coupon_nonce' => wp_create_nonce('apply-coupon'),
     ]);
 });
+
+// ============================================================
+// LZ 05/09 — Ítem "Mapa" al inicio del menú horizontal (primary)
+// Antepone un enlace que abre el modal del mapa (clase bp-open-map
+// gestionada en bono-compartir.js) antes de los enlaces de WP.
+// ============================================================
+add_filter('wp_nav_menu_items', function($items, $args) {
+    if (!isset($args->theme_location) || $args->theme_location !== 'primary') {
+        return $items;
+    }
+    $map_item = '<li class="bp-nav-mapa"><a href="#mapa" class="bp-open-map">Mapa</a></li>';
+    return $map_item . $items;
+}, 10, 2);
+
+// ============================================================
+// LZ 05/09 — Quitar el ítem "Mapa" del menú desplegable (user-menu)
+// El mapa se abre desde el botón del header y el menú horizontal.
+// Excluye tanto el ítem manual del admin (clase bp-open-map) como
+// cualquier enlace al mapa que pudiera añadirse al user-menu.
+// ============================================================
+add_filter('wp_nav_menu_objects', function($items, $args) {
+    if (!isset($args->theme_location) || $args->theme_location !== 'user-menu') {
+        return $items;
+    }
+    foreach ($items as $k => $item) {
+        $cls = is_array($item->classes) ? implode(' ', $item->classes) : '';
+        if (strpos($cls, 'bp-open-map') !== false) {
+            unset($items[$k]);
+        }
+    }
+    return array_values($items);
+}, 10, 2);
+
+// ============================================================
+// LZ 26/08 — GEOCODIFICACIÓN AUTOMÁTICA desde "Dirección"
+// Al escribir la dirección en el admin del producto, se geocodifica
+// (Nominatim/OSM, sin key) y se guardan mapa_lat/mapa_lng automáticamente.
+// El mapa en vivo del admin usa Google Maps JS (key del panel Integraciones).
+// ============================================================
+add_action('admin_enqueue_scripts', function($hook) {
+    // Solo en edición de producto (post.php o post-new.php con post_type=product)
+    if (!in_array($hook, ['post.php', 'post-new.php'], true)) return;
+    global $post_type;
+    if ($post_type !== 'product') return;
+    $key = bp_get_setting('maps_api_key', '');
+    wp_enqueue_script('bp-lz-admin-geo', get_template_directory_uri() . '/assets/js/admin-geocodificar.js', [], BP_LZ_VERSION, true);
+    wp_localize_script('bp-lz-admin-geo', 'bp_geo', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('bp_geo_nonce'),
+        'maps_key' => $key,
+    ]);
+});
+
+// Endpoint AJAX: geocodifica la dirección (Nominatim) y guarda mapa_lat/mapa_lng
+add_action('wp_ajax_bp_geo_geocodificar', function() {
+    check_ajax_referer('bp_geo_nonce', 'nonce');
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error(['mensaje' => 'Sin permisos']);
+    }
+    $post_id = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
+    $direccion = isset($_POST['direccion']) ? sanitize_text_field(wp_unslash($_POST['direccion'])) : '';
+    if (!$post_id || !$direccion) {
+        wp_send_json_error(['mensaje' => 'Faltan datos']);
+    }
+    // Geocodificar con Nominatim (OpenStreetMap) — sin key, gratis.
+    // 1º intento: la dirección tal cual (funciona para cualquier isla).
+    // 2º intento: añadir ", España" si el primero no encuentra nada.
+    $ctx = stream_context_create(['http' => ['timeout' => 15, 'header' => "User-Agent: BonosPremiumLZ/1.0\r\n"]]);
+    $data = [];
+    foreach ([$direccion, $direccion . ', España'] as $intento) {
+        $url = "https://nominatim.openstreetmap.org/search?q=" . urlencode($intento) . "&format=json&limit=1&countrycodes=es";
+        $res = @file_get_contents($url, false, $ctx);
+        if ($res !== false) {
+            $data = json_decode($res, true);
+            if (!empty($data[0]['lat']) && !empty($data[0]['lon'])) break;
+        }
+    }
+    if (empty($data[0]['lat']) || empty($data[0]['lon'])) {
+        wp_send_json_error(['mensaje' => 'No se encontró la dirección. Prueba con más detalle (calle, número, población).']);
+    }
+    $lat = $data[0]['lat'];
+    $lng = $data[0]['lon'];
+    // Guardar automáticamente (campos ACF free + meta directa para robustez)
+    update_post_meta($post_id, 'mapa_lat', $lat);
+    update_post_meta($post_id, 'mapa_lng', $lng);
+    if (function_exists('update_field')) {
+        update_field('mapa_lat', $lat, $post_id);
+        update_field('mapa_lng', $lng, $post_id);
+    }
+    wp_send_json_success([
+        'lat' => $lat,
+        'lng' => $lng,
+        'dir' => $data[0]['display_name'] ?? $direccion,
+    ]);
+});
+
+// ============================================================
+// MAPA DE BONOS — devuelve todos los productos con coordenadas
+// para pintar los markers en el modal de mapa a pantalla completa.
+// ============================================================
+// Precio para el marker: SOLO el precio de oferta si existe (Félix 05/09),
+// si no, el precio normal. Para variables, el mínimo de las variaciones.
+function bp_precio_oferta_txt($producto) {
+    if (!$producto) return '';
+    $precio = '';
+    if ($producto->is_type('variable')) {
+        $precio = $producto->get_variation_sale_price('min');
+        if (empty($precio)) $precio = $producto->get_variation_price('min');
+    } else {
+        $precio = $producto->get_sale_price();
+        if (empty($precio)) $precio = $producto->get_price();
+    }
+    if ($precio === '' || $precio === false) return '';
+    return trim(wp_strip_all_tags(html_entity_decode(wc_price($precio))));
+}
+add_action('wp_ajax_bp_bonos_mapa', 'bp_bonos_mapa_data');
+add_action('wp_ajax_nopriv_bp_bonos_mapa', 'bp_bonos_mapa_data');
+function bp_bonos_mapa_data() {
+    $productos = get_posts([
+        'post_type'      => 'product',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'no_found_rows'  => true,
+    ]);
+    $bonos = [];
+    foreach ($productos as $pid) {
+        $lat = get_field('mapa_lat', $pid) ?: get_post_meta($pid, 'mapa_lat', true);
+        $lng = get_field('mapa_lng', $pid) ?: get_post_meta($pid, 'mapa_lng', true);
+        if ((empty($lat) || empty($lng)) && function_exists('get_field')) {
+            $m = get_field('mapa', $pid) ?: get_post_meta($pid, 'mapa', true);
+            if (is_array($m) && isset($m['lat'], $m['lng'])) {
+                $lat = $m['lat'];
+                $lng = $m['lng'];
+            }
+        }
+        $lat = (float) $lat;
+        $lng = (float) $lng;
+        if (empty($lat) || empty($lng)) continue;
+        $producto = wc_get_product($pid);
+        $img = get_the_post_thumbnail_url($pid, 'thumbnail');
+        $bonos[] = [
+            'id'        => $pid,
+            'titulo'    => get_the_title($pid),
+            'nombre'    => get_field('nombre_establecimiento', $pid) ?: get_post_meta($pid, 'nombre_establecimiento', true),
+            'url'       => get_permalink($pid),
+            'img'       => $img ? $img : '',
+            'precio'    => $producto ? $producto->get_price_html() : '',
+            'precio_txt' => bp_precio_oferta_txt($producto),
+            'localidad' => get_field('localidad', $pid) ?: get_post_meta($pid, 'localidad', true),
+            'lat'       => $lat,
+            'lng'       => $lng,
+        ];
+    }
+    wp_send_json_success($bonos);
+}
 
 // Clases del body
 add_filter('body_class', function($classes) {
@@ -221,6 +487,33 @@ add_action('template_redirect', function() {
     }
     header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
 });
+
+// FIX 03/09: Forzar no-store en FICHAS DE PRODUCTO aunque WooCommerce (modo
+// Coming Soon) sobreescriba con max-age=60. Sin esto el navegador servía la
+// versión vieja del botón comprar (form + AJAX) aunque el servidor ya
+// generara el enlace directo ?add-to-cart=...
+add_filter('wp_headers', function($headers) {
+    if (function_exists('is_product') && is_product()) {
+        $headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0';
+        $headers['Pragma'] = 'no-cache';
+        $headers['Expires'] = 'Wed, 11 Jan 1984 05:00:00 GMT';
+    }
+    return $headers;
+}, 999);
+
+// Refuerzo: template_include con prioridad 9999 (corre DESPUÉS del ComingSoon
+// handler de WooCommerce, que pone max-age=60 y pisaría el wp_headers de arriba)
+add_filter('template_include', function($template) {
+    if (function_exists('is_product') && is_product()) {
+        header_remove('Cache-Control');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+    }
+    return $template;
+}, 9999);
+
+
 
 // Ocultar wishlist duplicado del plugin YA NO se oculta: el plugin es el sistema principal
 // de favoritos. Se eliminó la ocultación para que el corazón del plugin sea el visible.
@@ -391,8 +684,12 @@ function bp_load_more_products() {
     ob_start();
     if ($loop->have_posts()) {
         while ($loop->have_posts()) { $loop->the_post();
-            // Ejecutar el hook personalizado que genera el card
-            do_action('woocommerce_before_shop_loop_item');
+            // FIX 31/08: usar la MISMA plantilla que el loop inicial de archive-product.php
+            // (wc_get_template_part content-product → genera <li class="product"> con el card
+            // dentro vía hook woocommerce_before_shop_loop_item). Antes se usaba solo
+            // do_action('woocommerce_before_shop_loop_item') → el card salía SIN el <li>
+            // envolvente y la carga infinita no tenía el mismo formato que los li iniciales.
+            wc_get_template_part('content', 'product');
         }
     }
     wp_reset_postdata();
@@ -426,7 +723,16 @@ add_action('woocommerce_before_shop_loop_item', function() {
     $city = get_field('localidad') ?: get_post_meta(get_the_ID(), 'localidad', true);
     $nombre_establecimiento = get_field('nombre_establecimiento') ?: get_post_meta(get_the_ID(), 'nombre_establecimiento', true);
     $regular_price = $product->get_regular_price();
-    $sale_price = $product->get_sale_price() ?: $regular_price;
+    $sale_price = $product->get_price() ?: $regular_price;
+
+    // FIX 18/08 (Félix): en productos VARIABLES el precio del loop es el de la
+    // PRIMERA variación (la primera del listado), no el mínimo.
+    // 25/08: se delega en bp_resolver_precio_loop() que respeta el modo elegido
+    // en la ficha del producto (auto/min/max/variacion/manual).
+    $resuelto = bp_resolver_precio_loop($product);
+    $sale_price = $resuelto['sale'];
+    $regular_price = $resuelto['regular'];
+    if (!$regular_price) $regular_price = $sale_price; // sin regular → solo precio
     
     echo '<div class="bp-product-card">';
     echo '<div class="bp-product-image-wrap">';
@@ -482,7 +788,7 @@ function bp_checkout_coupon_form() {
         ?>
         <div class="bp-checkout-coupon-wrap">
             <button type="button" class="bp-coupon-toggle">
-                <i class="fas fa-ticket-alt"></i> ¿Tienes un cupón de descuento?
+                ¿Tienes un cupón de descuento?
                 <i class="fas fa-chevron-down bp-coupon-arrow"></i>
             </button>
             <div class="bp-coupon-body" style="display:none;">
@@ -645,7 +951,8 @@ function bp_form_intro($form) {
 
 // ============================================================
 // RECAPTCHA v3 — protege los formularios de spam
-// Las keys se definen en wp-config.php:
+// Las keys se configuran en el panel BonosPremium > Integraciones
+// (o, como respaldo, en wp-config.php):
 //
 //   define('BP_RECAPTCHA_SITE_KEY', 'TU_SITE_KEY_V3');
 //   define('BP_RECAPTCHA_SECRET_KEY', 'TU_SECRET_KEY_V3');
@@ -656,15 +963,33 @@ function bp_form_intro($form) {
 if (!defined('BP_RECAPTCHA_SITE_KEY'))    define('BP_RECAPTCHA_SITE_KEY', '');
 if (!defined('BP_RECAPTCHA_SECRET_KEY'))  define('BP_RECAPTCHA_SECRET_KEY', '');
 
-// Cargar script de reCAPTCHA v3 + token en los formularios
+// Prioridad: panel (bp_theme_settings) > wp-config
+function bp_recaptcha_site_key()   { return bp_get_setting('recaptcha_site_key', BP_RECAPTCHA_SITE_KEY); }
+function bp_recaptcha_secret_key() { return bp_get_setting('recaptcha_secret_key', BP_RECAPTCHA_SECRET_KEY); }
+
+// ¿Estamos en una de las 3 páginas de formulario del tema?
+// (promociona-tu-negocio, recibir-ofertas, contacta-con-nosotros)
+function bp_is_form_page() {
+    if (get_query_var('bp_form_page')) return true;
+    if (is_page_template('template-contacto.php')) return true;
+    if (is_page_template('template-promociona.php')) return true;
+    if (is_page_template('template-recibir-ofertas.php')) return true;
+    return false;
+}
+
+// Cargar script de reCAPTCHA v3 SOLO en las páginas de formulario
 add_action('wp_enqueue_scripts', function() {
-    if (empty(BP_RECAPTCHA_SITE_KEY)) return;
-    wp_enqueue_script('bp-recaptcha', 'https://www.google.com/recaptcha/api.js?render=' . BP_RECAPTCHA_SITE_KEY, [], null, true);
+    $site = bp_recaptcha_site_key();
+    if (empty($site)) return;
+    if (!bp_is_form_page()) return; // solo en los 3 formularios, no en toda la web
+    wp_enqueue_script('bp-recaptcha', 'https://www.google.com/recaptcha/api.js?render=' . $site, [], null, true);
 });
 
 // Añadir token hidden a cada formulario via JS (se rellena al cargar)
 add_action('wp_footer', function() {
-    if (empty(BP_RECAPTCHA_SITE_KEY)) return;
+    $site = bp_recaptcha_site_key();
+    if (empty($site)) return;
+    if (!bp_is_form_page()) return; // solo en los 3 formularios
     ?>
     <script>
     jQuery(function($) {
@@ -674,7 +999,7 @@ add_action('wp_footer', function() {
                 $('.bp-form').each(function() {
                     var $form = $(this);
                     if ($form.find('input[name="g-recaptcha-response"]').length) return;
-                    grecaptcha.execute('<?php echo esc_js(BP_RECAPTCHA_SITE_KEY); ?>', {action: 'submit'}).then(function(token) {
+                    grecaptcha.execute('<?php echo esc_js($site); ?>', {action: 'submit'}).then(function(token) {
                         if (!$form.find('input[name="g-recaptcha-response"]').length) {
                             $('<input>').attr({type: 'hidden', name: 'g-recaptcha-response', value: token}).appendTo($form);
                         } else {
@@ -694,14 +1019,15 @@ add_action('wp_footer', function() {
 
 // Validar reCAPTCHA en el servidor al procesar el formulario
 function bp_verify_recaptcha() {
-    if (empty(BP_RECAPTCHA_SECRET_KEY)) return true; // no configurado, se permite
+    $secret = bp_recaptcha_secret_key();
+    if (empty($secret)) return true; // no configurado, se permite
 
     $token = $_POST['g-recaptcha-response'] ?? '';
     if (empty($token)) return false;
 
     $response = wp_remote_post('https://www.google.com/recaptcha/api/siteverify', [
         'body' => [
-            'secret'   => BP_RECAPTCHA_SECRET_KEY,
+            'secret'   => $secret,
             'response' => $token,
             'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '',
         ],
@@ -802,7 +1128,7 @@ function bp_form_success($form) {
 // Campos comunes reutilizables
 function bp_form_field($type, $name, $label, $required = true, $extra = '') {
     printf(
-        '<p class="bp-form-row"><label for="%1$s">%2$s %3$s</label><input type="%4$s" name="%1$s" id="%1$s" placeholder="%2$s" %5$s /></p>',
+        '<p class="bp-form-row"><label for="%1$s">%2$s %3$s</label><input type="%4$s" name="%1$s" id="%1$s" placeholder="" %5$s /></p>',
         esc_attr($name),
         esc_html($label),
         $required ? '<span class="bp-form-required">*</span>' : '<span class="bp-form-opt">(opcional)</span>',
@@ -844,10 +1170,6 @@ function bp_form_select($name, $label, $options, $selected = '', $required = tru
 // ============================================================
 add_filter('woocommerce_order_button_text', function() {
     return 'Finalizar compra';
-});
-add_filter( 'woocommerce_checkout_fields', function( $fields ) {
-    $fields['billing']['billing_email']['label'] = 'Email';
-    return $fields;
 });
 
 // ============================================================
@@ -1114,3 +1436,265 @@ add_filter('woocommerce_logout_redirect', function ($redirect, $requested) {
     return add_query_arg('bp_logout', '1', $redirect);
 }, 10, 2);
 
+// ===== RESOLVER PRECIO DEL LOOP (usado en woocommerce_before_shop_loop_item) =====
+// Devuelve array ['sale' => float, 'regular' => float|null] según el modo configurado.
+
+/**
+ * Busca la variación por defecto del producto variable (default attributes).
+ * Devuelve el objeto WC_Product_Variation o null.
+ */
+function bp_buscar_variacion_por_defecto($product, $children) {
+    if (!$product || empty($children)) return null;
+    $defaults = $product->get_default_attributes();
+    if (empty($defaults)) return null;
+
+    foreach ($children as $cid) {
+        $v = wc_get_product($cid);
+        if (!$v) continue;
+        $attrs = $v->get_variation_attributes();
+        if (!is_array($attrs)) continue;
+        // Normalizar claves: attribute_sleccionar vs sleccionar
+        $coincide = true;
+        foreach ($defaults as $dk => $dv) {
+            $dk_norm = $dk;
+            if (strpos($dk_norm, 'attribute_') !== 0) $dk_norm = 'attribute_' . $dk_norm;
+            $val = isset($attrs[$dk_norm]) ? $attrs[$dk_norm] : null;
+            if ($val === null || $val === '') $val = isset($attrs[$dk]) ? $attrs[$dk] : null;
+            if ((string)$val !== (string)$dv) { $coincide = false; break; }
+        }
+        if ($coincide) return $v;
+    }
+    return null;
+}
+
+function bp_resolver_precio_loop($product) {
+    $pid = $product->get_id();
+    $mode = get_post_meta($pid, '_bp_loop_price_mode', true) ?: 'auto';
+    $var_id = (int) get_post_meta($pid, '_bp_loop_price_variation', true);
+    $manual = (float) get_post_meta($pid, '_bp_loop_price_manual', true);
+
+    $sale = $product->get_price();
+    $regular = $product->get_regular_price();
+    $es_variable = $product->is_type('variable');
+
+    if ($es_variable) {
+        $children = $product->get_children();
+        switch ($mode) {
+            case 'min':
+                if ($children) {
+                    $precios = array();
+                    $regulares = array();
+                    foreach ($children as $cid) {
+                        $v = wc_get_product($cid);
+                        if ($v) {
+                            $precios[] = (float) $v->get_price();
+                            $reg = $v->get_regular_price();
+                            if ($reg !== '') $regulares[] = (float) $reg;
+                        }
+                    }
+                    if ($precios) {
+                        $sale = min($precios);
+                        $regular = $regulares ? min($regulares) : null;
+                    }
+                }
+                break;
+
+            case 'max':
+                if ($children) {
+                    $precios = array();
+                    $regulares = array();
+                    foreach ($children as $cid) {
+                        $v = wc_get_product($cid);
+                        if ($v) {
+                            $precios[] = (float) $v->get_price();
+                            $reg = $v->get_regular_price();
+                            if ($reg !== '') $regulares[] = (float) $reg;
+                        }
+                    }
+                    if ($precios) {
+                        $sale = max($precios);
+                        $regular = $regulares ? max($regulares) : null;
+                    }
+                }
+                break;
+
+            case 'variacion':
+                if ($var_id) {
+                    $v = wc_get_product($var_id);
+                    if ($v) {
+                        $sale = $v->get_price();
+                        $regular = $v->get_regular_price();
+                        if ($regular === '') $regular = null;
+                    }
+                } elseif (!empty($children)) {
+                    // Si no se eligió variación concreta, usar la primera (compatibilidad)
+                    $first = wc_get_product($children[0]);
+                    if ($first) {
+                        $sale = $first->get_price();
+                        $regular = $first->get_regular_price();
+                        if ($regular === '') $regular = null;
+                    }
+                }
+                break;
+
+            case 'manual':
+                if ($manual > 0) {
+                    $sale = $manual;
+                    $regular = null; // precio manual no muestra tachado
+                }
+                break;
+
+            case 'auto':
+            default:
+                // Usar la variación por defecto del producto (default attributes) si existe;
+                // si no, la primera variación; si no hay variaciones, el precio directo.
+                $variacion_auto = bp_buscar_variacion_por_defecto($product, $children);
+                if ($variacion_auto) {
+                    $sale = $variacion_auto->get_price();
+                    $regular = $variacion_auto->get_regular_price();
+                    if ($regular === '') $regular = null;
+                } elseif (!empty($children)) {
+                    $first = wc_get_product($children[0]);
+                    if ($first) {
+                        $sale = $first->get_price();
+                        $regular = $first->get_regular_price();
+                        if ($regular === '') $regular = null;
+                    }
+                }
+                break;
+        }
+    } else {
+        // Producto simple: si hay modo manual configurado, aplica
+        if ($mode === 'manual' && $manual > 0) {
+            $sale = $manual;
+            $regular = null;
+        }
+    }
+
+    if (!$regular) $regular = $sale;
+    return array('sale' => $sale, 'regular' => $regular);
+}
+// ===== PRECIO EN EL LISTADO (LOOP) PARA PRODUCTOS VARIABLE =====
+// Félix 25/08: poder elegir qué precio sale en el loop de productos
+// cuando el producto tiene variaciones.
+// Modos: auto | min | max | variacion | manual
+// Guarda en post_meta: _bp_loop_price_mode, _bp_loop_price_variation, _bp_loop_price_manual
+add_action('add_meta_boxes', function () {
+    add_meta_box(
+        'bp_loop_price',
+        'Precio en el listado (loop)',
+        'bp_loop_price_metabox_html',
+        'product',
+        'side',
+        'default'
+    );
+});
+
+function bp_loop_price_metabox_html($post) {
+    wp_nonce_field('bp_loop_price_save', 'bp_loop_price_nonce');
+    $mode = get_post_meta($post->ID, '_bp_loop_price_mode', true) ?: 'auto';
+    $var_id = (int) get_post_meta($post->ID, '_bp_loop_price_variation', true);
+    $manual = get_post_meta($post->ID, '_bp_loop_price_manual', true);
+
+    $product = wc_get_product($post->ID);
+    $is_variable = $product && $product->is_type('variable');
+    $variaciones = array();
+    if ($is_variable) {
+        $variaciones = $product->get_children();
+    }
+    ?>
+    <p style="margin-top:2px;font-size:11px;color:#666;">
+        Elige qué precio mostrar en la cuadrícula de productos.
+        <?php if ($is_variable): ?>
+            <strong>Producto variable con <?= count($variaciones) ?> variación/es.</strong>
+        <?php else: ?>
+            <strong>Producto simple</strong> — el modo solo aplica si se convierte en variable.
+        <?php endif; ?>
+    </p>
+    <label style="display:block;font-size:11px;font-weight:600;margin-bottom:3px;">Modo</label>
+    <select name="bp_loop_price_mode" id="bp-loop-price-mode" style="width:100%;margin-bottom:8px;">
+        <option value="auto" <?php selected($mode, 'auto'); ?>>Automático (primera variación / precio actual)</option>
+        <option value="min" <?php selected($mode, 'min'); ?>>Mínimo de las variaciones</option>
+        <option value="max" <?php selected($mode, 'max'); ?>>Máximo de las variaciones</option>
+        <option value="variacion" <?php selected($mode, 'variacion'); ?>>Elegir variación concreta</option>
+        <option value="manual" <?php selected($mode, 'manual'); ?>>Precio fijo manual</option>
+    </select>
+
+    <div id="bp-loop-price-variacion" style="margin-bottom:8px;<?= $mode === 'variacion' ? '' : 'display:none;'; ?>">
+        <label style="display:block;font-size:11px;font-weight:600;margin-bottom:3px;">Variación a mostrar</label>
+        <?php if ($is_variable && !empty($variaciones)): ?>
+            <select name="bp_loop_price_variation" style="width:100%;">
+                <?php foreach ($variaciones as $vid): ?>
+                    <?php $v = wc_get_product($vid); if (!$v) continue; ?>
+                    <?php $attrs = $v->get_variation_attributes(); $label = is_array($attrs) ? implode(' / ', array_filter($attrs)) : 'Variación #' . $vid; ?>
+                    <option value="<?= (int)$vid; ?>" <?php selected($var_id, $vid); ?>>
+                        <?= esc_html($label); ?> — <?= wc_price($v->get_price()); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p style="font-size:10px;color:#888;margin-top:3px;">Se muestran las variaciones publicadas del producto.</p>
+        <?php else: ?>
+            <p style="font-size:11px;color:#b00;">Este producto no tiene variaciones publicadas todavía.</p>
+            <input type="hidden" name="bp_loop_price_variation" value="<?= esc_attr($var_id); ?>">
+        <?php endif; ?>
+    </div>
+
+    <div id="bp-loop-price-manual" style="margin-bottom:8px;<?= $mode === 'manual' ? '' : 'display:none;'; ?>">
+        <label style="display:block;font-size:11px;font-weight:600;margin-bottom:3px;">Precio fijo (€)</label>
+        <input type="number" step="0.01" min="0" name="bp_loop_price_manual" value="<?= esc_attr($manual); ?>" placeholder="Ej: 29.90" style="width:100%;">
+    </div>
+
+    <script>
+    (function () {
+        var sel = document.getElementById('bp-loop-price-mode');
+        if (!sel) return;
+        function toggle() {
+            var m = sel.value;
+            document.getElementById('bp-loop-price-variacion').style.display = (m === 'variacion') ? '' : 'none';
+            document.getElementById('bp-loop-price-manual').style.display = (m === 'manual') ? '' : 'none';
+        }
+        sel.addEventListener('change', toggle);
+    })();
+    </script>
+    <?php
+}
+
+// Guardar
+add_action('save_post_product', function ($post_id) {
+    if (!isset($_POST['bp_loop_price_nonce']) || !wp_verify_nonce($_POST['bp_loop_price_nonce'], 'bp_loop_price_save')) return;
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+    if (!current_user_can('edit_product', $post_id)) return;
+
+    $mode = isset($_POST['bp_loop_price_mode']) ? sanitize_text_field($_POST['bp_loop_price_mode']) : 'auto';
+    $valid = array('auto', 'min', 'max', 'variacion', 'manual');
+    if (!in_array($mode, $valid)) $mode = 'auto';
+    update_post_meta($post_id, '_bp_loop_price_mode', $mode);
+
+    $var = isset($_POST['bp_loop_price_variation']) ? (int) $_POST['bp_loop_price_variation'] : 0;
+    update_post_meta($post_id, '_bp_loop_price_variation', $var);
+
+    $manual = isset($_POST['bp_loop_price_manual']) ? (float) str_replace(',', '.', $_POST['bp_loop_price_manual']) : '';
+    if ($manual <= 0) $manual = '';
+    update_post_meta($post_id, '_bp_loop_price_manual', $manual);
+});
+
+
+add_filter( 'woocommerce_get_terms_and_conditions_checkbox_text', 'personalizar_texto_check_terminos', 999 );
+function personalizar_texto_check_terminos( $text ) {
+    return 'He leído y acepto las [terms] de la web';
+}
+
+/* --- Quitar scroll automatico al mostrar login en checkout --- */
+add_action('wp_footer', function() {
+    if (is_checkout()) {
+        ?><script>
+jQuery(function(jq) {
+    if (typeof wc_checkout_login_form !== 'undefined')
+        wc_checkout_login_form.show_login_form = function() {
+            jq('form.login, form.woocommerce-form--login').slideToggle(400);
+            return false;
+        };
+});
+</script><?php
+    }
+});
