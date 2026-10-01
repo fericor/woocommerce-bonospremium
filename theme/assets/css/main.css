@@ -1134,7 +1134,7 @@ button {
 #place_order,
 .checkout-button {
     margin: 16px auto !important;
-    display: block !important;
+    display: grid !important;
     background: var(--bp-button-bg, var(--bp-primary)) !important;
     color: #fff !important;
     border: none !important;
@@ -1188,7 +1188,7 @@ form.woocommerce-form-login.bp-login-open {
 /* EXCEPCIÓN: el login de MI CUENTA SIEMPRE visible (el display:none de arriba
    es solo para el login desplegable del checkout/carrito) */
 .bp-auth-content form.woocommerce-form-login {
-    display: block !important;
+    display: grid !important;
     padding-top: 0 !important;
 }
 
@@ -1994,11 +1994,9 @@ input.qty {
     .bp-auth-app {
         padding: 0;
         background: #fff;
-        border-radius: 24px;
-        box-shadow: 0 12px 40px rgba(0,0,0,.10);
         overflow: hidden;
         display: grid;
-        grid-template-columns: 1fr 1.15fr;
+        /*grid-template-columns: 1fr 1.15fr;*/
     }
     /* Hero: ocupa toda la columna izquierda, centrado verticalmente */
     .bp-auth-hero {
@@ -3274,7 +3272,7 @@ input.qty {
     text-transform: uppercase !important;
     letter-spacing: .3px !important;
     margin-bottom: 4px !important;
-    display: block !important;
+    display: grid !important;
     text-align: left !important;
 }
 .wpfda-delete-account-container input[type="text"],
@@ -4019,12 +4017,12 @@ li.product .wlfmc-add-button a.wlfmc-btn-outofstock .wlfmc-icon-heart { color: v
 
 /* ═══ LOGIN / REGISTER MI CUENTA — estilo cards moderno ═══ */
 .woocommerce-account .bp-auth-content {
-    max-width: 520px;
-    margin: 0 auto;
+    /*max-width: 520px;
+    margin: 0 auto;*/
 }
 
 .woocommerce-account .bp-auth-content .u-columns.col2-set {
-    display: block !important;
+    display: grid !important;
 }
 
 .woocommerce-account .bp-auth-content .u-column1,
@@ -4113,4 +4111,142 @@ li.product .wlfmc-add-button a.wlfmc-btn-outofstock .wlfmc-icon-heart { color: v
 
 #customer_login {
     padding: 5px 15px;
+}
+/* ===== SOCIAL LOGIN BUTTONS (Mi Cuenta) ===== */
+.bp-social-login {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #f0f0f0;
+}
+.bp-social-divider {
+    text-align: center;
+    position: relative;
+    margin-bottom: 14px;
+}
+.bp-social-divider span {
+    background: #fff;
+    padding: 0 12px;
+    color: #9ca3af;
+    font-size: .8rem;
+    letter-spacing: .5px;
+}
+.bp-social-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.bp-social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 16px;
+    border-radius: 8px;
+    font-size: .9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: box-shadow .15s;
+    cursor: pointer;
+}
+.bp-social-btn--google {
+    background: #fff;
+    color: #333;
+    border: 1px solid #dadce0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+.bp-social-btn--google:hover {
+    background: #f8f9fa;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.bp-social-btn--apple {
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.bp-social-btn--apple:hover {
+    background: #222;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+.bp-social-btn svg {
+    flex-shrink: 0;
+}
+
+
+/* ===== SCROLLER HORIZONTAL: Productos relacionados ===== */
+.bp-related-scroller {
+    margin-top: 40px;
+    padding: 0 0 20px;
+    border-top: 1px solid var(--bp-border, #e5e5e7);
+}
+.bp-related-scroller-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--bp-text, #222);
+    margin: 20px 0 14px;
+}
+.bp-related-scroller-track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bp-primary, #039CDC) transparent;
+}
+.bp-related-scroller-track::-webkit-scrollbar {
+    height: 4px;
+}
+.bp-related-scroller-track::-webkit-scrollbar-track {
+    background: transparent;
+}
+.bp-related-scroller-track::-webkit-scrollbar-thumb {
+    background: var(--bp-primary, #039CDC);
+    border-radius: 4px;
+}
+.bp-related-card {
+    flex: 0 0 180px;
+    scroll-snap-align: start;
+    text-decoration: none;
+    background: #fff;
+    border: 1px solid var(--bp-border, #eee);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow .2s;
+    display: flex;
+    flex-direction: column;
+}
+.bp-related-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+.bp-related-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+}
+.bp-related-card-title {
+    padding: 8px 10px 2px;
+    font-size: .8rem;
+    font-weight: 600;
+    color: #222;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.bp-related-card-price {
+    padding: 0 10px 10px;
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--bp-primary, #039CDC);
+}
+@media (max-width: 600px) {
+    .bp-related-card {
+        flex: 0 0 150px;
+    }
+    .bp-related-card img { height: 130px; }
 }

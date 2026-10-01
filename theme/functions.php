@@ -5,6 +5,7 @@
 
 // Panel de ajustes de la tienda (colores, SMTP Brevo, emails de formularios)
 require_once get_template_directory() . '/admin-bp-settings.php';
+require_once get_template_directory() . "/auth-handlers.php";
 
 // Versión dinámica basada en la fecha de modificación del style.css principal.
 // Si no se puede leer el archivo, cae al número manual como respaldo.
@@ -178,6 +179,7 @@ add_action('acf/init', function() {
 // Soporte para WooCommerce
 add_action('after_setup_theme', function() {
     add_theme_support('woocommerce');
+    // add_theme_support(.wc-product-gallery-zoom.); // DESACTIVADO por bug imagen inmensa
     add_theme_support('wc-product-gallery-lightbox');
     add_theme_support('wc-product-gallery-slider');
     add_theme_support('post-thumbnails');
@@ -1683,25 +1685,6 @@ function personalizar_texto_check_terminos( $text ) {
     return 'He leído y acepto las [terms] de la web';
 }
 
-/* --- Quitar scroll automatico al mostrar login en checkout --- */
-add_action('wp_footer', function() {
-    if (is_checkout()) {
-        ?><script>
-jQuery(function(jq) {
-    if (typeof wc_checkout_login_form !== 'undefined')
-        wc_checkout_login_form.show_login_form = function() {
-            jq('form.login, form.woocommerce-form--login').slideToggle(400);
-            return false;
-        };
-});
-</script><?php
-    }
-});
-
-/* ─── Desactivar zoom en galería de producto ─── */
-
-/* ─── Desactivar zoom en galería de producto ─── */
-add_action('wp', function() {
-    remove_theme_support('wc-product-gallery-zoom');
-    wp_dequeue_script('zoom');
-}, 100);
+/* Desactivar zoom + lightbox */
+add_filter('woocommerce_single_product_zoom_enabled', '__return_false');
+add_filter('woocommerce_single_product_photoswipe_enabled', '__return_false');
