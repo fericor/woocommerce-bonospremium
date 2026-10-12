@@ -30,10 +30,10 @@
           return "<div class=\"simple-modal simple-modal--" + name + "\">\n	<div class=\"simple-modal__container\">\n <div class=\"simple-modal__middle\">\n <div class=\"simple-modal__box\">\n <div class=\"simple-modal-box simple-modal-box--" + size + "\">\n <div class=\"simple-modal-box__header\">\n <div class=\"simple-modal-box__title\">" + title + "</div>\n <button style=\"top: -10px; right: -10px;\" class=\"simple-modal-box__close\" type=\"button\"></button>\n </div>\n <div class=\"simple-modal-box__content\">" + content + "</div>\n </div>\n			</div>\n		</div>\n	</div>\n</div>";
       },
       binding: function(name) {
-          $(".simple-modal--" + name + " .simple-modal-box__close").click(function() {
+          jQuery(".simple-modal--" + name + " .simple-modal-box__close").click(function() {
               methods.close(name);
           });
-          $(".simple-modal--" + name + " .simple-modal__container").mousedown(function(e) {
+          jQuery(".simple-modal--" + name + " .simple-modal__container").mousedown(function(e) {
               if (!e.target.closest('.simple-modal-box')) {
                   methods.close(name);
               }

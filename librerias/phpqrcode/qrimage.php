@@ -74,7 +74,8 @@
             $base_image =ImageCreate($imgW, $imgH);
             
             $col[0] = ImageColorAllocate($base_image,255,255,255);
-            $col[1] = ImageColorAllocate($base_image,1,156,219);
+            // $col[1] = ImageColorAllocate($base_image,1,156,219);
+            $col[1] = ImageColorAllocate($base_image,51,51,51);
 
             imagefill($base_image, 0, 0, $col[0]);
 

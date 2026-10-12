@@ -16,5 +16,19 @@
     },
     "fontawesome": {
         "normal": "fontawesome_normal_7ea195556637d817f455524c7885b526"
+    },
+    "open sans": {
+        "300_italic": "\/var\/www\/vhosts\/bonospremiumlz.com\/httpdocs\/wp-content\/plugins\/woocommerce-bonospremium\/librerias\/dompdf\/vendor\/dompdf\/dompdf\/lib\/fonts\/open_sans_300_italic_258838c8efdfc7019e5a90819007278d",
+        "italic": "\/var\/www\/vhosts\/bonospremiumlz.com\/httpdocs\/wp-content\/plugins\/woocommerce-bonospremium\/librerias\/dompdf\/vendor\/dompdf\/dompdf\/lib\/fonts\/open_sans_italic_44abbf515697b2e1edcab2b61f1077c1",
+        "500_italic": "\/var\/www\/vhosts\/bonospremiumlz.com\/httpdocs\/wp-content\/plugins\/woocommerce-bonospremium\/librerias\/dompdf\/vendor\/dompdf\/dompdf\/lib\/fonts\/open_sans_500_italic_860f16c89f325c81a7c4c82d4bb076eb",
+        "600_italic": "\/var\/www\/vhosts\/bonospremiumlz.com\/httpdocs\/wp-content\/plugins\/woocommerce-bonospremium\/librerias\/dompdf\/vendor\/dompdf\/dompdf\/lib\/fonts\/open_sans_600_italic_f1486c0c9eda07de75fb146b499fb915",
+        "bold_italic": "\/var\/www\/vhosts\/bonospremiumlz.com\/httpdocs\/wp-content\/plugins\/woocommerce-bonospremium\/librerias\/dompdf\/vendor\/dompdf\/dompdf\/lib\/fonts\/open_sans_bold_italic_89aa0be993cf3d3586687aed9e8514fb",
+        "800_italic": "\/var\/www\/vhosts\/bonospremiumlz.com\/httpdocs\/wp-content\/plugins\/woocommerce-bonospremium\/librerias\/dompdf\/vendor\/dompdf\/dompdf\/lib\/fonts\/open_sans_800_italic_7f4ecba6a1acf28088760a1089f41cb8",
+        "300": "\/var\/www\/vhosts\/bonospremiumlz.com\/httpdocs\/wp-content\/plugins\/woocommerce-bonospremium\/librerias\/dompdf\/vendor\/dompdf\/dompdf\/lib\/fonts\/open_sans_300_cc9177faf761614fd9472dbfb39f3367",
+        "normal": "\/var\/www\/vhosts\/bonospremiumlz.com\/httpdocs\/wp-content\/plugins\/woocommerce-bonospremium\/librerias\/dompdf\/vendor\/dompdf\/dompdf\/lib\/fonts\/open_sans_normal_db681fdbf640fe1e91be48917a2e7fa1",
+        "500": "\/var\/www\/vhosts\/bonospremiumlz.com\/httpdocs\/wp-content\/plugins\/woocommerce-bonospremium\/librerias\/dompdf\/vendor\/dompdf\/dompdf\/lib\/fonts\/open_sans_500_7fced0367a08c27b9062e02430fa9412",
+        "600": "\/var\/www\/vhosts\/bonospremiumlz.com\/httpdocs\/wp-content\/plugins\/woocommerce-bonospremium\/librerias\/dompdf\/vendor\/dompdf\/dompdf\/lib\/fonts\/open_sans_600_255f61ac329584600fe78c0036ba7c53",
+        "bold": "\/var\/www\/vhosts\/bonospremiumlz.com\/httpdocs\/wp-content\/plugins\/woocommerce-bonospremium\/librerias\/dompdf\/vendor\/dompdf\/dompdf\/lib\/fonts\/open_sans_bold_aee4a353f84fa74c10e96b62820c535a",
+        "800": "open_sans_800_a8c264394531e65c4bac1ff4f3ceeaf2"
     }
 }

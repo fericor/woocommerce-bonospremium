@@ -41,6 +41,16 @@ function bono_wallet_shortcode($atts) {
         $user_id
     ));
     
+    // Obtener historial de RECARGAS (abonos de crédito desde el CRM / retornos de bono)
+    $recargas = $wpdb->get_results($wpdb->prepare(
+        "SELECT * FROM {$wpdb->prefix}credito_transacciones 
+         WHERE user_id = %d 
+         AND tipo = 'credito' 
+         ORDER BY fecha_transaccion DESC 
+         LIMIT 50",
+        $user_id
+    ));
+    
     ob_start();
     ?>
     <div class="bono-wallet-container">
@@ -77,8 +87,45 @@ function bono_wallet_shortcode($atts) {
             <?php endif; ?>
         </div>
         
-        <!-- Historial -->
-        <div class="bono-wallet-history mt-4">
+        <!-- Historial en TABS: Recargas | Recientes -->
+        <div class="bono-wallet-tabs">
+            <button type="button" class="bono-wallet-tab active" onclick="bonoWalletTab('recargas', this)"><i class="fas fa-plus-circle"></i> Recargas</button>
+            <button type="button" class="bono-wallet-tab" onclick="bonoWalletTab('recientes', this)"><i class="fas fa-history"></i> Recientes</button>
+        </div>
+
+        <!-- Tab: Historial de Recargas (solo abonos) -->
+        <div id="bono-tab-recargas" class="bono-wallet-history">
+            <h4><i class="fas fa-plus-circle"></i> Historial de Recargas</h4>
+            <?php if (!empty($recargas)): ?>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Monto</th>
+                            <th>Descripción</th>
+                            <th>Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($recargas as $rec): ?>
+                        <tr>
+                            <td><?php echo date('d/m/Y H:i', strtotime($rec->fecha_transaccion)); ?></td>
+                            <td class="text-success">+<?php echo number_format($rec->monto, 2); ?> €</td>
+                            <td><?php echo esc_html($rec->descripcion); ?></td>
+                            <td><?php echo number_format($rec->saldo_nuevo, 2); ?> €</td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php else: ?>
+            <p class="text-muted">No hay recargas registradas.</p>
+            <?php endif; ?>
+        </div>
+
+        <!-- Tab: Historial Reciente (todo) -->
+        <div id="bono-tab-recientes" class="bono-wallet-history" style="display:none;">
             <h4><i class="fas fa-history"></i> Historial Reciente</h4>
             <?php if (!empty($historial)): ?>
             <div class="table-responsive">
@@ -120,6 +167,19 @@ function bono_wallet_shortcode($atts) {
             <?php endif; ?>
         </div>
     </div>
+    
+    <script>
+    function bonoWalletTab(tab, btn) {
+        // Recargas | Recientes
+        document.getElementById('bono-tab-recargas').style.display  = (tab === 'recargas')  ? '' : 'none';
+        document.getElementById('bono-tab-recientes').style.display = (tab === 'recientes') ? '' : 'none';
+        var tabs = document.querySelectorAll('.bono-wallet-tab');
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+        }
+        btn.classList.add('active');
+    }
+    </script>
     
     <style>
         .bono-wallet-container {
@@ -210,6 +270,36 @@ function bono_wallet_shortcode($atts) {
         .badge {
             font-size: 0.85em;
             padding: 0.35em 0.65em;
+        }
+        
+        /* Tabs de historial */
+        .bono-wallet-tabs {
+            display: flex;
+            gap: 5px;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 15px;
+        }
+        
+        .bono-wallet-tab {
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: -2px;
+        }
+        
+        .bono-wallet-tab:hover {
+            color: #009cdc;
+        }
+        
+        .bono-wallet-tab.active {
+            color: #009cdc;
+            border-bottom-color: #009cdc;
         }
     </style>
     <?php

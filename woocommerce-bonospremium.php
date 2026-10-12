@@ -1395,7 +1395,7 @@ function crearPdf($ORDERID, $QRCODE, $NAME_FILE=""){
 		if (preg_match('/\bCINE YELMO\b/i', $NOMBRE_EMPRESA)) {
 			$TIPO_BUSCAR = bp_cine_resolver_tipo($wpdb, $STRING_CINE_TIPO);
 				
-			$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM {$wpdb->prefix}wc_codes_cinema WHERE activo = 0 AND tipo = '$TIPO_BUSCAR' AND orderId = 0 LIMIT 1" ) ); 
+			$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM {$wpdb->prefix}wc_codes_cinema WHERE activo = 0 AND tipo = '$TIPO_BUSCAR' AND orderId = 0 ORDER BY id ASC LIMIT 1" ) ); 
 						
 			$CODIDO_CINE      = $ARRAY_POST->codes;
 			$cineImagen       = BP_IMG_BASE . '/ticket_cine.png';
@@ -1690,7 +1690,7 @@ function crearPdfOld($ORDERID, $QRCODE, $NAME_FILE=""){
 		if (preg_match('/\bCINE YELMO\b/i', $NOMBRE_EMPRESA)) {
 			$TIPO_BUSCAR = bp_cine_resolver_tipo($wpdb, $STRING_CINE_TIPO);
 				
-			$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM {$wpdb->prefix}wc_codes_cinema WHERE activo = 0 AND tipo = '$TIPO_BUSCAR' AND orderId = 0 LIMIT 1" ) ); 
+			$ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM {$wpdb->prefix}wc_codes_cinema WHERE activo = 0 AND tipo = '$TIPO_BUSCAR' AND orderId = 0 ORDER BY id ASC LIMIT 1" ) ); 
 						
 			$CODIDO_CINE      = $ARRAY_POST->codes;
 			$cineImagen       = BP_IMG_BASE . '/ticket_cine.png';
@@ -1889,7 +1889,7 @@ function crearPdfSimple($ORDERID, $QRCODE, $IDPRODUCTO){
     if (preg_match('/\bCINE YELMO\b/i', $NOMBRE_EMPRESA)) {
         $TIPO_BUSCAR = bp_cine_resolver_tipo($wpdb, $STRING_CINE_TIPO);
             
-        $ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM {$wpdb->prefix}wc_codes_cinema WHERE activo = 0 AND tipo = '$TIPO_BUSCAR' AND orderId = 0 LIMIT 1" ) ); 
+        $ARRAY_POST = $wpdb->get_row( $wpdb->prepare( "SELECT codes FROM {$wpdb->prefix}wc_codes_cinema WHERE activo = 0 AND tipo = '$TIPO_BUSCAR' AND orderId = 0 ORDER BY id ASC LIMIT 1" ) ); 
                     
         $CODIDO_CINE      = $ARRAY_POST->codes;
         $cineImagen       = BP_IMG_BASE . '/ticket_cine.png';
@@ -3613,11 +3613,11 @@ function bp_cine_resolver_tipo($wpdb, $string_tipo) {
 
     // 1. Match EXACTO
     $exacto = $wpdb->get_var($wpdb->prepare(
-        "SELECT tipo FROM {$tabla} WHERE activo = 0 AND tipo = %s LIMIT 1", $string_tipo));
+        "SELECT tipo FROM {$tabla} WHERE activo = 0 AND tipo = %s ORDER BY id ASC LIMIT 1", $string_tipo));
     if ($exacto) return $exacto;
 
     // 2. Match por CONTENIDO
-    $tipos = $wpdb->get_col("SELECT DISTINCT tipo FROM {$tabla} WHERE activo = 0");
+    $tipos = $wpdb->get_col("SELECT DISTINCT tipo FROM {$tabla} WHERE activo = 0 ORDER BY id ASC");
     $st = mb_strtolower($string_tipo);
     foreach ($tipos as $t) {
         $tl = mb_strtolower($t);
@@ -4544,12 +4544,12 @@ function bp_creditos_delete($request) {
 }
 
 ////////////////////////////////////////////////////////////////////////
-// 📬 ALERTA STOCK CINE (cron servidor cada hora) — aviso si quedan <= 15 entradas
+// 📬 ALERTA STOCK CINE (cron servidor cada hora) — aviso si quedan <= 100 entradas
 function bp_cine_stock_alert_check() {
     global $wpdb;
 
     $tabla = $wpdb->prefix . 'wc_codes_cinema';   // multi-tienda (cada tienda su prefijo)
-    $umbral = 15;
+    $umbral = 100;
 
     // Entradas libres: activo=0 y sin pedido asignado
     $total_libres = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$tabla} WHERE activo = 0 AND orderId = 0");
@@ -4560,7 +4560,7 @@ function bp_cine_stock_alert_check() {
         ARRAY_A
     );
 
-    // Anti-spam: solo avisa cuando CRUZA el umbral (baja de 15 habiendo estado por encima)
+    // Anti-spam: solo avisa cuando CRUZA el umbral (baja de 100 habiendo estado por encima)
     $flag = 'bp_cine_alert_sent_' . md5($wpdb->prefix);
     if ($total_libres > $umbral) {
         delete_option($flag); // se repuso: limpiar flag para volver a avisar si baja
@@ -4587,10 +4587,11 @@ function bp_cine_stock_alert_check() {
 
     $ok_info = wp_mail(bp_get_store_email('info'), $asunto, $mensaje);
     $ok_fericor = wp_mail('fericor@gmail.com', $asunto, $mensaje);
+    $ok_jorge = wp_mail('jorgetfn@hotmail.com', $asunto, $mensaje);
 
     update_option($flag, time());
 
-    return array('success' => true, 'total_libres' => $total_libres, 'status' => 'avisado', 'mail_info' => $ok_info, 'mail_fericor' => $ok_fericor);
+    return array('success' => true, 'total_libres' => $total_libres, 'status' => 'avisado', 'mail_info' => $ok_info, 'mail_fericor' => $ok_fericor, 'mail_jorge' => $ok_jorge);
 }
 
 // Endpoint REST para que el cron del servidor lo dispare (auth por token)

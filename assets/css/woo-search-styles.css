@@ -1,0 +1,300 @@
+.woo-search-shortcode-container {
+    position: relative;
+    z-index: 9999;
+}
+
+/* ===== VERSIÓN ESCRITORIO ===== */
+.woo-search-desktop {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .woo-search-desktop {
+        display: block;
+    }
+    
+    .woo-search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 350px; /* Ancho fijo */
+    }
+    
+    /* INPUT CON ICONO A LA IZQUIERDA - CORREGIDO */
+    .woo-search-input {
+        width: 100%;
+        padding: 12px 15px 12px 50px; /* Más padding izquierdo */
+        border: none !important;
+        background: transparent !important;
+        color: #ffffff !important;
+        font-size: 24px !important;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1; /* Input sobre el botón */
+        box-sizing: border-box;
+		margin-left: 45px;
+    }
+    
+    /* PLACEHOLDER EN BLANCO */
+    .woo-search-input::placeholder {
+        color: rgba(255, 255, 255, 0.8) !important;
+        opacity: 1;
+        font-size: 20px;
+    }
+    
+    .woo-search-input:focus {
+        outline: none;
+        box-shadow: none;
+    }
+	
+	.woo-search-btn {
+        position: absolute;
+        top: 10px;
+        background: none;
+        color: #ffffff !important;
+        z-index: 2;
+        height: 24px;
+        align-items: center;
+    }
+    
+    .woo-search-btn:hover {
+        background: none !important;
+    }
+    
+    .woo-search-btn svg {
+        width: 24px;
+        height: 24px;
+        pointer-events: none; /* Permite clics a través del SVG */
+    }
+    
+    .woo-search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        max-height: 400px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        display: none;
+        z-index: 10000;
+        margin-top: 5px;
+    }
+    
+    .woo-search-result-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        text-decoration: none;
+        color: #333;
+        transition: background 0.2s;
+        cursor: pointer;
+    }
+    
+    .woo-search-result-item:hover {
+        background: #f5f5f5;
+    }
+    
+    .woo-result-image {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        margin-right: 10px;
+        border-radius: 3px;
+    }
+    
+    .woo-result-info {
+        flex: 1;
+    }
+    
+    .woo-result-title {
+        font-weight: 500;
+        margin-bottom: 5px;
+        color: #333;
+        font-size: 16px;
+    }
+    
+    .woo-result-price {
+        color: #d32f2f;
+        font-weight: bold;
+        font-size: 14px;
+    }
+}
+
+/* ===== VERSIÓN MÓVIL ===== */
+.woo-search-mobile {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .woo-search-mobile {
+        display: none;
+    }
+}
+
+.woo-mobile-toggle {
+    background: none;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.woo-mobile-toggle svg {
+    width: 28px;
+    height: 28px;
+}
+
+.woo-mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 9998;
+}
+
+.woo-mobile-panel {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 85%;
+    height: 100%;
+    background: #d32f2f;
+    transition: right 0.3s ease;
+    z-index: 9999;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+}
+
+.woo-mobile-panel.active {
+    right: 0;
+}
+
+.woo-mobile-header {
+    padding: 20px;
+    background: #b71c1c;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.woo-mobile-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: white;
+}
+
+.woo-close-search {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.woo-close-search svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* INPUT MÓVIL */
+.woo-mobile-body {
+    padding: 20px;
+    position: relative;
+}
+
+.woo-mobile-body .woo-search-input {
+    width: 100%;
+    padding: 15px 15px 15px 50px;
+    border: 2px solid white;
+    border-radius: 6px;
+    background: white;
+    font-size: 18px !important;
+    color: #333;
+    box-sizing: border-box;
+}
+
+/* Icono dentro del input móvil */
+.woo-mobile-body .search-icon-mobile {
+    position: absolute;
+    left: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    color: #333;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.woo-mobile-body .woo-search-results {
+    background: white;
+    border-radius: 4px;
+    max-height: 70vh;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+.woo-mobile-body .woo-search-result-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Placeholder móvil */
+.woo-mobile-body .woo-search-input::placeholder {
+    color: rgba(51, 51, 51, 0.7) !important;
+    font-size: 18px;
+}
+
+/* Loading animation */
+.woo-search-loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-size: 16px;
+}
+
+.woo-search-no-results,
+.woo-search-error {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-size: 16px;
+}
+
+.woo-search-loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ddd;
+    border-top-color: #d32f2f;
+    border-radius: 50%;
+    animation: woo-spin 0.8s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes woo-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Fix para autocomplete del navegador */
+/*input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}*/
