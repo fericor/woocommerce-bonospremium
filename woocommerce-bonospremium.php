@@ -12,6 +12,10 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
+// Token de sincronizacion con el CRM: se define en wp-config.php (nunca en el repo)
+if ( ! defined( 'BP_AUTH_TOKEN' ) ) { define( 'BP_AUTH_TOKEN', '___BP_AUTH_TOKEN_NO_DEFINIDO___' ); }
+
+
 /////////////////////////////////////////////////////////
 // Quitar los desimales cuando sea necesario
 add_filter( 'woocommerce_price_trim_zeros', '__return_true' );
@@ -3654,7 +3658,7 @@ add_action('rest_api_init', function () {
         'callback'            => 'bp_asignar_rol_empresa',
         'permission_callback' => function ($request) {
             $token = $request->get_param('auth_token');
-            return $token === 'BonosSync2026!';
+            return $token === BP_AUTH_TOKEN;
         },
     ]);
 });
@@ -3691,7 +3695,7 @@ add_action('rest_api_init', function () {
         'callback'            => 'bp_obtener_usuario',
         'permission_callback' => function ($request) {
             $token = $request->get_param('auth_token');
-            return $token === 'BonosSync2026!';
+            return $token === BP_AUTH_TOKEN;
         },
     ]);
 });
@@ -3744,7 +3748,7 @@ add_action('rest_api_init', function () {
         'callback'            => 'bp_listar_empresas_colaboradoras',
         'permission_callback' => function ($request) {
             $token = $request->get_param('auth_token');
-            return $token === 'BonosSync2026!';
+            return $token === BP_AUTH_TOKEN;
         },
     ]);
 });
@@ -3808,7 +3812,7 @@ add_action('rest_api_init', function () {
         'callback'            => 'bp_asignar_rol_auxiliar',
         'permission_callback' => function ($request) {
             $token = $request->get_param('auth_token');
-            return $token === 'BonosSync2026!';
+            return $token === BP_AUTH_TOKEN;
         },
     ]);
 });
@@ -3843,7 +3847,7 @@ add_action('rest_api_init', function () {
         'callback'            => 'bp_obtener_items_personalizados',
         'permission_callback' => function ($request) {
             $token = $request->get_param('auth_token');
-            return $token === 'BonosSync2026!';
+            return $token === BP_AUTH_TOKEN;
         }
     ));
 });
@@ -3902,7 +3906,7 @@ add_action('rest_api_init', function () {
         'methods'             => 'GET',
         'callback'            => 'bp_v2_reporte',
         'permission_callback' => function ($request) {
-            return $request->get_param('auth_token') === 'BonosSync2026!';
+            return $request->get_param('auth_token') === BP_AUTH_TOKEN;
         }
     ));
 });
@@ -4226,7 +4230,7 @@ add_action('rest_api_init', function () {
         'methods'             => 'POST',
         'callback'            => 'bp_eliminar_usuario',
         'permission_callback' => function ($request) {
-            return $request->get_param('auth_token') === 'BonosSync2026!';
+            return $request->get_param('auth_token') === BP_AUTH_TOKEN;
         },
     ]);
 });
@@ -4294,7 +4298,7 @@ add_action('rest_api_init', function () {
         'methods'             => 'GET',
         'callback'            => 'bp_creditos_listar',
         'permission_callback' => function ($request) {
-            return $request->get_param('auth_token') === 'BonosSync2026!';
+            return $request->get_param('auth_token') === BP_AUTH_TOKEN;
         },
     ]);
     // Listar usuarios WP (selector)
@@ -4302,7 +4306,7 @@ add_action('rest_api_init', function () {
         'methods'             => 'GET',
         'callback'            => 'bp_creditos_usuarios',
         'permission_callback' => function ($request) {
-            return $request->get_param('auth_token') === 'BonosSync2026!';
+            return $request->get_param('auth_token') === BP_AUTH_TOKEN;
         },
     ]);
     // Añadir crédito
@@ -4310,7 +4314,7 @@ add_action('rest_api_init', function () {
         'methods'             => 'POST',
         'callback'            => 'bp_creditos_add',
         'permission_callback' => function ($request) {
-            return $request->get_param('auth_token') === 'BonosSync2026!';
+            return $request->get_param('auth_token') === BP_AUTH_TOKEN;
         },
     ]);
     // Actualizar crédito
@@ -4318,7 +4322,7 @@ add_action('rest_api_init', function () {
         'methods'             => 'POST',
         'callback'            => 'bp_creditos_update',
         'permission_callback' => function ($request) {
-            return $request->get_param('auth_token') === 'BonosSync2026!';
+            return $request->get_param('auth_token') === BP_AUTH_TOKEN;
         },
     ]);
     // Eliminar crédito
@@ -4326,7 +4330,7 @@ add_action('rest_api_init', function () {
         'methods'             => 'POST',
         'callback'            => 'bp_creditos_delete',
         'permission_callback' => function ($request) {
-            return $request->get_param('auth_token') === 'BonosSync2026!';
+            return $request->get_param('auth_token') === BP_AUTH_TOKEN;
         },
     ]);
 });
@@ -4600,7 +4604,7 @@ add_action('rest_api_init', function () {
         'methods'  => 'GET',
         'permission_callback' => function ($request) {
             $token = $request->get_param('auth_token');
-            return $token === 'BonosSync2026!';
+            return $token === BP_AUTH_TOKEN;
         },
         'callback' => function () {
             $resultado = bp_cine_stock_alert_check();
