@@ -499,13 +499,29 @@ function mostrar_barra_admin($mostrar) {
 add_filter('show_admin_bar', 'mostrar_barra_admin');
 
 // Bloquear acceso directo a wp-login.php
+// Deja pasar: el envio del formulario (POST), las acciones legitimas (recuperar
+// contrasena, cerrar sesion, contrasenas de entradas) y a quien ya tiene sesion.
+// Al resto (visitantes sin sesion) le manda a /mi-cuenta/, donde todos los roles
+// (incluidos los administradores) pueden iniciar sesion y luego entrar a wp-admin.
 function bloquear_acceso_wp_login() {
-    if (strpos($_SERVER['REQUEST_URI'], 'wp-login.php') !== false && $_SERVER['REQUEST_METHOD'] == 'GET') {
-        wp_redirect(home_url('/mi-cuenta/')); // Cambia '/mi-cuenta/' por la URL a la que quieras redirigir
-        exit;
+    $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+    if (strpos($uri, 'wp-login.php') === false) {
+        return;
     }
+    if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] !== 'GET') {
+        return;
+    }
+    $accion = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+    if (in_array($accion, array('logout', 'lostpassword', 'rp', 'resetpass', 'postpass', 'confirmaction'), true)) {
+        return;
+    }
+    if (is_user_logged_in()) {
+        return;
+    }
+    wp_safe_redirect(home_url('/mi-cuenta/'));
+    exit;
 }
-// add_action('init', 'bloquear_acceso_wp_login');
+add_action('init', 'bloquear_acceso_wp_login');
 
 function custom_hello_elementor_viewport_content() {
 	return 'width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0';
