@@ -473,18 +473,33 @@ add_action('pre_get_posts', 'buscar_solo_en_productos');
 
 ////////////////////////////////////////////////////////////
 // Restringir acceso al admin solo para ciertos roles
+// Restringir el acceso al panel: solo los roles permitidos entran en wp-admin.
+// No toca a los visitantes sin sesion (WordPress ya les manda al login) ni a AJAX,
+// admin-post, REST/XML-RPC ni cron, para no romper el carrito, el CRM ni los
+// formularios del frontend (is_admin() tambien es true en esas peticiones).
 function restringir_acceso_admin() {
-    if (is_admin() && !defined('DOING_AJAX')) {
-        $usuario_actual = wp_get_current_user();
-        $roles_permitidos = array('administrator', 'auxiliar_bonospremium');
+    if (!is_admin() || defined('DOING_AJAX') || defined('DOING_CRON')) {
+        return;
+    }
+    if (defined('REST_REQUEST') || defined('XMLRPC_REQUEST')) {
+        return;
+    }
+    $pagenow = isset($GLOBALS['pagenow']) ? $GLOBALS['pagenow'] : '';
+    if (in_array($pagenow, array('admin-ajax.php', 'admin-post.php'), true)) {
+        return;
+    }
+    if (!is_user_logged_in()) {
+        return; // un visitante sin sesion: que WordPress le lleve al login de siempre
+    }
+    $usuario_actual = wp_get_current_user();
+    $roles_permitidos = array('administrator', 'auxiliar_bonospremium');
 
-        if (!array_intersect($roles_permitidos, (array) $usuario_actual->roles)) {
-            wp_redirect(home_url('/mi-cuenta/')); // Redirige a "mi-cuenta" o donde prefieras
-            exit;
-        }
+    if (!array_intersect($roles_permitidos, (array) $usuario_actual->roles)) {
+        wp_safe_redirect(home_url('/mi-cuenta/')); // Redirige a "mi-cuenta" o donde prefieras
+        exit;
     }
 }
-// add_action('init', 'restringir_acceso_admin');
+add_action('init', 'restringir_acceso_admin');
 
 // Asegurar que los usuarios con rol permitido vean la barra de administración
 function mostrar_barra_admin($mostrar) {
